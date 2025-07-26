@@ -1,0 +1,36 @@
+# ===== Java / Spring Boot =====
+/target/
+bin/
+build/
+*.class
+*.log
+*.jar
+*.war
+
+# ===== Gradle 관련 =====
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle-wrapper.properties
+
+# ===== STS (Eclipse 기반) 관련 =====
+.classpath
+.project
+.settings/
+.metadata/
+
+# ===== IntelliJ 관련 (팀원용) =====
+.idea/
+*.iws
+*.ipr
+*.iml
+
+# ===== 기타 =====
+.DS_Store
+Thumbs.db
+*.swp
+
+# ===== 환경 파일 (보안 및 비공개 정보) =====
+.env
+application-*.yml
+application-*.properties
