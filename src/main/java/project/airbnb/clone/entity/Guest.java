@@ -35,7 +35,7 @@ public class Guest extends BaseEntity {
     @Column(name = "email", nullable = false, length = 50)
     private String email;
 
-    @Column(name = "profile_url")
+    @Column(name = "profile_url", nullable = false)
     private String profileUrl;
 
     @Column(name = "about_me")

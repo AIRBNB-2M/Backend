@@ -35,11 +35,11 @@ public class Accommodation extends BaseEntity {
     @Column(name = "address", nullable = false, length = 50)
     private String address;
 
-    @Column(name = "max_people")
+    @Column(name = "max_people", nullable = false)
     private Short maxPeople;
 
-    @Column(name = "price")
-    private Long price;
+    @Column(name = "price", nullable = false)
+    private Integer price;
 
     @Column(name = "title", nullable = false, length = 50)
     private String title;
@@ -50,6 +50,6 @@ public class Accommodation extends BaseEntity {
     @Column(name = "check_out", nullable = false)
     private LocalTime checkOut;
 
-    @Column(name = "number", nullable = false, length = 11)
+    @Column(name = "number", nullable = false, length = 12)
     private String number;
 }

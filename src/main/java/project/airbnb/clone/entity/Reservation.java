@@ -37,15 +37,15 @@ public class Reservation extends BaseEntity {
     @Column(name = "adults", nullable = false)
     private Byte adults;
 
-    @Column(name = "children")
+    @Column(name = "children", nullable = false)
     private Byte children;
 
-    @Column(name = "infant")
-    private Byte infant;
+    @Column(name = "infant", nullable = false)
+    private Byte infants;
 
-    @Column(name = "start_date")
+    @Column(name = "start_date", nullable = false)
     private LocalDateTime startDate;
 
-    @Column(name = "end_date")
+    @Column(name = "end_date", nullable = false)
     private LocalDateTime endDate;
 }
