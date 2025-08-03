@@ -3,6 +3,7 @@ package project.airbnb.clone.service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import lombok.RequiredArgsConstructor;
 import project.airbnb.clone.entity.Accommodation;
@@ -20,6 +21,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import java.io.StringReader;
+import java.net.URI;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
@@ -35,9 +37,17 @@ public class TourApiService {
 	public void fetchAndSaveAccommodations() throws Exception {
 		
 		// 1. API 호출 (XML 응답 받기)
-		String url = "https://apis.data.go.kr/B551011/KorService2/areaBasedSyncList2"
-                + "?serviceKey=" + tourApiKey
-                + "&MobileApp=AppTest&MobileOS=ETC&contentTypeId=32&pageNo=1&numOfRows=10";
+		String url = UriComponentsBuilder
+	            .newInstance()
+	            .uri(URI.create("https://apis.data.go.kr/B551011/KorService2/areaBasedSyncList2"))
+	            .queryParam("serviceKey", tourApiKey)
+	            .queryParam("MobileApp", "AppTest")
+	            .queryParam("MobileOS", "ETC")
+	            .queryParam("contentTypeId", 32)
+	            .queryParam("pageNo", 1)
+	            .queryParam("numOfRows", 10)
+	            .build(false)
+	            .toUriString();
         RestTemplate restTemplate = new RestTemplate();
         String xml = restTemplate.getForObject(url, String.class);
 
@@ -62,10 +72,17 @@ public class TourApiService {
             // detailCommon2에서 overview(설명)
             String overview = null;
             try {
-            	String detailUrl = "https://apis.data.go.kr/B551011/KorService2/detailCommon2"
-                        + "?serviceKey=" + tourApiKey
-                        + "&MobileApp=AppTest&MobileOS=ETC&contentId=" + contentId
-                        + "&defaultYN=N&overviewYN=Y";
+            	String detailUrl = UriComponentsBuilder
+                        .newInstance()
+                        .uri(URI.create("https://apis.data.go.kr/B551011/KorService2/detailCommon2"))
+                        .queryParam("serviceKey", tourApiKey)
+                        .queryParam("MobileApp", "AppTest")
+                        .queryParam("MobileOS", "ETC")
+                        .queryParam("contentId", contentId)
+                        .queryParam("defaultYN", "N")
+                        .queryParam("overviewYN", "Y")
+                        .build(false)
+                        .toUriString();
                 String detailXml = restTemplate.getForObject(detailUrl, String.class);
                 Document detailDoc = builder.parse(new InputSource(new StringReader(detailXml)));
                 NodeList overviewNode = detailDoc.getElementsByTagName("overview");
@@ -79,10 +96,16 @@ public class TourApiService {
             Short maxPeople = null;
             Integer price = null;
             try {
-            	 String introUrl = "https://apis.data.go.kr/B551011/KorService2/detailIntro2"
-                         + "?serviceKey=" + tourApiKey
-                         + "&MobileApp=AppTest&MobileOS=ETC&contentId=" + contentId
-                         + "&contentTypeId=32";
+            	String introUrl = UriComponentsBuilder
+                        .newInstance()
+                        .uri(URI.create("https://apis.data.go.kr/B551011/KorService2/detailIntro2"))
+                        .queryParam("serviceKey", tourApiKey)
+                        .queryParam("MobileApp", "AppTest")
+                        .queryParam("MobileOS", "ETC")
+                        .queryParam("contentId", contentId)
+                        .queryParam("contentTypeId", 32)
+                        .build(false)
+                        .toUriString();
                 String introXml = restTemplate.getForObject(introUrl, String.class);
                 Document introDoc = builder.parse(new InputSource(new StringReader(introXml)));
                 NodeList introItems = introDoc.getElementsByTagName("item");
