@@ -1,29 +1,26 @@
 package project.airbnb.clone.service;
 
+import java.io.StringReader;
+import java.net.URI;
+import java.util.List;
+import java.util.Optional;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import lombok.RequiredArgsConstructor;
-import project.airbnb.clone.entity.Accommodation;
-import project.airbnb.clone.repository.AccommodationRepository;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.ArrayList;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-import java.io.StringReader;
-import java.net.URI;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
+
+import lombok.RequiredArgsConstructor;
+import project.airbnb.clone.entity.Accommodation;
+import project.airbnb.clone.repository.AccommodationRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -52,7 +49,6 @@ public class TourApiService {
         String xml = restTemplate.getForObject(url, String.class);
 
         // 2. XML 파싱
-        List<Accommodation> list = new ArrayList<>();
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document doc = builder.parse(new InputSource(new StringReader(xml)));
@@ -67,7 +63,7 @@ public class TourApiService {
             Double mapY = parseDouble(getTagValue("mapy", item));
             String title = getTagValue("title", item);
             String number = getTagValue("tel", item);
-            String contentId = getTagValue("contentid", item);
+            String tourApiId = getTagValue("contentid", item);
 
             // detailCommon2에서 overview(설명)
             String overview = null;
@@ -78,7 +74,7 @@ public class TourApiService {
                         .queryParam("serviceKey", tourApiKey)
                         .queryParam("MobileApp", "AppTest")
                         .queryParam("MobileOS", "ETC")
-                        .queryParam("contentId", contentId)
+                        .queryParam("contentId", tourApiId)
                         .queryParam("defaultYN", "N")
                         .queryParam("overviewYN", "Y")
                         .build(false)
@@ -102,7 +98,7 @@ public class TourApiService {
                         .queryParam("serviceKey", tourApiKey)
                         .queryParam("MobileApp", "AppTest")
                         .queryParam("MobileOS", "ETC")
-                        .queryParam("contentId", contentId)
+                        .queryParam("contentId", tourApiId)
                         .queryParam("contentTypeId", 32)
                         .build(false)
                         .toUriString();
@@ -118,25 +114,42 @@ public class TourApiService {
                 }
             } catch (Exception e) {}
 
-            Accommodation acc = Accommodation.builder()
-                .address(address)
-                .mapX(mapX)
-                .mapY(mapY)
-                .description(overview != null ? overview : "")
-                .maxPeople(maxPeople != null ? maxPeople : 0)
-                .price(price != null ? price : 0)
-                .title(title)
-                .checkIn(parseLocalTime(checkInTime))
-                .checkOut(parseLocalTime(checkOutTime))
-                .number(number)
-                .build();
+            String safeCheckIn = (checkInTime == null || checkInTime.trim().isEmpty()) ? "정보없음" : checkInTime.trim();
+            String safeCheckOut = (checkOutTime == null || checkOutTime.trim().isEmpty()) ? "정보없음" : checkOutTime.trim();
+            String safeNumber = (number == null || number.trim().isEmpty()) ? "정보없음" : number.trim();
+            
+            Optional<Accommodation> existing = accommodationRepository.findByTourApiId(tourApiId);
 
-            list.add(acc);
+            if (existing.isPresent()) {
+                Accommodation acc = existing.get();
+                acc.setAddress(address);
+                acc.setMapX(mapX);
+                acc.setMapY(mapY);
+                acc.setDescription(overview != null ? overview : "");
+                acc.setMaxPeople(maxPeople != null ? maxPeople : 0);
+                acc.setPrice(price != null ? price : 0);
+                acc.setTitle(title);
+                acc.setCheckIn(safeCheckIn);
+                acc.setCheckOut(safeCheckOut);
+                acc.setNumber(safeNumber);
+                accommodationRepository.save(acc);
+            } else {
+                Accommodation acc = Accommodation.builder()
+                        .tourApiId(tourApiId)
+                        .address(address)
+                        .mapX(mapX)
+                        .mapY(mapY)
+                        .description(overview != null ? overview : "")
+                        .maxPeople(maxPeople != null ? maxPeople : 0)
+                        .price(price != null ? price : 0)
+                        .title(title)
+                        .checkIn(safeCheckIn)
+                        .checkOut(safeCheckOut)
+                        .number(safeNumber)
+                        .build();
+                accommodationRepository.save(acc);
+            }
         }
-
-
-        // 3. 저장
-        accommodationRepository.saveAll(list);
 	}
 	
 	private Double parseDouble(String value) {
@@ -161,25 +174,6 @@ public class TourApiService {
 	    } catch (Exception e) {
 	        return null;
 	    }
-	}
-
-	private LocalTime parseLocalTime(String value) {
-	    if (value == null || value.isEmpty()) return null;
-	    try {
-	        // "15:00"
-	        if (value.matches("\\d{1,2}:\\d{2}")) {
-	            return LocalTime.parse(value, DateTimeFormatter.ofPattern("H:mm"));
-	        }
-	        // "15시"
-	        if (value.endsWith("시")) {
-	            int hour = Integer.parseInt(value.replace("시", ""));
-	            return LocalTime.of(hour, 0);
-	        }
-	        
-	    } catch (Exception e) {
-	        return null; // 못 읽는 포맷은 null 반환
-	    }
-	    return null;
 	}
 
 	

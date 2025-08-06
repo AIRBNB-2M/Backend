@@ -36,7 +36,7 @@ public class Accommodation extends BaseEntity {
     @Column(name = "description", nullable = false)
     private String description;
 
-    @Column(name = "address", nullable = false, length = 50)
+    @Column(name = "address", nullable = false, length = 255)
     private String address;
 
     @Column(name = "max_people", nullable = false)
@@ -45,15 +45,29 @@ public class Accommodation extends BaseEntity {
     @Column(name = "price", nullable = false)
     private Integer price;
 
-    @Column(name = "title", nullable = false, length = 50)
+    @Column(name = "title", nullable = false, length = 255)
     private String title;
 
     @Column(name = "check_in", nullable = false)
-    private LocalTime checkIn;
+    private String checkIn;
 
     @Column(name = "check_out", nullable = false)
-    private LocalTime checkOut;
+    private String checkOut;
 
-    @Column(name = "number", nullable = false, length = 12)
+    @Column(name = "number", nullable = false, length = 50)
     private String number;
+    
+    @Column(name = "tour_api_id", nullable = false, length = 30)
+    private String tourApiId;
+    
+    public void setMapX(Double mapX) { this.mapX = mapX; }
+    public void setMapY(Double mapY) { this.mapY = mapY; }
+    public void setDescription(String description) { this.description = description; }
+    public void setAddress(String address) { this.address = address; }
+    public void setMaxPeople(Short maxPeople) { this.maxPeople = maxPeople; }
+    public void setPrice(Integer price) { this.price = price; }
+    public void setTitle(String title) { this.title = title; }
+    public void setCheckIn(String checkIn) { this.checkIn = checkIn; }
+    public void setCheckOut(String checkOut) { this.checkOut = checkOut; }
+    public void setNumber(String number) { this.number = number; }
 }
