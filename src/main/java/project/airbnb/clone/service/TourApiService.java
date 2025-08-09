@@ -28,6 +28,8 @@ public class TourApiService {
 	
 	@Value("${tourapi.key}")
     private String tourApiKey;
+	
+	private final RestTemplate restTemplate;
 
 	private final AccommodationRepository accommodationRepository;
 	
@@ -45,7 +47,6 @@ public class TourApiService {
 	            .queryParam("numOfRows", 50)
 	            .build(false)
 	            .toUriString();
-        RestTemplate restTemplate = new RestTemplate();
         String xml = restTemplate.getForObject(url, String.class);
 
         // 2. XML 파싱
