@@ -28,6 +28,8 @@ public class TourApiService {
 	
 	@Value("${tourapi.key}")
     private String tourApiKey;
+	
+	private final RestTemplate restTemplate;
 
 	private final AccommodationRepository accommodationRepository;
 	
@@ -45,7 +47,6 @@ public class TourApiService {
 	            .queryParam("numOfRows", 50)
 	            .build(false)
 	            .toUriString();
-        RestTemplate restTemplate = new RestTemplate();
         String xml = restTemplate.getForObject(url, String.class);
 
         // 2. XML 파싱
@@ -75,7 +76,7 @@ public class TourApiService {
                         .queryParam("MobileApp", "AppTest")
                         .queryParam("MobileOS", "ETC")
                         .queryParam("contentId", tourApiId)
-                        .queryParam("defaultYN", "N")
+                        .queryParam("defaultYN", "Y")
                         .queryParam("overviewYN", "Y")
                         .build(false)
                         .toUriString();
@@ -104,7 +105,7 @@ public class TourApiService {
                         .queryParam("contentTypeId", 32)
                         .build(false)
                         .toUriString();
-                String introXml = restTemplate.getForObject(introUrl, String.class);
+                String introXml = restTemplate.getForObject(introUrl, String.class);                
                 Document introDoc = builder.parse(new InputSource(new StringReader(introXml)));
                 NodeList introItems = introDoc.getElementsByTagName("item");
                 if (introItems.getLength() > 0) {
@@ -123,6 +124,10 @@ public class TourApiService {
                     price = parseIntFlexible(priceRaw);
                 }
             } catch (Exception e) {}
+            
+            if (price == null) {
+                price = fetchAveragePriceFromDetailInfo(tourApiKey, tourApiId, restTemplate, builder);
+            }
             
             if (tourApiId == null || tourApiId.isBlank()) continue;
             if (mapX == null || mapY == null) continue;
@@ -221,5 +226,50 @@ public class TourApiService {
 	    }
 	    return null;
 	}
+	
+	private Integer fetchAveragePriceFromDetailInfo(String tourApiKey, String tourApiId, RestTemplate restTemplate,
+			DocumentBuilder builder) {
+		try {
+			String infoUrl = UriComponentsBuilder.newInstance()
+					.uri(URI.create("https://apis.data.go.kr/B551011/KorService2/detailInfo2"))
+					.queryParam("serviceKey", tourApiKey).queryParam("MobileApp", "AppTest")
+					.queryParam("MobileOS", "ETC").queryParam("contentId", tourApiId).queryParam("contentTypeId", 32)
+					.build(false).toUriString();
 
+			String infoXml = restTemplate.getForObject(infoUrl, String.class);
+			if (infoXml == null || infoXml.isBlank())
+				return null;
+
+			Document infoDoc = builder.parse(new InputSource(new StringReader(infoXml)));
+			NodeList rooms = infoDoc.getElementsByTagName("item");
+
+			long sum = 0L;
+			int count = 0;
+			String[] feeTags = { "roomminfee", "roomoffseasonminfee1", "roomoffseasonminfee2", "roompeakseasonminfee1",
+					"roompeakseasonminfee2" };
+
+			for (int r = 0; r < rooms.getLength(); r++) {
+				Element room = (Element) rooms.item(r);
+				for (String tag : feeTags) {
+					Integer p = parseIntFlexible(getTagValueSafe(tag, room));
+					if (p != null && p > 0) {
+						sum += p;
+						count++;
+					}
+				}
+			}
+			if (count == 0)
+				return null;
+
+			long avg = Math.round((double) sum / (double) count);
+			if (avg > Integer.MAX_VALUE)
+				return Integer.MAX_VALUE;
+			if (avg < Integer.MIN_VALUE)
+				return Integer.MIN_VALUE;
+			return (int) avg;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
 }
