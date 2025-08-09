@@ -42,7 +42,7 @@ public class TourApiService {
 	            .queryParam("MobileOS", "ETC")
 	            .queryParam("contentTypeId", 32)
 	            .queryParam("pageNo", 1)
-	            .queryParam("numOfRows", 10)
+	            .queryParam("numOfRows", 50)
 	            .build(false)
 	            .toUriString();
         RestTemplate restTemplate = new RestTemplate();
@@ -58,12 +58,12 @@ public class TourApiService {
             Element item = (Element) itemList.item(i);
 
             // areaBasedSyncList2 (엔드포인트)
-            String address = getTagValue("addr1", item);
-            Double mapX = parseDouble(getTagValue("mapx", item));
-            Double mapY = parseDouble(getTagValue("mapy", item));
-            String title = getTagValue("title", item);
-            String number = getTagValue("tel", item);
-            String tourApiId = getTagValue("contentid", item);
+            String address = getTagValueSafe("addr1", item);
+            Double mapX = parseDouble(getTagValueSafe("mapx", item));
+            Double mapY = parseDouble(getTagValueSafe("mapy", item));
+            String title = getTagValueSafe("title", item);
+            String number = getTagValueSafe("tel", item);
+            String tourApiId = getTagValueSafe("contentid", item);
 
             // detailCommon2에서 overview(설명)
             String overview = null;
@@ -86,7 +86,9 @@ public class TourApiService {
                     overview = overviewNode.item(0).getTextContent();
                 }
             } catch (Exception e) { overview = null; }
-
+            
+            String safeDescription = (overview == null || overview.isBlank()) ? null : overview.trim();
+            
             // detailIntro2에서 상세정보
             String checkInTime = null, checkOutTime = null;
             Short maxPeople = null;
@@ -107,28 +109,44 @@ public class TourApiService {
                 NodeList introItems = introDoc.getElementsByTagName("item");
                 if (introItems.getLength() > 0) {
                     Element intro = (Element) introItems.item(0);
-                    checkInTime = getTagValue("checkintime", intro);
-                    checkOutTime = getTagValue("checkouttime", intro);
-                    maxPeople = parseShort(getTagValue("roommaxcount", intro));
-                    price = parseInt(getTagValue("roomoffseasonminfee1", intro));
+
+                    checkInTime = firstNonBlank(intro, "checkintime");
+                    checkOutTime = firstNonBlank(intro, "checkouttime");
+
+                    String maxPeopleRaw = firstNonBlank(intro, "roommaxcount", "accomcountlodging");
+                    maxPeople = parseShortFlexible(maxPeopleRaw);
+
+                    String priceRaw = firstNonBlank(intro,
+                            "roomoffseasonminfee1", "roomoffseasonminfee2",
+                            "roompeakseasonminfee1", "roompeakseasonminfee2",
+                            "roomminfee");
+                    price = parseIntFlexible(priceRaw);
                 }
             } catch (Exception e) {}
-
-            String safeCheckIn = (checkInTime == null || checkInTime.trim().isEmpty()) ? "정보없음" : checkInTime.trim();
-            String safeCheckOut = (checkOutTime == null || checkOutTime.trim().isEmpty()) ? "정보없음" : checkOutTime.trim();
-            String safeNumber = (number == null || number.trim().isEmpty()) ? "정보없음" : number.trim();
+            
+            if (tourApiId == null || tourApiId.isBlank()) continue;
+            if (mapX == null || mapY == null) continue;
+            
+            String safeAddress = (address == null || address.isBlank()) ? null : address.trim();
+            String safeTitle   = (title   == null || title.isBlank())   ? null : title.trim();
+            
+            if (safeAddress == null || safeTitle == null) continue;
+            
+            String safeCheckIn  = (checkInTime  == null || checkInTime.isBlank())  ? null : checkInTime.trim();
+            String safeCheckOut = (checkOutTime == null || checkOutTime.isBlank()) ? null : checkOutTime.trim();
+            String safeNumber   = (number       == null || number.isBlank())       ? null : number.trim();
             
             Optional<Accommodation> existing = accommodationRepository.findByTourApiId(tourApiId);
 
             if (existing.isPresent()) {
                 Accommodation acc = existing.get();
-                acc.setAddress(address);
+                acc.setAddress(safeAddress);
                 acc.setMapX(mapX);
                 acc.setMapY(mapY);
-                acc.setDescription(overview != null ? overview : "");
-                acc.setMaxPeople(maxPeople != null ? maxPeople : 0);
-                acc.setPrice(price != null ? price : 0);
-                acc.setTitle(title);
+                acc.setDescription(safeDescription);
+                acc.setMaxPeople(maxPeople);
+                acc.setPrice(price);
+                acc.setTitle(safeTitle);
                 acc.setCheckIn(safeCheckIn);
                 acc.setCheckOut(safeCheckOut);
                 acc.setNumber(safeNumber);
@@ -136,13 +154,13 @@ public class TourApiService {
             } else {
                 Accommodation acc = Accommodation.builder()
                         .tourApiId(tourApiId)
-                        .address(address)
+                        .address(safeAddress)
                         .mapX(mapX)
                         .mapY(mapY)
-                        .description(overview != null ? overview : "")
-                        .maxPeople(maxPeople != null ? maxPeople : 0)
-                        .price(price != null ? price : 0)
-                        .title(title)
+                        .description(safeDescription)
+                        .maxPeople(maxPeople)
+                        .price(price)
+                        .title(safeTitle)
                         .checkIn(safeCheckIn)
                         .checkOut(safeCheckOut)
                         .number(safeNumber)
@@ -160,28 +178,33 @@ public class TourApiService {
 	    }
 	}
 	
-	private Short parseShort(String value) {
+	private Integer parseIntFlexible(String value) {
 	    try {
-	        return value != null && !value.isEmpty() ? Short.parseShort(value) : null;
+	        if (value == null) return null;
+	        String digits = value.replaceAll("[^0-9-]", "");
+	        return digits.isEmpty() ? null : Integer.parseInt(digits);
+	    } catch (Exception e) {
+	        return null;
+	    }
+	}
+	private Short parseShortFlexible(String value) {
+	    try {
+	        if (value == null) return null;
+	        String digits = value.replaceAll("[^0-9-]", "");
+	        return digits.isEmpty() ? null : Short.parseShort(digits);
 	    } catch (Exception e) {
 	        return null;
 	    }
 	}
 	
-	private Integer parseInt(String value) {
-	    try {
-	        return value != null && !value.isEmpty() ? Integer.parseInt(value) : null;
-	    } catch (Exception e) {
-	        return null;
-	    }
+	private String getTagValueSafe(String tag, Element element) {
+	    NodeList nodes = element.getElementsByTagName(tag);
+	    if (nodes.getLength() == 0) return null;
+	    Node node = nodes.item(0);
+	    if (node == null) return null;
+	    String text = node.getTextContent();
+	    return (text == null) ? null : text.trim();
 	}
-
-	
-	private String getTagValue(String tag, Element element) {
-        NodeList nlList = element.getElementsByTagName(tag).item(0).getChildNodes();
-        Node nValue = (Node) nlList.item(0);
-        return nValue == null ? null : nValue.getNodeValue();
-    }
 	
 	public List<Accommodation> getAllAccommodations() {
 	    return accommodationRepository.findAll();
@@ -190,4 +213,13 @@ public class TourApiService {
 	public Optional<Accommodation> getAccommodation(Long id) {
 	    return accommodationRepository.findById(id);
 	}
+	
+	private String firstNonBlank(Element el, String... tags) {
+	    for (String t : tags) {
+	        String v = getTagValueSafe(t, el);
+	        if (v != null && !v.isBlank()) return v;
+	    }
+	    return null;
+	}
+
 }

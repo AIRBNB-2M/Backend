@@ -33,28 +33,28 @@ public class Accommodation extends BaseEntity {
     @Column(name = "map_y", nullable = false)
     private Double mapY;
 
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = true)
     private String description;
 
     @Column(name = "address", nullable = false, length = 255)
     private String address;
 
-    @Column(name = "max_people", nullable = false)
+    @Column(name = "max_people", nullable = true)
     private Short maxPeople;
 
-    @Column(name = "price", nullable = false)
+    @Column(name = "price", nullable = true)
     private Integer price;
 
     @Column(name = "title", nullable = false, length = 255)
     private String title;
 
-    @Column(name = "check_in", nullable = false)
+    @Column(name = "check_in", nullable = true)
     private String checkIn;
 
-    @Column(name = "check_out", nullable = false)
+    @Column(name = "check_out", nullable = true)
     private String checkOut;
 
-    @Column(name = "number", nullable = false, length = 50)
+    @Column(name = "number", nullable = true, length = 50)
     private String number;
     
     @Column(name = "tour_api_id", nullable = false, length = 30)
