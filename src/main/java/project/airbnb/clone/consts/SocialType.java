@@ -13,4 +13,8 @@ public enum SocialType {
     NONE("none");
 
     private final String socialName;
+
+    public static SocialType from(String registrationId) {
+        return SocialType.valueOf(registrationId.toUpperCase());
+    }
 }
