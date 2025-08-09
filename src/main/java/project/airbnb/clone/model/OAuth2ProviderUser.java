@@ -27,11 +27,6 @@ public abstract class OAuth2ProviderUser implements ProviderUser {
     }
 
     @Override
-    public String getProvider() {
-        return clientRegistration.getRegistrationId();
-    }
-
-    @Override
     public String getEmail() {
         return (String) getAttributes().get("email");
     }
@@ -42,11 +37,6 @@ public abstract class OAuth2ProviderUser implements ProviderUser {
                          .stream()
                          .map(authority -> new SimpleGrantedAuthority(authority.getAuthority()))
                          .toList();
-    }
-
-    @Override
-    public OAuth2User getOAuth2User() {
-        return oAuth2User;
     }
 
     @Override

@@ -10,17 +10,11 @@ import java.util.List;
 @Builder
 public class FormUser implements ProviderUser {
 
-    private String id;
     private String username;
     private String password;
     private String email;
     private String provider;
     private List<? extends GrantedAuthority> authorities;
-
-    @Override
-    public String getId() {
-        return id;
-    }
 
     @Override
     public String getUsername() {

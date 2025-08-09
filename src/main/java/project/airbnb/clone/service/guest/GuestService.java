@@ -22,6 +22,8 @@ public class GuestService {
         Guest guest = Guest.builder()
                            .name(providerUser.getUsername())
                            .email(providerUser.getEmail())
+                           .number(providerUser.getNumber())
+                           .birthDate(providerUser.getBirthDate())
                            .profileUrl(providerUser.getImageUrl())
                            .password(passwordEncoder.encode(providerUser.getPassword()))
                            .socialType(SocialType.from(registrationId))
