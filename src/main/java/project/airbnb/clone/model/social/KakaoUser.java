@@ -17,11 +17,6 @@ public class KakaoUser extends OAuth2ProviderUser {
     }
 
     @Override
-    public String getId() {
-        return (String) getAttributes().get("id");
-    }
-
-    @Override
     public String getUsername() {
         return (String) otherAttributes.get("nickname");
     }
