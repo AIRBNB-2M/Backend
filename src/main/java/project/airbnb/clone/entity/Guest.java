@@ -2,19 +2,26 @@ package project.airbnb.clone.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import project.airbnb.clone.consts.SocialType;
 
 import java.time.LocalDate;
 
 @Getter
 @Entity
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Table(name = "guests")
 public class Guest extends BaseEntity {
 
@@ -26,10 +33,10 @@ public class Guest extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "birth_date", nullable = false)
+    @Column(name = "birth_date")
     private LocalDate birthDate;
 
-    @Column(name = "number", nullable = false, length = 11)
+    @Column(name = "number", length = 11)
     private String number;
 
     @Column(name = "email", nullable = false, length = 50)
@@ -44,6 +51,11 @@ public class Guest extends BaseEntity {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "social_type")
+    private SocialType socialType;
+
+    @Builder.Default
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
 }

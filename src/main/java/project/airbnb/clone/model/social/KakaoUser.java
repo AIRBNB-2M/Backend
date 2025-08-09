@@ -1,7 +1,9 @@
-package project.airbnb.clone.model;
+package project.airbnb.clone.model.social;
 
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import project.airbnb.clone.model.Attributes;
+import project.airbnb.clone.model.OAuth2ProviderUser;
 
 import java.util.Map;
 
