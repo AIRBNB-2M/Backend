@@ -18,7 +18,7 @@ public class TourApiController {
 
 	private final TourApiService tourApiService;
 	
-	@PostMapping("/api/fetch-accomodattions")
+	@PostMapping("/api/fetch-accomodations")
 	public String fetchAndSaveAccommodations() {
 		
 		try {
