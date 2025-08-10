@@ -60,4 +60,18 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(errorResponse, headers, status);
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<?> handleException(Exception e, HttpServletRequest request) {
+        HttpStatus serverError = HttpStatus.INTERNAL_SERVER_ERROR;
+
+        ErrorResponse<String> errorResponse = ErrorResponse.<String>builder()
+                                                           .status(serverError.value())
+                                                           .error(serverError.getReasonPhrase())
+                                                           .message(e.getMessage())
+                                                           .path(request.getRequestURI())
+                                                           .build();
+
+        return new ResponseEntity<>(errorResponse, serverError);
+    }
 }
