@@ -10,7 +10,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -29,7 +29,7 @@ public class TourApiService {
 	@Value("${tourapi.key}")
     private String tourApiKey;
 	
-	private final RestTemplate restTemplate;
+	private final RestClient restClient;
 
 	private final AccommodationRepository accommodationRepository;
 	
@@ -47,7 +47,10 @@ public class TourApiService {
 	            .queryParam("numOfRows", 50)
 	            .build(false)
 	            .toUriString();
-        String xml = restTemplate.getForObject(url, String.class);
+		String xml = restClient.get()
+			    .uri(url)
+			    .retrieve()
+			    .body(String.class);
 
         // 2. XML 파싱
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -80,7 +83,11 @@ public class TourApiService {
                         .queryParam("overviewYN", "Y")
                         .build(false)
                         .toUriString();
-                String detailXml = restTemplate.getForObject(detailUrl, String.class);
+            	String detailXml = restClient.get()
+            		    .uri(detailUrl)
+            		    .retrieve()
+            		    .body(String.class);
+            	
                 Document detailDoc = builder.parse(new InputSource(new StringReader(detailXml)));
                 NodeList overviewNode = detailDoc.getElementsByTagName("overview");
                 if (overviewNode.getLength() > 0) {
@@ -105,7 +112,11 @@ public class TourApiService {
                         .queryParam("contentTypeId", 32)
                         .build(false)
                         .toUriString();
-                String introXml = restTemplate.getForObject(introUrl, String.class);                
+            	String introXml = restClient.get()
+            		    .uri(introUrl)
+            		    .retrieve()
+            		    .body(String.class);
+            	
                 Document introDoc = builder.parse(new InputSource(new StringReader(introXml)));
                 NodeList introItems = introDoc.getElementsByTagName("item");
                 if (introItems.getLength() > 0) {
@@ -126,7 +137,7 @@ public class TourApiService {
             } catch (Exception e) {}
             
             if (price == null) {
-                price = fetchAveragePriceFromDetailInfo(tourApiKey, tourApiId, restTemplate, builder);
+                price = fetchAveragePriceFromDetailInfo(tourApiKey, tourApiId, restClient, builder);
             }
             
             if (tourApiId == null || tourApiId.isBlank()) continue;
@@ -227,8 +238,8 @@ public class TourApiService {
 	    return null;
 	}
 	
-	private Integer fetchAveragePriceFromDetailInfo(String tourApiKey, String tourApiId, RestTemplate restTemplate,
-			DocumentBuilder builder) {
+	private Integer fetchAveragePriceFromDetailInfo(String tourApiKey, String tourApiId,
+	        RestClient restClient, DocumentBuilder builder) {
 		try {
 			String infoUrl = UriComponentsBuilder.newInstance()
 					.uri(URI.create("https://apis.data.go.kr/B551011/KorService2/detailInfo2"))
@@ -236,7 +247,11 @@ public class TourApiService {
 					.queryParam("MobileOS", "ETC").queryParam("contentId", tourApiId).queryParam("contentTypeId", 32)
 					.build(false).toUriString();
 
-			String infoXml = restTemplate.getForObject(infoUrl, String.class);
+			String infoXml = restClient.get()
+				    .uri(infoUrl)
+				    .retrieve()
+				    .body(String.class);
+			
 			if (infoXml == null || infoXml.isBlank())
 				return null;
 
