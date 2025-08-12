@@ -1,4 +1,4 @@
-package project.airbnb.clone.controller.guets;
+package project.airbnb.clone.controller.guests;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
