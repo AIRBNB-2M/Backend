@@ -48,7 +48,7 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserService)
                                 .oidcUserService(customOidcUserService)
                         )
-                        .successHandler(jwtAuthenticationSuccessHandler)
+                        .successHandler(oAuthAuthenticationSuccessHandler)
                         .failureHandler(customAuthenticationFailureHandler)
                 )
 
