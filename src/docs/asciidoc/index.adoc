@@ -1,0 +1,13 @@
+= Airbnb 프로젝트 REST API 문서
+airbnb
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+[[Guest-API]]
+== Guest API
+
+include::guest-signup.adoc[]
