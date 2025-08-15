@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.airbnb.clone.common.exceptions.EmailAlreadyExistsException;
+import project.airbnb.clone.consts.SocialType;
 import project.airbnb.clone.dto.guest.SignupRequestDto;
 import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.model.ProviderUser;
@@ -23,7 +24,14 @@ public class GuestService {
      */
     @Transactional
     public void register(ProviderUser providerUser) {
-        validateExistsEmail(providerUser.getEmail());
+        String email = providerUser.getEmail();
+        SocialType socialType = SocialType.from(providerUser.getProvider());
+
+        if (guestRepository.existsByEmailAndSocialType(email, socialType)) {
+            return;
+        }
+
+        validateExistsEmail(email);
 
         String encodePassword = encodePassword(providerUser.getPassword());
         Guest guest = providerUser.toEntity(encodePassword);

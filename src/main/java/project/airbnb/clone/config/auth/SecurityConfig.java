@@ -27,7 +27,7 @@ public class SecurityConfig {
     private final ObjectMapper objectMapper;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomOidcUserService customOidcUserService;
-    private final JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler;
+    private final OAuthAuthenticationSuccessHandler oAuthAuthenticationSuccessHandler;
     private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
     @Bean
