@@ -5,7 +5,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.airbnb.clone.common.exceptions.EmailAlreadyExistsException;
-import project.airbnb.clone.consts.SocialType;
 import project.airbnb.clone.dto.guest.SignupRequestDto;
 import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.model.ProviderUser;
@@ -21,19 +20,13 @@ public class GuestService {
 
     /**
      * OAuth 가입
-     * @param registrationId 소셜 정보
      */
     @Transactional
-    public void register(String registrationId, ProviderUser providerUser) {
-        Guest guest = Guest.builder()
-                           .name(providerUser.getUsername())
-                           .email(providerUser.getEmail())
-                           .number(providerUser.getNumber())
-                           .birthDate(providerUser.getBirthDate())
-                           .profileUrl(providerUser.getImageUrl())
-                           .password(encodePassword(providerUser.getPassword()))
-                           .socialType(SocialType.from(registrationId))
-                           .build();
+    public void register(ProviderUser providerUser) {
+        validateExistsEmail(providerUser.getEmail());
+
+        String encodePassword = encodePassword(providerUser.getPassword());
+        Guest guest = providerUser.toEntity(encodePassword);
 
         guestRepository.save(guest);
     }
@@ -43,14 +36,18 @@ public class GuestService {
      */
     @Transactional
     public void register(SignupRequestDto signupRequestDto) {
-        if (guestRepository.existsByEmail(signupRequestDto.email())) {
-            throw new EmailAlreadyExistsException("Email already exists : " + signupRequestDto.email());
-        }
+        validateExistsEmail(signupRequestDto.email());
 
         String encodePassword = encodePassword(signupRequestDto.password());
         Guest guest = signupRequestDto.toEntity(encodePassword);
 
         guestRepository.save(guest);
+    }
+
+    private void validateExistsEmail(String email) {
+        if (guestRepository.existsByEmail(email)) {
+            throw new EmailAlreadyExistsException("Email already exists : " + email);
+        }
     }
 
     private String encodePassword(String rawPassword) {
