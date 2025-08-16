@@ -10,9 +10,11 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import project.airbnb.clone.common.exceptions.EmailAlreadyExistsException;
+import project.airbnb.clone.dto.jwt.TokenResponse;
 import project.airbnb.clone.model.PrincipalUser;
 import project.airbnb.clone.model.ProviderUser;
 import project.airbnb.clone.service.guest.GuestService;
+import project.airbnb.clone.service.jwt.TokenService;
 
 import java.io.IOException;
 
@@ -21,6 +23,7 @@ import java.io.IOException;
 public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
     private final GuestService guestService;
+    private final TokenService tokenService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -28,6 +31,9 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
             PrincipalUser principal = (PrincipalUser) authentication.getPrincipal();
             ProviderUser providerUser = principal.providerUser();
             guestService.register(providerUser);
+
+            TokenResponse tokenResponse = tokenService.generateToken(providerUser.getEmail());
+
         } catch (EmailAlreadyExistsException ex) {
             OAuth2Error oAuth2Error = new OAuth2Error(ex.getMessage(), "Email Already Exists", null);
             throw new OAuth2AuthenticationException(oAuth2Error, ex);
