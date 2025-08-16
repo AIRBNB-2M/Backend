@@ -1,14 +1,15 @@
 package project.airbnb.clone.model;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.List;
 
-@Data
+@Getter
 @Builder
-public class FormUser implements ProviderUser {
+public class RestUser implements ProviderUser {
 
     private String username;
     private String password;
@@ -38,6 +39,6 @@ public class FormUser implements ProviderUser {
 
     @Override
     public List<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 }

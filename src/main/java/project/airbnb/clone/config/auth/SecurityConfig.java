@@ -15,6 +15,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import project.airbnb.clone.config.handlers.failer.CustomAuthenticationFailureHandler;
 import project.airbnb.clone.config.handlers.success.JwtAuthenticationSuccessHandler;
+import project.airbnb.clone.config.handlers.success.OAuthAuthenticationSuccessHandler;
 import project.airbnb.clone.config.rest.RestApiDsl;
 import project.airbnb.clone.service.security.CustomOAuth2UserService;
 import project.airbnb.clone.service.security.CustomOidcUserService;
@@ -25,9 +26,11 @@ import project.airbnb.clone.service.security.CustomOidcUserService;
 public class SecurityConfig {
 
     private final ObjectMapper objectMapper;
-    private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomOidcUserService customOidcUserService;
+    private final CustomOAuth2UserService customOAuth2UserService;
+
     private final JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler;
+    private final OAuthAuthenticationSuccessHandler oAuthAuthenticationSuccessHandler;
     private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
     @Bean
@@ -48,7 +51,7 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserService)
                                 .oidcUserService(customOidcUserService)
                         )
-                        .successHandler(jwtAuthenticationSuccessHandler)
+                        .successHandler(oAuthAuthenticationSuccessHandler)
                         .failureHandler(customAuthenticationFailureHandler)
                 )
 

@@ -21,7 +21,8 @@ public class DelegatingProviderUserConverter implements ProviderUserConverter<Pr
                 new OAuth2NaverProviderUserConverter(),
                 new OAuth2KakaoOidcProviderUserConverter(),
                 new OAuth2KakaoProviderUserConverter(),
-                new OAuth2GithubProviderUserConverter()
+                new OAuth2GithubProviderUserConverter(),
+                new RestProviderUserConverter()
         )));
     }
 

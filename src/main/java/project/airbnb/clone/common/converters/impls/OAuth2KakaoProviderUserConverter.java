@@ -1,5 +1,6 @@
 package project.airbnb.clone.common.converters.impls;
 
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import project.airbnb.clone.common.converters.ProviderUserConverter;
 import project.airbnb.clone.common.converters.ProviderUserRequest;
@@ -12,7 +13,9 @@ public class OAuth2KakaoProviderUserConverter implements ProviderUserConverter<P
 
     @Override
     public ProviderUser converter(ProviderUserRequest providerUserRequest) {
-        if (!providerUserRequest.clientRegistration().getRegistrationId().equals(SocialType.KAKAO.getSocialName())) {
+        ClientRegistration clientRegistration = providerUserRequest.clientRegistration();
+
+        if (clientRegistration == null || !clientRegistration.getRegistrationId().equals(SocialType.KAKAO.getSocialName())) {
             return null;
         }
 
@@ -23,7 +26,7 @@ public class OAuth2KakaoProviderUserConverter implements ProviderUserConverter<P
         return new KakaoUser(
                 OAuthUtils.getOtherAttributes(providerUserRequest.oAuth2User(), "kakao_account", "profile"),
                 providerUserRequest.oAuth2User(),
-                providerUserRequest.clientRegistration()
+                clientRegistration
         );
     }
 }

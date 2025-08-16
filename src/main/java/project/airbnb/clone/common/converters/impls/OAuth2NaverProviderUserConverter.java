@@ -1,5 +1,6 @@
 package project.airbnb.clone.common.converters.impls;
 
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import project.airbnb.clone.common.converters.ProviderUserConverter;
 import project.airbnb.clone.common.converters.ProviderUserRequest;
 import project.airbnb.clone.consts.SocialType;
@@ -11,7 +12,9 @@ public class OAuth2NaverProviderUserConverter implements ProviderUserConverter<P
 
     @Override
     public ProviderUser converter(ProviderUserRequest providerUserRequest) {
-        if (!providerUserRequest.clientRegistration().getRegistrationId().equals(SocialType.NAVER.getSocialName())) {
+        ClientRegistration clientRegistration = providerUserRequest.clientRegistration();
+
+        if (clientRegistration == null || !clientRegistration.getRegistrationId().equals(SocialType.NAVER.getSocialName())) {
             return null;
         }
 
