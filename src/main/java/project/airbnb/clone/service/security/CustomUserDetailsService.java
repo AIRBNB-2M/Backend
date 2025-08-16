@@ -1,5 +1,6 @@
 package project.airbnb.clone.service.security;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -10,31 +11,22 @@ import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.model.PrincipalUser;
 import project.airbnb.clone.model.ProviderUser;
 import project.airbnb.clone.repository.guest.GuestRepository;
-import project.airbnb.clone.service.guest.GuestService;
 
 @Service
-public class CustomUserDetailsService extends AbstractOAuth2UserService implements UserDetailsService {
+@RequiredArgsConstructor
+public class CustomUserDetailsService implements UserDetailsService {
 
     private final GuestRepository guestRepository;
-
-    public CustomUserDetailsService(GuestService guestService, GuestRepository guestRepository, ProviderUserConverter<ProviderUserRequest, ProviderUser> converter) {
-        super(guestService, guestRepository, converter);
-        this.guestRepository = guestRepository;
-    }
+    private final ProviderUserConverter<ProviderUserRequest, ProviderUser> providerUserConverter;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Guest guest = guestRepository.findByEmail(username)
+                                     .orElseThrow(() -> new UsernameNotFoundException("Cannot find guest for: " + username));
 
-        Guest guest = guestRepository.findByEmail(username).orElse(null);
+        ProviderUserRequest providerUserRequest = new ProviderUserRequest(guest);
+        ProviderUser providerUser = providerUserConverter.converter(providerUserRequest);
 
-        if (guest != null) {
-            ProviderUserRequest providerUserRequest = new ProviderUserRequest(guest);
-            ProviderUser providerUser = providerUser(providerUserRequest);
-
-            register(providerUser);
-            return new PrincipalUser(providerUser);
-        }
-
-        throw new UsernameNotFoundException("Cannot find guest for: " + username);
+        return new PrincipalUser(providerUser);
     }
 }

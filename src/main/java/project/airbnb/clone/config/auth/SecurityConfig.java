@@ -1,5 +1,6 @@
 package project.airbnb.clone.config.auth;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -12,7 +13,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import project.airbnb.clone.common.handlers.success.JwtAuthenticationSuccessHandler;
+import project.airbnb.clone.config.handlers.failer.CustomAuthenticationFailureHandler;
+import project.airbnb.clone.config.handlers.success.JwtAuthenticationSuccessHandler;
+import project.airbnb.clone.config.handlers.success.OAuthAuthenticationSuccessHandler;
+import project.airbnb.clone.config.rest.RestApiDsl;
 import project.airbnb.clone.service.security.CustomOAuth2UserService;
 import project.airbnb.clone.service.security.CustomOidcUserService;
 
@@ -21,8 +25,13 @@ import project.airbnb.clone.service.security.CustomOidcUserService;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CustomOAuth2UserService customOAuth2UserService;
+    private final ObjectMapper objectMapper;
     private final CustomOidcUserService customOidcUserService;
+    private final CustomOAuth2UserService customOAuth2UserService;
+
+    private final JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler;
+    private final OAuthAuthenticationSuccessHandler oAuthAuthenticationSuccessHandler;
+    private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -31,7 +40,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
 
-//                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -42,12 +51,20 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserService)
                                 .oidcUserService(customOidcUserService)
                         )
-                        .successHandler(new JwtAuthenticationSuccessHandler()) //TODO: 토큰 발급 기능 추가 필요
+                        .successHandler(oAuthAuthenticationSuccessHandler)
+                        .failureHandler(customAuthenticationFailureHandler)
                 )
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                        .anyRequest().permitAll() //TODO: API 개발하면서 추가
+                        .requestMatchers("/api/auth/login", "/api/auth/signup").permitAll()
+                        .anyRequest().permitAll()
+                )
+
+                .with(new RestApiDsl<>(objectMapper), rest -> rest
+                        .restSuccessHandler(jwtAuthenticationSuccessHandler)
+                        .restFailureHandler(customAuthenticationFailureHandler)
+                        .loginProcessingUrl("/api/auth/login")
                 )
         ;
 
