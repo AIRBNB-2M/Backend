@@ -16,7 +16,7 @@ import java.io.IOException;
 
 @Slf4j
 @Component
-public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
+public class OAuthAuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
     private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
@@ -24,13 +24,11 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         log.debug("인증 실패 : {}", exception.getMessage());
 
-        int statusCode;
+        int statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
         Throwable cause = exception.getCause();
 
         if (cause instanceof EmailAlreadyExistsException) {
             statusCode = HttpStatus.CONFLICT.value();
-        } else {
-            statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
         }
 
         //TODO: 운영 환경에서 프론트엔드 배포 주소 연결

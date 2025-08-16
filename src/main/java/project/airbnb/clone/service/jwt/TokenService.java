@@ -13,7 +13,9 @@ import project.airbnb.clone.repository.guest.GuestRepository;
 
 import java.time.Duration;
 
+import static project.airbnb.clone.common.jwt.JwtProperties.AUTHORIZATION_HEADER;
 import static project.airbnb.clone.common.jwt.JwtProperties.REFRESH_TOKEN_KEY;
+import static project.airbnb.clone.common.jwt.JwtProperties.TOKEN_PREFIX;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +31,7 @@ public class TokenService {
         String accessToken = jwtProvider.generateAccessToken(guest);
         String refreshToken = jwtProvider.generateRefreshToken(guest);
 
+        response.addHeader(AUTHORIZATION_HEADER, TOKEN_PREFIX + accessToken);
         ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_KEY, refreshToken)
                                               .path("/")
                                               .httpOnly(true)

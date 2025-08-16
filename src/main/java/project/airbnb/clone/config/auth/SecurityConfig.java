@@ -13,8 +13,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import project.airbnb.clone.config.handlers.failer.CustomAuthenticationFailureHandler;
-import project.airbnb.clone.config.handlers.success.JwtAuthenticationSuccessHandler;
+import project.airbnb.clone.common.jwt.JwtProperties;
+import project.airbnb.clone.config.handlers.failer.OAuthAuthenticationFailureHandler;
+import project.airbnb.clone.config.handlers.failer.RestAuthenticationFailureHandler;
+import project.airbnb.clone.config.handlers.success.RestAuthenticationSuccessHandler;
 import project.airbnb.clone.config.handlers.success.OAuthAuthenticationSuccessHandler;
 import project.airbnb.clone.config.rest.RestApiDsl;
 import project.airbnb.clone.service.security.CustomOAuth2UserService;
@@ -29,9 +31,10 @@ public class SecurityConfig {
     private final CustomOidcUserService customOidcUserService;
     private final CustomOAuth2UserService customOAuth2UserService;
 
-    private final JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler;
+    private final RestAuthenticationSuccessHandler restAuthenticationSuccessHandler;
     private final OAuthAuthenticationSuccessHandler oAuthAuthenticationSuccessHandler;
-    private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+    private final OAuthAuthenticationFailureHandler OAuthAuthenticationFailureHandler;
+    private final RestAuthenticationFailureHandler restAuthenticationFailureHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -52,7 +55,7 @@ public class SecurityConfig {
                                 .oidcUserService(customOidcUserService)
                         )
                         .successHandler(oAuthAuthenticationSuccessHandler)
-                        .failureHandler(customAuthenticationFailureHandler)
+                        .failureHandler(OAuthAuthenticationFailureHandler)
                 )
 
                 .authorizeHttpRequests(auth -> auth
@@ -62,8 +65,8 @@ public class SecurityConfig {
                 )
 
                 .with(new RestApiDsl<>(objectMapper), rest -> rest
-                        .restSuccessHandler(jwtAuthenticationSuccessHandler)
-                        .restFailureHandler(customAuthenticationFailureHandler)
+                        .restSuccessHandler(restAuthenticationSuccessHandler)
+                        .restFailureHandler(restAuthenticationFailureHandler)
                         .loginProcessingUrl("/api/auth/login")
                 )
         ;
@@ -80,6 +83,8 @@ public class SecurityConfig {
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
+
+        configuration.addExposedHeader(JwtProperties.AUTHORIZATION_HEADER);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
