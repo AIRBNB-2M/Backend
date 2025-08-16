@@ -1,4 +1,4 @@
-package project.airbnb.clone.config.handlers.failer;
+package project.airbnb.clone.config.security.handlers.failer;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

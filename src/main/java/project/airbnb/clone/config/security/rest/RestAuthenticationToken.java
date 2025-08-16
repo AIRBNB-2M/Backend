@@ -1,4 +1,4 @@
-package project.airbnb.clone.config.rest;
+package project.airbnb.clone.config.security.rest;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;

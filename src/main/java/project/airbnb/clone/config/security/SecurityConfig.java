@@ -1,4 +1,4 @@
-package project.airbnb.clone.config.auth;
+package project.airbnb.clone.config.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -14,11 +14,11 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import project.airbnb.clone.common.jwt.JwtProperties;
-import project.airbnb.clone.config.handlers.failer.OAuthAuthenticationFailureHandler;
-import project.airbnb.clone.config.handlers.failer.RestAuthenticationFailureHandler;
-import project.airbnb.clone.config.handlers.success.RestAuthenticationSuccessHandler;
-import project.airbnb.clone.config.handlers.success.OAuthAuthenticationSuccessHandler;
-import project.airbnb.clone.config.rest.RestApiDsl;
+import project.airbnb.clone.config.security.handlers.failer.OAuthAuthenticationFailureHandler;
+import project.airbnb.clone.config.security.handlers.failer.RestAuthenticationFailureHandler;
+import project.airbnb.clone.config.security.handlers.success.RestAuthenticationSuccessHandler;
+import project.airbnb.clone.config.security.handlers.success.OAuthAuthenticationSuccessHandler;
+import project.airbnb.clone.config.security.rest.RestApiDsl;
 import project.airbnb.clone.service.security.CustomOAuth2UserService;
 import project.airbnb.clone.service.security.CustomOidcUserService;
 

@@ -1,4 +1,4 @@
-package project.airbnb.clone.config.rest;
+package project.airbnb.clone.config.security.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpMethod;

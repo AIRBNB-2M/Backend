@@ -1,4 +1,4 @@
-package project.airbnb.clone.config.handlers.failer;
+package project.airbnb.clone.config.security.handlers.failer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
