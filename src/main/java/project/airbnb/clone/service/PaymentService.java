@@ -33,7 +33,6 @@ public class PaymentService {
         Reservation reservation = reservationRepository.findById(req.getReservationId())
                 .orElseThrow(() -> new IllegalArgumentException("예약 미존재: " + req.getReservationId()));
 
-        // 멱등 처리: 기존 merchantUid가 있으면 업데이트, 없으면 생성
         Payment payment = paymentRepository.findByMerchantUid(req.getMerchantUid())
                 .orElse(Payment.builder()
                         .reservation(reservation)
@@ -62,7 +61,7 @@ public class PaymentService {
         Payment payment = paymentRepository.findByMerchantUid(req.getMerchantUid())
                 .orElseThrow(() -> new IllegalArgumentException("주문 미존재: " + req.getMerchantUid()));
 
-        // 검증: merchantUid & amount
+        // 검증
         if (!req.getMerchantUid().equals(detail.getMerchant_uid()))
             throw new IllegalStateException("merchantUid 불일치");
         if (!payment.getAmount().equals(detail.getAmount()))

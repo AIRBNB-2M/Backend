@@ -10,7 +10,7 @@ public class PaymentDtos {
 	@Data @NoArgsConstructor @AllArgsConstructor @Builder
     public static class PrepareRequest {
         private Long reservationId;     // 결제와 연결할 예약 ID
-        private String merchantUid;     // 주문번호(멱등키)
+        private String merchantUid;     // 주문번호
         private Integer amount;         // 결제 금액
     }
     @Data @NoArgsConstructor @AllArgsConstructor @Builder
