@@ -1,5 +1,8 @@
 package project.airbnb.clone.service.jwt;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -30,6 +33,29 @@ public class TokenService {
     public TokenResponse generateAndSendToken(String email, HttpServletResponse response) {
         Guest guest = guestRepository.getGuestByEmail(email);
 
+        return getTokenResponse(response, guest);
+    }
+
+    public void refreshAccessToken(String refreshToken, HttpServletResponse response, HttpServletRequest request) {
+        jwtProvider.validateToken(refreshToken);
+
+        Claims claims = jwtProvider.parseClaims(refreshToken);
+        Long id = Long.valueOf(claims.getSubject());
+
+        Guest guest = guestRepository.getGuestById(id);
+
+        String key = String.valueOf(id);
+        String savedRefreshToken = redisRepository.getValue(key);
+        request.setAttribute("key", key); //예외 발생 시 Advice에서 처리할 수 있도록 저장
+
+        if (!refreshToken.equals(savedRefreshToken)) {
+            throw new JwtException("Refresh Token is invalid: " + refreshToken);
+        }
+
+        getTokenResponse(response, guest);
+    }
+
+    private TokenResponse getTokenResponse(HttpServletResponse response, Guest guest) {
         String accessToken = jwtProvider.generateAccessToken(guest);
         String refreshToken = jwtProvider.generateRefreshToken(guest);
 
