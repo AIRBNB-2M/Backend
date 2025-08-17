@@ -10,10 +10,13 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import project.airbnb.clone.common.jwt.JwtProperties;
+import project.airbnb.clone.config.security.handlers.failer.CustomAuthenticationEntryPoint;
+import project.airbnb.clone.config.security.jwt.JwtAuthenticationFilter;
 import project.airbnb.clone.config.security.handlers.failer.OAuthAuthenticationFailureHandler;
 import project.airbnb.clone.config.security.handlers.failer.RestAuthenticationFailureHandler;
 import project.airbnb.clone.config.security.handlers.success.RestAuthenticationSuccessHandler;
@@ -30,7 +33,8 @@ public class SecurityConfig {
     private final ObjectMapper objectMapper;
     private final CustomOidcUserService customOidcUserService;
     private final CustomOAuth2UserService customOAuth2UserService;
-
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final RestAuthenticationSuccessHandler restAuthenticationSuccessHandler;
     private final OAuthAuthenticationSuccessHandler oAuthAuthenticationSuccessHandler;
     private final OAuthAuthenticationFailureHandler OAuthAuthenticationFailureHandler;
@@ -61,13 +65,19 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/signup").permitAll()
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
 
                 .with(new RestApiDsl<>(objectMapper), rest -> rest
                         .restSuccessHandler(restAuthenticationSuccessHandler)
                         .restFailureHandler(restAuthenticationFailureHandler)
                         .loginProcessingUrl("/api/auth/login")
+                )
+
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
                 )
         ;
 

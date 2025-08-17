@@ -15,6 +15,12 @@ public interface GuestRepository extends JpaRepository<Guest, Long> {
         ));
     }
 
+    default Guest getGuestById(Long id) {
+        return findById(id).orElseThrow(() -> new EntityNotFoundException(
+                "Cannot found Guest from: " + id
+        ));
+    }
+
     Optional<Guest> findByEmail(String email);
     boolean existsByEmail(String email);
     boolean existsByEmailAndSocialType(String email, SocialType socialType);
