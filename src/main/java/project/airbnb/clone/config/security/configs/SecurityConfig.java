@@ -16,6 +16,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import project.airbnb.clone.common.jwt.JwtProperties;
 import project.airbnb.clone.config.security.jwt.JwtAuthenticationFilter;
+import project.airbnb.clone.config.security.jwt.JwtExceptionFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -25,6 +26,7 @@ public class SecurityConfig {
     private final OAuthSecurityConfigurer oAuthSecurityConfigurer;
     private final RestSecurityConfigurer restSecurityConfigurer;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtExceptionFilter jwtExceptionFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -43,6 +45,7 @@ public class SecurityConfig {
                 .with(oAuthSecurityConfigurer, Customizer.withDefaults())
 
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class)
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()

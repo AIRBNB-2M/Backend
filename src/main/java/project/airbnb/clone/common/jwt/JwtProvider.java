@@ -1,13 +1,10 @@
 package project.airbnb.clone.common.jwt;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.security.authentication.CredentialsExpiredException;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import project.airbnb.clone.config.security.jwt.JwtAuthenticationToken;
@@ -59,10 +56,8 @@ public class JwtProvider {
     public void validateToken(String token) {
         try {
             parseClaims(token);
-        } catch (ExpiredJwtException e) {
-            throw new CredentialsExpiredException("The token has expired.", e);
         } catch (JwtException | IllegalArgumentException e) {
-            throw new InsufficientAuthenticationException("The token is invalid.", e);
+            throw new JwtException("Token is invalid", e);
         }
     }
 
