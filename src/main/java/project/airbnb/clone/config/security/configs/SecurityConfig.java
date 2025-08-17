@@ -1,37 +1,30 @@
-package project.airbnb.clone.config.auth;
+package project.airbnb.clone.config.security.configs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import project.airbnb.clone.config.handlers.failer.CustomAuthenticationFailureHandler;
-import project.airbnb.clone.config.handlers.success.JwtAuthenticationSuccessHandler;
-import project.airbnb.clone.config.handlers.success.OAuthAuthenticationSuccessHandler;
-import project.airbnb.clone.config.rest.RestApiDsl;
-import project.airbnb.clone.service.security.CustomOAuth2UserService;
-import project.airbnb.clone.service.security.CustomOidcUserService;
+import project.airbnb.clone.common.jwt.JwtProperties;
+import project.airbnb.clone.config.security.jwt.JwtAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final ObjectMapper objectMapper;
-    private final CustomOidcUserService customOidcUserService;
-    private final CustomOAuth2UserService customOAuth2UserService;
-
-    private final JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler;
-    private final OAuthAuthenticationSuccessHandler oAuthAuthenticationSuccessHandler;
-    private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+    private final OAuthSecurityConfigurer oAuthSecurityConfigurer;
+    private final RestSecurityConfigurer restSecurityConfigurer;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -46,25 +39,15 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
-                .oauth2Login(oauth -> oauth
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)
-                                .oidcUserService(customOidcUserService)
-                        )
-                        .successHandler(oAuthAuthenticationSuccessHandler)
-                        .failureHandler(customAuthenticationFailureHandler)
-                )
+                .with(restSecurityConfigurer, Customizer.withDefaults())
+                .with(oAuthSecurityConfigurer, Customizer.withDefaults())
+
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/signup").permitAll()
-                        .anyRequest().permitAll()
-                )
-
-                .with(new RestApiDsl<>(objectMapper), rest -> rest
-                        .restSuccessHandler(jwtAuthenticationSuccessHandler)
-                        .restFailureHandler(customAuthenticationFailureHandler)
-                        .loginProcessingUrl("/api/auth/login")
+                        .anyRequest().authenticated()
                 )
         ;
 
@@ -80,6 +63,8 @@ public class SecurityConfig {
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
+
+        configuration.addExposedHeader(JwtProperties.AUTHORIZATION_HEADER);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

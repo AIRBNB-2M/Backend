@@ -1,7 +1,8 @@
-package project.airbnb.clone.config.rest;
+package project.airbnb.clone.config.security.rest;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -25,7 +26,7 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
         PrincipalUser principalUser = (PrincipalUser) userDetailsService.loadUserByUsername(email);
 
         if (!passwordEncoder.matches(password, principalUser.getPassword())) {
-            throw new BadCredentialsException("Invalid password");
+            throw new AuthenticationServiceException("Invalid Password: " + password, new BadCredentialsException("Authentication Failed"));
         }
 
         return RestAuthenticationToken.authenticated(
