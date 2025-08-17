@@ -10,6 +10,7 @@ import project.airbnb.clone.common.jwt.JwtProvider;
 import project.airbnb.clone.dto.jwt.TokenResponse;
 import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.repository.guest.GuestRepository;
+import project.airbnb.clone.repository.redis.RedisRepository;
 
 import java.time.Duration;
 
@@ -24,6 +25,7 @@ public class TokenService {
     private final JwtProvider jwtProvider;
     private final JwtProperties jwtProperties;
     private final GuestRepository guestRepository;
+    private final RedisRepository redisRepository;
 
     public TokenResponse generateAndSendToken(String email, HttpServletResponse response) {
         Guest guest = guestRepository.getGuestByEmail(email);
@@ -32,10 +34,14 @@ public class TokenService {
         String refreshToken = jwtProvider.generateRefreshToken(guest);
 
         response.addHeader(AUTHORIZATION_HEADER, TOKEN_PREFIX + accessToken);
+        Duration refreshDuration = Duration.ofSeconds(jwtProperties.getRefreshToken().getExpiration());
+
+        redisRepository.setValue(String.valueOf(guest.getId()), refreshToken, refreshDuration);
+
         ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_KEY, refreshToken)
                                               .path("/")
                                               .httpOnly(true)
-                                              .maxAge(Duration.ofSeconds(jwtProperties.getRefreshToken().getExpiration()))
+                                              .maxAge(refreshDuration)
                                               .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
