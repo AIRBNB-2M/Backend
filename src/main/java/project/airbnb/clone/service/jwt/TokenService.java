@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
@@ -16,11 +17,14 @@ import project.airbnb.clone.repository.guest.GuestRepository;
 import project.airbnb.clone.repository.redis.RedisRepository;
 
 import java.time.Duration;
+import java.util.Date;
 
 import static project.airbnb.clone.common.jwt.JwtProperties.AUTHORIZATION_HEADER;
+import static project.airbnb.clone.common.jwt.JwtProperties.BLACK_LIST_PREFIX;
 import static project.airbnb.clone.common.jwt.JwtProperties.REFRESH_TOKEN_KEY;
 import static project.airbnb.clone.common.jwt.JwtProperties.TOKEN_PREFIX;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TokenService {
@@ -39,9 +43,7 @@ public class TokenService {
     public void refreshAccessToken(String refreshToken, HttpServletResponse response, HttpServletRequest request) {
         jwtProvider.validateToken(refreshToken);
 
-        Claims claims = jwtProvider.parseClaims(refreshToken);
-        Long id = Long.valueOf(claims.getSubject());
-
+        Long id = jwtProvider.getId(refreshToken);
         Guest guest = guestRepository.getGuestById(id);
 
         String key = String.valueOf(id);
@@ -72,5 +74,40 @@ public class TokenService {
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return new TokenResponse(accessToken, refreshToken);
+    }
+
+    public boolean containsBlackList(String token) {
+        String key = BLACK_LIST_PREFIX + token;
+        return redisRepository.getValue(key) != null;
+    }
+
+    public void logoutProcess(String accessToken, String refreshToken) {
+        //액세스 토큰 블랙리스트 처리
+        addBlackList(accessToken);
+
+        //리프레시 토큰 제거
+        removeRefreshToken(refreshToken);
+    }
+
+    private void addBlackList(String accessToken) {
+        accessToken = accessToken.substring(TOKEN_PREFIX.length());
+        String key = BLACK_LIST_PREFIX + accessToken;
+
+        Date now = new Date();
+        Claims claims = jwtProvider.parseClaims(accessToken);
+        Date expiration = claims.getExpiration();
+
+        long remain = expiration.getTime() - now.getTime();
+
+        if (remain > 0) {
+            redisRepository.setValue(key, "logout", Duration.ofMillis(remain));
+            log.debug("Access Token added to blacklist: {}", accessToken);
+        }
+    }
+
+    private void removeRefreshToken(String refreshToken) {
+        Long id = jwtProvider.getId(refreshToken);
+        redisRepository.deleteValue(String.valueOf(id));
+        log.debug("Refresh Token removed from Redis: {}", refreshToken);
     }
 }

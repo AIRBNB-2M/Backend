@@ -61,6 +61,11 @@ public class JwtProvider {
         }
     }
 
+    public Long getId(String token) {
+        Claims claims = parseClaims(token);
+        return Long.valueOf(claims.getSubject());
+    }
+
     public Claims parseClaims(String token) {
         return Jwts.parser()
                    .verifyWith(key)
