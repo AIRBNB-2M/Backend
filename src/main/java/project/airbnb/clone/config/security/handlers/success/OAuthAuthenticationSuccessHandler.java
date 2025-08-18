@@ -37,7 +37,7 @@ public class OAuthAuthenticationSuccessHandler extends SimpleUrlAuthenticationSu
             ProviderUser providerUser = principal.providerUser();
 
             guestService.register(providerUser);
-            TokenResponse tokenResponse = tokenService.generateAndSendToken(providerUser.getEmail(), response);
+            TokenResponse tokenResponse = tokenService.generateAndSendToken(providerUser.getEmail(), providerUser.getPrincipalName(), response);
 
             log.debug("OAuth 인증 성공, 토큰 발급");
 

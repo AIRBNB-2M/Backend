@@ -42,4 +42,9 @@ public class NaverUser extends OAuth2ProviderUser {
         String number = (String) getAttributes().get("mobile");
         return number.replaceAll("-", "");
     }
+
+    @Override
+    public String getPrincipalName() {
+        return (String) getAttributes().get("id");
+    }
 }

@@ -20,4 +20,9 @@ public class GithubUser extends OAuth2ProviderUser {
     public String getImageUrl() {
         return (String) getAttributes().get("avatar_url");
     }
+
+    @Override
+    public String getPrincipalName() {
+        return String.valueOf(getAttributes().get("id"));
+    }
 }

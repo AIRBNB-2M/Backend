@@ -6,9 +6,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
+import project.airbnb.clone.common.events.logout.OAuthLogoutEvent;
 import project.airbnb.clone.common.jwt.JwtProperties;
 import project.airbnb.clone.common.jwt.JwtProvider;
 import project.airbnb.clone.dto.jwt.TokenResponse;
@@ -33,20 +35,20 @@ public class TokenService {
     private final JwtProperties jwtProperties;
     private final GuestRepository guestRepository;
     private final RedisRepository redisRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public TokenResponse generateAndSendToken(String email, HttpServletResponse response) {
+    public TokenResponse generateAndSendToken(String email, String principalName, HttpServletResponse response) {
         Guest guest = guestRepository.getGuestByEmail(email);
 
-        return getTokenResponse(response, guest);
+        return getTokenResponse(response, guest, principalName);
     }
 
     public void refreshAccessToken(String refreshToken, HttpServletResponse response, HttpServletRequest request) {
         jwtProvider.validateToken(refreshToken);
 
         Long id = jwtProvider.getId(refreshToken);
-        Guest guest = guestRepository.getGuestById(id);
-
         String key = String.valueOf(id);
+
         String savedRefreshToken = redisRepository.getValue(key);
         request.setAttribute("key", key); //예외 발생 시 Advice에서 처리할 수 있도록 저장
 
@@ -54,12 +56,15 @@ public class TokenService {
             throw new JwtException("Refresh Token is invalid: " + refreshToken);
         }
 
-        getTokenResponse(response, guest);
+        String principalName = jwtProvider.getPrincipalName(refreshToken);
+
+        Guest guest = guestRepository.getGuestById(id);
+        getTokenResponse(response, guest, principalName);
     }
 
-    private TokenResponse getTokenResponse(HttpServletResponse response, Guest guest) {
-        String accessToken = jwtProvider.generateAccessToken(guest);
-        String refreshToken = jwtProvider.generateRefreshToken(guest);
+    private TokenResponse getTokenResponse(HttpServletResponse response, Guest guest, String principalName) {
+        String accessToken = jwtProvider.generateAccessToken(guest, principalName);
+        String refreshToken = jwtProvider.generateRefreshToken(guest, principalName);
 
         response.addHeader(AUTHORIZATION_HEADER, TOKEN_PREFIX + accessToken);
         Duration refreshDuration = Duration.ofSeconds(jwtProperties.getRefreshToken().getExpiration());
@@ -86,7 +91,11 @@ public class TokenService {
         addBlackList(accessToken);
 
         //리프레시 토큰 제거
-        removeRefreshToken(refreshToken);
+        Long id = removeRefreshToken(refreshToken);
+
+        //로그아웃 이벤트 발행
+        Guest guest = guestRepository.getGuestById(id);
+        eventPublisher.publishEvent(new OAuthLogoutEvent(guest.getSocialType()));
     }
 
     private void addBlackList(String accessToken) {
@@ -105,9 +114,11 @@ public class TokenService {
         }
     }
 
-    private void removeRefreshToken(String refreshToken) {
+    private Long removeRefreshToken(String refreshToken) {
         Long id = jwtProvider.getId(refreshToken);
         redisRepository.deleteValue(String.valueOf(id));
         log.debug("Refresh Token removed from Redis: {}", refreshToken);
+
+        return id;
     }
 }

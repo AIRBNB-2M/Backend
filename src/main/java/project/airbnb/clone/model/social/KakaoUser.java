@@ -25,4 +25,9 @@ public class KakaoUser extends OAuth2ProviderUser {
     public String getImageUrl() {
         return (String) otherAttributes.get("profile_image_url");
     }
+
+    @Override
+    public String getPrincipalName() {
+        return (String) getAttributes().get("sub");
+    }
 }
