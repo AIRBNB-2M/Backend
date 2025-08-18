@@ -1,4 +1,4 @@
-package project.airbnb.clone.config.advice;
+package project.airbnb.clone.common.advice;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;

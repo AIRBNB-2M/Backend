@@ -1,11 +1,11 @@
-package project.airbnb.clone.config.http;
+package project.airbnb.clone.config.infra;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
-import project.airbnb.clone.common.converters.GitHubAppClient;
+import project.airbnb.clone.common.clients.GitHubAppClient;
 
 @Configuration
 public class HttpClientConfig {

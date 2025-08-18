@@ -9,7 +9,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import project.airbnb.clone.common.converters.GitHubAppClient;
+import project.airbnb.clone.common.clients.GitHubAppClient;
 import project.airbnb.clone.common.converters.ProviderUserConverter;
 import project.airbnb.clone.common.converters.ProviderUserRequest;
 import project.airbnb.clone.consts.SocialType;

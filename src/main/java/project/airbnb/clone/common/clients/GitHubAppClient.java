@@ -1,4 +1,4 @@
-package project.airbnb.clone.common.converters;
+package project.airbnb.clone.common.clients;
 
 import lombok.Getter;
 import org.springframework.web.bind.annotation.RequestHeader;
