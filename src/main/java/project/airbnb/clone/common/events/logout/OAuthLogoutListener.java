@@ -11,8 +11,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import project.airbnb.clone.common.clients.KakaoAppClient;
 import project.airbnb.clone.common.clients.KakaoAppClient.KakaoIdResponse;
+import project.airbnb.clone.common.clients.NaverAppClient;
+import project.airbnb.clone.common.clients.NaverAppClient.NaverResponse;
 import project.airbnb.clone.consts.SocialType;
 import project.airbnb.clone.model.PrincipalUser;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import static project.airbnb.clone.common.jwt.JwtProperties.TOKEN_PREFIX;
 
@@ -22,6 +27,7 @@ import static project.airbnb.clone.common.jwt.JwtProperties.TOKEN_PREFIX;
 public class OAuthLogoutListener {
 
     private final KakaoAppClient kakaoAppClient;
+    private final NaverAppClient naverAppClient;
     private final OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
 
     @EventListener
@@ -37,6 +43,10 @@ public class OAuthLogoutListener {
             }
             case NAVER -> {
                 String accessToken = getAccessToken(socialType.getSocialName());
+                String encodedToken = URLEncoder.encode(accessToken, StandardCharsets.UTF_8);
+
+                NaverResponse response = naverAppClient.logout(encodedToken);
+                log.debug("Naver logout success: response={}", response);
             }
             default -> log.debug("Not support logout API: {}", socialType);
         }
