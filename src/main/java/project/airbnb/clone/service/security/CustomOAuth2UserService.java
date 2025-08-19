@@ -1,6 +1,7 @@
 package project.airbnb.clone.service.security;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -10,6 +11,7 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import project.airbnb.clone.common.clients.GitHubAppClient;
+import project.airbnb.clone.common.clients.GitHubAppClient.EmailInfoResponse;
 import project.airbnb.clone.common.converters.ProviderUserConverter;
 import project.airbnb.clone.common.converters.ProviderUserRequest;
 import project.airbnb.clone.consts.SocialType;
@@ -19,6 +21,9 @@ import project.airbnb.clone.model.ProviderUser;
 import java.util.HashMap;
 import java.util.List;
 
+import static project.airbnb.clone.common.jwt.JwtProperties.TOKEN_PREFIX;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
@@ -51,17 +56,18 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     }
 
     private String extractPrimaryEmail(String token) {
-        List<GitHubAppClient.Response> userEmails = gitHubAppClient.getUserEmails(token);
+        List<EmailInfoResponse> userEmails = gitHubAppClient.getUserEmails(token);
+        log.debug("GitHub user email fetch succeeded: {}", userEmails);
 
         return userEmails.stream()
-                         .filter(response -> response.isPrimary() && response.isVerified())
-                         .map(GitHubAppClient.Response::getEmail)
+                         .filter(emailInfoResponse -> emailInfoResponse.primary() && emailInfoResponse.verified())
+                         .map(EmailInfoResponse::email)
                          .findFirst()
                          .orElseThrow(() -> new OAuth2AuthenticationException("Github 계정에 verified & primary 이메일이 없습니다."));
     }
 
     private String generateBearerToken(OAuth2UserRequest userRequest) {
         String token = userRequest.getAccessToken().getTokenValue();
-        return "Bearer " + token;
+        return TOKEN_PREFIX + token;
     }
 }

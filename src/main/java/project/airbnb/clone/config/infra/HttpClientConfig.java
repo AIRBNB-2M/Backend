@@ -12,6 +12,7 @@ import project.airbnb.clone.common.clients.NaverAppClient;
 
 import java.util.Map;
 
+import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 
@@ -20,7 +21,10 @@ public class HttpClientConfig {
 
     @Bean
     public GitHubAppClient gitHubAppClient(RestClient.Builder builder) {
-        RestClient restClient = builder.baseUrl("https://api.github.com").build();
+        RestClient restClient = builder.baseUrl("https://api.github.com")
+                                       .defaultHeader(ACCEPT, "application/vnd.github+json")
+                                       .defaultHeader("X-GitHub-Api-Version", "2022-11-28")
+                                       .build();
 
         return HttpServiceProxyFactory.builderFor(RestClientAdapter.create(restClient))
                                       .build()
