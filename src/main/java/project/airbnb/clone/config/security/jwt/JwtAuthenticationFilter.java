@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import project.airbnb.clone.common.jwt.JwtProvider;
+import project.airbnb.clone.service.jwt.TokenService;
 
 import java.io.IOException;
 
@@ -24,6 +25,7 @@ import static project.airbnb.clone.common.jwt.JwtProperties.TOKEN_PREFIX;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
+    private final TokenService tokenService;
 
     /**
      * @throws CredentialsExpiredException token has expired
@@ -34,7 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String accessToken = resolveToken(request);
 
-        if (accessToken != null) {
+        if (accessToken != null && !tokenService.containsBlackList(accessToken)) {
             jwtProvider.validateToken(accessToken);
 
             SecurityContextHolder.getContextHolderStrategy().getContext().setAuthentication(

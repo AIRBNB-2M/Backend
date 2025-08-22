@@ -13,7 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import project.airbnb.clone.config.advice.ErrorResponse;
+import project.airbnb.clone.common.advice.ErrorResponse;
 
 import java.io.IOException;
 

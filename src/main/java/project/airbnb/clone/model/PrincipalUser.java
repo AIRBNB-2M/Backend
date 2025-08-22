@@ -12,6 +12,10 @@ import java.util.Map;
 
 public record PrincipalUser(ProviderUser providerUser) implements UserDetails, OidcUser, OAuth2User {
 
+    public String getPrincipalName() {
+        return providerUser.getPrincipalName();
+    }
+
     @Override
     public String getName() {
         return providerUser.getUsername();
@@ -34,7 +38,7 @@ public record PrincipalUser(ProviderUser providerUser) implements UserDetails, O
 
     @Override
     public String getUsername() {
-        return providerUser.getUsername();
+        return providerUser.getPrincipalName();
     }
 
     @Override

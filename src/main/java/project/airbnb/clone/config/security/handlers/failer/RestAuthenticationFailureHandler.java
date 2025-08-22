@@ -12,7 +12,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
-import project.airbnb.clone.config.advice.ErrorResponse;
+import project.airbnb.clone.common.advice.ErrorResponse;
 
 import java.io.IOException;
 

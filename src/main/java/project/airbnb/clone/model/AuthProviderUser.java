@@ -6,7 +6,7 @@ import project.airbnb.clone.entity.Guest;
 
 import java.util.List;
 
-public record AuthProviderUser(Guest guest) implements ProviderUser {
+public record AuthProviderUser(Guest guest, String principalName) implements ProviderUser {
 
     @Override
     public String getUsername() {
@@ -36,5 +36,10 @@ public record AuthProviderUser(Guest guest) implements ProviderUser {
     @Override
     public List<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));  //TODO: 여러 권한 추가
+    }
+
+    @Override
+    public String getPrincipalName() {
+        return principalName;
     }
 }

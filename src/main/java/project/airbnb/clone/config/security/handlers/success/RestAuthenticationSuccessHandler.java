@@ -25,7 +25,7 @@ public class RestAuthenticationSuccessHandler implements AuthenticationSuccessHa
         PrincipalUser principal = (PrincipalUser) authentication.getPrincipal();
 
         String email = principal.providerUser().getEmail();
-        tokenService.generateAndSendToken(email, response);
+        tokenService.generateAndSendToken(email, "default", response);
 
         log.debug("REST 인증 성공, 토큰 발급");
     }

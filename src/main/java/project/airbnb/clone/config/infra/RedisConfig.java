@@ -1,4 +1,4 @@
-package project.airbnb.clone.config;
+package project.airbnb.clone.config.infra;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
