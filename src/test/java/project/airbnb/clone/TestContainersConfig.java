@@ -4,22 +4,24 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
 public abstract class TestContainersConfig {
 
-    @Container
     public static final MySQLContainer<?> MYSQL_CONTAINER = new MySQLContainer<>("mysql:8.0.35")
             .withDatabaseName("testdb")
             .withUsername("test")
             .withPassword("test");
 
-    @Container
     public static final GenericContainer<?> REDIS_CONTAINER = new GenericContainer<>(DockerImageName.parse("redis:7.2.4"))
             .withExposedPorts(6379);
+
+    static {
+        MYSQL_CONTAINER.start();
+        REDIS_CONTAINER.start();
+    }
 
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {

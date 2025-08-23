@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import project.airbnb.clone.common.jwt.JwtProvider;
 import project.airbnb.clone.controller.guests.GuestController;
-import project.airbnb.clone.service.guest.GuestService;
+import project.airbnb.clone.repository.redis.RedisRepository;
+import project.airbnb.clone.service.jwt.TokenService;
 
 @Disabled
 @WebMvcTest({
@@ -18,7 +20,10 @@ public abstract class ControllerTestSupport {
 
     @Autowired protected ObjectMapper objectMapper;
     @Autowired protected MockMvc mockMvc;
-    @MockitoBean protected GuestService guestService;
+
+    @MockitoBean protected RedisRepository redisRepository;
+    @MockitoBean protected JwtProvider jwtProvider;
+    @MockitoBean protected TokenService tokenService;
 
     protected String creatJson(Object dto) throws JsonProcessingException {
         return objectMapper.writeValueAsString(dto);

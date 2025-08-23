@@ -4,8 +4,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import project.airbnb.clone.controller.RestDocsTestSupport;
 import project.airbnb.clone.dto.guest.SignupRequestDto;
+import project.airbnb.clone.service.guest.GuestService;
 
 import java.time.LocalDate;
 
@@ -16,6 +18,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static project.airbnb.clone.config.RestDocsConfig.field;
 
 class GuestControllerTest extends RestDocsTestSupport {
+
+    @MockitoBean
+    protected GuestService guestService;
 
     @Test
     @DisplayName("REST 회원 가입")
