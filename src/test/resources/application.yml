@@ -7,5 +7,33 @@ spring:
       client:
         registration:
           google:
-            client-id: test
-            client-secret: test
+            client-id: test-google
+            client-secret: test-google-secret
+            redirect-uri: test-google-redirect
+            provider: google
+            authorization-grant-type: authorization_code
+          naver:
+            client-id: test-naver
+            client-secret: test-naver-secret
+            redirect-uri: test-naver-redirect
+            provider: naver
+            authorization-grant-type: authorization_code
+
+        provider:
+          google:
+            authorization-uri: test-google-auth
+            token-uri: test-google-token
+            user-info-uri: test-google-user
+            user-name-attribute: sub
+          naver:
+            authorization-uri: test-naver-auth
+            token-uri: test-naver-token
+            user-info-uri: test-naver-user
+            user-name-attribute: id
+
+jwt:
+  secret-key: testsecretkeytestsecretkeytestsecretkeytestsecretkey
+  access-token:
+    expiration: 1000
+  refresh-token:
+    expiration: 1000
