@@ -57,15 +57,15 @@ class TokenServiceTest extends TestContainersConfig {
         jwtProperties.setSecretKey(Base64.getEncoder().encodeToString("test-secret-key".repeat(10).getBytes()));
 
         TokenProperties accessToken = new TokenProperties();
-        accessToken.setExpiration(3000);
+        accessToken.setExpiration(300_000);
         jwtProperties.setAccessToken(accessToken);
 
         TokenProperties refreshToken = new TokenProperties();
-        refreshToken.setExpiration(6000);
+        refreshToken.setExpiration(600_000);
         jwtProperties.setRefreshToken(refreshToken);
 
         guest = Guest.builder().name("Jessica Bala").email("test@email.com").password("858d2781-2a13-4d26-b3c9-7b84b214f82f").build();
-        guestRepository.save(guest);
+        guestRepository.saveAndFlush(guest);
     }
 
     @AfterEach
