@@ -15,4 +15,4 @@ include::guest-signup.adoc[]
 [[Token-API]]
 == Token API
 
-include::refresh-access.adoc[]
+include::token.adoc[]

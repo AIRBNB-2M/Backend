@@ -16,6 +16,7 @@ import static org.springframework.http.HttpHeaders.SET_COOKIE;
 import static org.springframework.restdocs.cookies.CookieDocumentation.cookieWithName;
 import static org.springframework.restdocs.cookies.CookieDocumentation.requestCookies;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -51,6 +52,31 @@ class RefreshTokenControllerTest extends RestDocsTestSupport {
                        responseHeaders(
                                headerWithName(AUTHORIZATION).description("새로운 액세스 토큰 발급"),
                                headerWithName(SET_COOKIE).description("새로운 리프레시 토큰 발급")
+                       )
+               ));
+    }
+
+    @Test
+    @DisplayName("액세스 토큰과 리프레시 토큰을 받아 로그아웃 처리를 한다.")
+    void logout() throws Exception {
+        //given
+
+        //when
+        //then
+        mockMvc.perform(post("/api/auth/logout")
+                       .cookie(new Cookie("RefreshToken", "{refresh-token}"))
+                       .header(AUTHORIZATION,"Bearer {access-token}")
+               )
+               .andExpect(status().isOk())
+               .andDo(restDocs.document(
+                       requestCookies(
+                               cookieWithName("RefreshToken").description("로그인 시 전달된 리프레시 토큰")
+                       ),
+                       requestHeaders(
+                               headerWithName(AUTHORIZATION).description("로그인 시 전달된 액세스 토큰")
+                       ),
+                       responseHeaders(
+                               headerWithName(SET_COOKIE).description("무효 처리된 리프레시 토큰")
                        )
                ));
     }

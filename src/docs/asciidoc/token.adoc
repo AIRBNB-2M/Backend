@@ -1,0 +1,7 @@
+[[Token-API-refresh-access]]
+=== 액세스 토큰 재발급
+operation::refresh-token-controller-test/refresh-access-token[snippets='http-request,request-cookies,http-response,response-headers']
+
+[[Token-API-logout]]
+=== 로그아웃
+operation::refresh-token-controller-test/logout[snippets='http-request,request-headers,request-cookies,http-response,response-headers']
