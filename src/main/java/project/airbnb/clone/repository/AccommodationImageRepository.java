@@ -10,6 +10,5 @@ import project.airbnb.clone.entity.AccommodationImage;
 
 public interface AccommodationImageRepository extends JpaRepository<AccommodationImage, Long> {
 
-    Optional<AccommodationImage> findByAccommodationAndImageUrl(Accommodation accommodation, String imageUrl);
     List<AccommodationImage> findByAccommodation(Accommodation accommodation);
 }

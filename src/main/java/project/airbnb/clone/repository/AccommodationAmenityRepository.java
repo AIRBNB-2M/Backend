@@ -10,6 +10,5 @@ import project.airbnb.clone.entity.Amenity;
 
 public interface AccommodationAmenityRepository extends JpaRepository<AccommodationAmenity, Long> {
 
-	boolean existsByAccommodationAndAmenity(Accommodation accommodation, Amenity amenity);
     List<AccommodationAmenity> findByAccommodation(Accommodation accommodation);
 }

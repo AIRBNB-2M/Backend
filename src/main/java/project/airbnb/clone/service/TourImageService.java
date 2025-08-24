@@ -2,29 +2,21 @@ package project.airbnb.clone.service;
 
 import java.io.StringReader;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
+import java.util.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
 import org.xml.sax.InputSource;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import project.airbnb.clone.entity.Accommodation;
-import project.airbnb.clone.entity.AccommodationImage;
-import project.airbnb.clone.repository.AccommodationImageRepository;
-import project.airbnb.clone.repository.AccommodationRepository;
+import project.airbnb.clone.entity.*;
+import project.airbnb.clone.repository.*;
 
 @Slf4j
 @Service
@@ -37,6 +29,9 @@ public class TourImageService {
     private final RestClient restClient;
     private final AccommodationRepository accommodationRepository;
     private final AccommodationImageRepository accommodationImageRepository;
+
+    // 필요 시 조정 (한 숙소당 이미지가 많지 않지만, 안전하게 값 유지)
+    private static final int BATCH = 500;
 
     @Transactional
     public int fetchAndSaveImagesForAllAccommodations() throws Exception {
@@ -63,9 +58,18 @@ public class TourImageService {
         log.info("[IMG] fetchFor accId={}, contentId={}", accommodation.getId(), contentId);
         if (contentId == null || contentId.isBlank()) return 0;
 
+        // ===== 0) 이 숙소의 기존 이미지들 한 번에 조회 → URL 기준 Map 구성 =====
+        List<AccommodationImage> existingList = accommodationImageRepository.findByAccommodation(accommodation);
+        Map<String, AccommodationImage> existingByUrl = new HashMap<>();
+        for (AccommodationImage ai : existingList) {
+            if (ai.getImageUrl() != null) {
+                existingByUrl.put(normalize(ai.getImageUrl()), ai);
+            }
+        }
+
+        // ===== 1) 대표 이미지(detailCommon2) =====
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
-        int saved = 0;
 
         String commonUrl = UriComponentsBuilder.newInstance()
                 .uri(URI.create("https://apis.data.go.kr/B551011/KorService2/detailCommon2"))
@@ -103,14 +107,9 @@ public class TourImageService {
         } else if (firstimage2 != null && !firstimage2.isBlank()) {
             thumbnailUrl = firstimage2.trim();
         }
-
-        if (thumbnailUrl != null) {
-            saved += saveImageIfNotExists(accommodation, thumbnailUrl, true);
-        } else {
-            log.info("[IMG] no representative image (firstimage/firstimage2 both null) for contentId={}", contentId);
-        }
         log.info("[IMG] firstimage={}, firstimage2={}, chosenThumb={}", firstimage, firstimage2, thumbnailUrl);
 
+        // ===== 2) 서브 이미지(detailImage2) =====
         String imageUrl = UriComponentsBuilder.newInstance()
                 .uri(URI.create("https://apis.data.go.kr/B551011/KorService2/detailImage2"))
                 .queryParam("serviceKey", tourApiKey)
@@ -126,6 +125,7 @@ public class TourImageService {
         String listXml = restClient.get().uri(imageUrl).retrieve().body(String.class);
         log.info("[IMG] listXml length={}", listXml == null ? 0 : listXml.length());
 
+        // 중복 제거를 위해 Set 사용
         List<String> subUrls = new ArrayList<>();
         if (listXml != null && !listXml.isBlank()) {
             try {
@@ -153,17 +153,40 @@ public class TourImageService {
             }
         }
 
-        for (String url : subUrls) {
-            saved += saveImageIfNotExists(accommodation, url, false);
-        }
-
+        // 대표 이미지 없으면 첫 번째 서브 이미지를 썸네일로 승격
         if (thumbnailUrl == null && !subUrls.isEmpty()) {
-            saved += saveImageIfNotExists(accommodation, subUrls.get(0), true);
-            log.info("[IMG] promoted first sub image as thumbnail: {}", subUrls.get(0));
+            thumbnailUrl = subUrls.get(0);
+            log.info("[IMG] promoted first sub image as thumbnail: {}", thumbnailUrl);
         }
 
-        log.info("[IMG] saved={}", saved);
-        return saved;
+        // ===== 3) 삽입/업데이트 목록 구성 → saveAll =====
+        List<AccommodationImage> toInsert = new ArrayList<>();
+        List<AccommodationImage> toUpdate = new ArrayList<>();
+
+        // 대표 이미지 먼저 처리(있다면)
+        if (thumbnailUrl != null) {
+            upsertImage(accommodation, thumbnailUrl, true, existingByUrl, toInsert, toUpdate);
+        }
+
+        // 서브 이미지 처리 (대표 이미지와 중복될 수 있어도 upsertImage에서 정리)
+        for (String url : subUrls) {
+            upsertImage(accommodation, url, false, existingByUrl, toInsert, toUpdate);
+        }
+
+        // 청크 저장 (현재는 보통 100장 이하지만 공통 패턴 유지)
+        int savedNew = 0;
+        for (int i = 0; i < toInsert.size(); i += BATCH) {
+            int end = Math.min(i + BATCH, toInsert.size());
+            accommodationImageRepository.saveAll(toInsert.subList(i, end));
+            savedNew += (end - i); // 신규만 카운트(이전 코드 정책 유지)
+        }
+        for (int i = 0; i < toUpdate.size(); i += BATCH) {
+            int end = Math.min(i + BATCH, toUpdate.size());
+            accommodationImageRepository.saveAll(toUpdate.subList(i, end));
+        }
+
+        log.info("[IMG] saved new={}, updatedThumb={}", savedNew, toUpdate.size());
+        return savedNew; // 컨트롤러 메시지 정책에 맞춰 '신규'만 카운트(원래 로직과 동일)
     }
 
     @Transactional(readOnly = true)
@@ -172,27 +195,42 @@ public class TourImageService {
         return opt.map(accommodationImageRepository::findByAccommodation).orElseGet(List::of);
     }
 
-    private int saveImageIfNotExists(Accommodation acc, String url, boolean thumbnail) {
-        if (url == null) return 0;
-        String normalized = url.trim().replaceAll("\\s+", "");
-        if (normalized.isEmpty()) return 0;
+    // ========= 헬퍼 =========
 
-        var existing = accommodationImageRepository.findByAccommodationAndImageUrl(acc, normalized);
-        if (existing.isPresent()) {
-            if (thumbnail && !existing.get().isThumbnail()) {
-                existing.get().setThumbnail(true);
-                accommodationImageRepository.save(existing.get());
+    private void upsertImage(
+            Accommodation acc,
+            String rawUrl,
+            boolean preferThumbnail,
+            Map<String, AccommodationImage> existingByUrl,
+            List<AccommodationImage> toInsert,
+            List<AccommodationImage> toUpdate
+    ) {
+        if (rawUrl == null) return;
+        String url = normalize(rawUrl);
+        if (url.isEmpty()) return;
+
+        AccommodationImage exist = existingByUrl.get(url);
+        if (exist != null) {
+            if (preferThumbnail && !exist.isThumbnail()) {
+                exist.setThumbnail(true);  // 썸네일 승격만 업데이트
+                toUpdate.add(exist);
             }
-            return 0;
+            return; // 신규 아님
         }
-        accommodationImageRepository.save(
-            AccommodationImage.builder()
+
+        // 신규
+        AccommodationImage img = AccommodationImage.builder()
                 .accommodation(acc)
-                .imageUrl(normalized)
-                .thumbnail(thumbnail)
-                .build()
-        );
-        return 1;
+                .imageUrl(url)
+                .thumbnail(preferThumbnail)
+                .build();
+        toInsert.add(img);
+        // Map에도 추가해두면 이후 중복 URL이 들어와도 신규로 또 담지 않음
+        existingByUrl.put(url, img);
+    }
+
+    private String normalize(String s) {
+        return s == null ? "" : s.trim().replaceAll("\\s+", "");
     }
 
     private String getTagValueSafe(String tag, Document doc) {
