@@ -54,6 +54,10 @@ spring:
 tourapi:
   key: ${TOUR_API_KEY}
 
+portone:
+  api-key: ${PORTONE_API_ID}
+  api-secret: ${PORTONE_API_SECRET}
+
 jwt:
   secret-key: ${JWT_SECRET_KEY}
   access-token:
