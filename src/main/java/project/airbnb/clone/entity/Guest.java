@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import project.airbnb.clone.consts.SocialType;
 
 import java.time.LocalDate;
@@ -42,6 +43,7 @@ public class Guest extends BaseEntity {
     @Column(name = "email", nullable = false, length = 50)
     private String email;
 
+    @Setter
     @Column(name = "profile_url")
     private String profileUrl;
 

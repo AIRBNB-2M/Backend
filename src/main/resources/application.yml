@@ -60,3 +60,10 @@ jwt:
     expiration: ${JWT_ACCESS_EXP}
   refresh-token:
     expiration: ${JWT_REFRESH_EXP}
+
+cloudflare:
+  r2:
+    endpoint: https://${R2_ENDPOINT_URL}.r2.cloudflarestorage.com
+    bucket: ${R2_BUCKET_NAME}
+    access-key: ${R2_ACCESS_KEY}
+    secret-key: ${R2_SECRET_KEY}
