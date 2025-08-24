@@ -44,7 +44,7 @@ public class TourApiService {
 	            .queryParam("MobileOS", "ETC")
 	            .queryParam("contentTypeId", 32)
 	            .queryParam("pageNo", 1)
-	            .queryParam("numOfRows", 50)
+	            .queryParam("numOfRows", 30)
 	            .build(false)
 	            .toUriString();
 		String xml = restClient.get()

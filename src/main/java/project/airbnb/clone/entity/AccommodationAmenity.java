@@ -9,14 +9,27 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "accommodation_amenities")
+@AllArgsConstructor
+@Builder
+@Table(
+	    name = "accommodation_amenities",
+	    uniqueConstraints = {
+	        @UniqueConstraint(
+	            name = "uk_acc_amenity",
+	            columnNames = {"accommodation_id", "amenity_id"}
+	        )
+	    }
+	)
 public class AccommodationAmenity extends BaseEntity {
 
     @Id

@@ -6,14 +6,27 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "amenities")
+@AllArgsConstructor
+@Builder
+@Table(
+	    name = "amenities",
+	    uniqueConstraints = {
+	        @UniqueConstraint(
+	            name = "uk_amenity_name",
+	            columnNames = {"name"}
+	        )
+	    }
+	)
 public class Amenity extends BaseEntity {
 
     @Id
@@ -24,6 +37,6 @@ public class Amenity extends BaseEntity {
     @Column(name = "name", nullable = false, length = 10)
     private String name;
 
-    @Column(name = "icon_url", nullable = false)
+    @Column(name = "icon_url", nullable = true)
     private String iconUrl;
 }
