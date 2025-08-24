@@ -71,7 +71,6 @@ public class TourAmenityService {
         log.info("[AMENITY] contentId={} detected={}", contentId, names);
         if (names.isEmpty()) return 0;
 
-        // 1) 기존 Amenity 일괄 조회 → 없는 것만 saveAll
         List<Amenity> existing = amenityRepository.findAllByNameIn(names);
         Map<String, Amenity> byName = new HashMap<>();
         for (Amenity a : existing) byName.put(a.getName(), a);
@@ -83,7 +82,6 @@ public class TourAmenityService {
             }
         }
         if (!toCreate.isEmpty()) {
-            // 청크 저장 (대량 대비)
             for (int i = 0; i < toCreate.size(); i += BATCH) {
                 int end = Math.min(i + BATCH, toCreate.size());
                 List<Amenity> saved = amenityRepository.saveAll(toCreate.subList(i, end));
@@ -91,7 +89,6 @@ public class TourAmenityService {
             }
         }
 
-        // 2) 숙소의 기존 매핑 일괄 조회 → 없는 매핑만 saveAll
         List<AccommodationAmenity> existingLinks = accommodationAmenityRepository.findByAccommodation(acc);
         Set<Long> linkedAmenityIds = new HashSet<>();
         for (AccommodationAmenity link : existingLinks) {
@@ -101,7 +98,7 @@ public class TourAmenityService {
         List<AccommodationAmenity> toLink = new ArrayList<>();
         for (String nm : names) {
             Amenity a = byName.get(nm);
-            if (a == null) continue; // 방어
+            if (a == null) continue;
             if (!linkedAmenityIds.contains(a.getId())) {
                 toLink.add(AccommodationAmenity.builder()
                         .accommodation(acc)
@@ -121,8 +118,6 @@ public class TourAmenityService {
 
         return linkedCount;
     }
-
-    // ====== 이하 기존 유틸/룰 그대로 ======
 
     private Map<String, String> fetchDetailIntro(String contentId) throws Exception {
         String url = UriComponentsBuilder.newInstance()

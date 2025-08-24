@@ -40,7 +40,6 @@ public class TourApiService {
     @Transactional
     public void fetchAndSaveAccommodations() throws Exception {
 
-        // 1. API 호출 (XML 응답 받기)
         String url = UriComponentsBuilder
                 .newInstance()
                 .uri(URI.create("https://apis.data.go.kr/B551011/KorService2/areaBasedSyncList2"))
@@ -55,21 +54,18 @@ public class TourApiService {
 
         String xml = restClient.get().uri(url).retrieve().body(String.class);
 
-        // 2. XML 파싱
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document doc = builder.parse(new InputSource(new StringReader(xml)));
 
         NodeList itemList = doc.getElementsByTagName("item");
 
-        // ★ saveAll 대상들을 모아두기
         List<Accommodation> toInsert = new ArrayList<>();
         List<Accommodation> toUpdate = new ArrayList<>();
 
         for (int i = 0; i < itemList.getLength(); i++) {
             Element item = (Element) itemList.item(i);
 
-            // areaBasedSyncList2
             String address = getTagValueSafe("addr1", item);
             Double mapX = parseDouble(getTagValueSafe("mapx", item));
             Double mapY = parseDouble(getTagValueSafe("mapy", item));
@@ -77,7 +73,6 @@ public class TourApiService {
             String number = getTagValueSafe("tel", item);
             String tourApiId = getTagValueSafe("contentid", item);
 
-            // detailCommon2 → overview
             String overview = null;
             try {
                 String detailUrl = UriComponentsBuilder
@@ -103,7 +98,6 @@ public class TourApiService {
 
             String safeDescription = (overview == null || overview.isBlank()) ? null : overview.trim();
 
-            // detailIntro2 → 상세정보
             String checkInTime = null, checkOutTime = null;
             Short maxPeople = null;
             Integer price = null;
@@ -187,7 +181,6 @@ public class TourApiService {
                 toInsert.add(acc);
             }
 
-            // ★ 청크 단위로 saveAll + flush/clear (메모리/왕복 최적화)
             if (toInsert.size() >= BATCH) {
                 accommodationRepository.saveAll(toInsert);
                 accommodationRepository.flush();
@@ -202,7 +195,6 @@ public class TourApiService {
             }
         }
 
-        // ★ 잔여분 처리
         if (!toInsert.isEmpty()) {
             accommodationRepository.saveAll(toInsert);
         }
@@ -212,8 +204,6 @@ public class TourApiService {
         accommodationRepository.flush();
         em.clear();
     }
-
-    // ===== 아래 유틸 메서드는 기존 그대로 =====
 
     private Double parseDouble(String value) {
         try {
