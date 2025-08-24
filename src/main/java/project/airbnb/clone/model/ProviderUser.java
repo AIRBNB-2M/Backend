@@ -41,7 +41,6 @@ public interface ProviderUser {
                     .email(getEmail())
                     .number(getNumber())
                     .birthDate(getBirthDate())
-                    .profileUrl(getImageUrl())
                     .password(encodePassword)
                     .socialType(SocialType.from(getProvider()))
                     .build();
