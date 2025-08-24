@@ -1,9 +1,11 @@
 package project.airbnb.clone.service.guest;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import project.airbnb.clone.common.events.guest.GuestImageUploadEvent;
 import project.airbnb.clone.common.exceptions.EmailAlreadyExistsException;
 import project.airbnb.clone.consts.SocialType;
 import project.airbnb.clone.dto.guest.SignupRequestDto;
@@ -18,6 +20,7 @@ public class GuestService {
 
     private final GuestRepository guestRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * OAuth 가입
@@ -37,6 +40,10 @@ public class GuestService {
         Guest guest = providerUser.toEntity(encodePassword);
 
         guestRepository.save(guest);
+
+        if (providerUser.getImageUrl() != null) {
+            eventPublisher.publishEvent(new GuestImageUploadEvent(guest.getId(), providerUser.getImageUrl()));
+        }
     }
 
     /**

@@ -11,3 +11,8 @@ airbnb
 == Guest API
 
 include::guest-signup.adoc[]
+
+[[Token-API]]
+== Token API
+
+include::token.adoc[]
