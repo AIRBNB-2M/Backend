@@ -1,26 +1,28 @@
 package project.airbnb.clone.service;
 
-import java.io.StringReader;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-
-import lombok.RequiredArgsConstructor;
 import project.airbnb.clone.entity.Accommodation;
 import project.airbnb.clone.repository.AccommodationRepository;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.StringReader;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -149,7 +151,7 @@ public class TourApiService {
             String safeCheckOut = (checkOutTime == null || checkOutTime.isBlank()) ? null : checkOutTime.trim();
             String safeNumber   = (number       == null || number.isBlank())       ? null : number.trim();
 
-            Optional<Accommodation> existing = accommodationRepository.findByTourApiId(tourApiId);
+            Optional<Accommodation> existing = accommodationRepository.findByContentId(tourApiId);
 
             if (existing.isPresent()) {
                 Accommodation acc = existing.get();
@@ -158,7 +160,7 @@ public class TourApiService {
                 acc.setMapY(mapY);
                 acc.setDescription(safeDescription);
                 acc.setMaxPeople(maxPeople);
-                acc.setPrice(price);
+                acc.setMinPrice(price);
                 acc.setTitle(safeTitle);
                 acc.setCheckIn(safeCheckIn);
                 acc.setCheckOut(safeCheckOut);
@@ -166,13 +168,13 @@ public class TourApiService {
                 toUpdate.add(acc);
             } else {
                 Accommodation acc = Accommodation.builder()
-                        .tourApiId(tourApiId)
+                        .contentId(tourApiId)
                         .address(safeAddress)
                         .mapX(mapX)
                         .mapY(mapY)
                         .description(safeDescription)
                         .maxPeople(maxPeople)
-                        .price(price)
+                        .minPrice(price)
                         .title(safeTitle)
                         .checkIn(safeCheckIn)
                         .checkOut(safeCheckOut)
