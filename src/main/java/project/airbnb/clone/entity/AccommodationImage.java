@@ -34,7 +34,7 @@ public class AccommodationImage extends BaseEntity {
     @Column(name = "accommodation_image_id", nullable = false)
     private Long id;
 
-    @Column(name = "image_url", nullable = false, length = 1000)
+    @Column(name = "image_url", nullable = false, length = 700)
     private String imageUrl;
 
     @Column(name = "thumbnail", nullable = false)
