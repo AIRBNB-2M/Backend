@@ -1,11 +1,5 @@
 package project.airbnb.clone.service;
 
-import java.io.StringReader;
-import java.net.URI;
-import java.util.*;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,10 +7,29 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-import project.airbnb.clone.entity.*;
-import project.airbnb.clone.repository.*;
+import project.airbnb.clone.entity.Accommodation;
+import project.airbnb.clone.entity.AccommodationAmenity;
+import project.airbnb.clone.entity.Amenity;
+import project.airbnb.clone.repository.AccommodationAmenityRepository;
+import project.airbnb.clone.repository.AccommodationRepository;
+import project.airbnb.clone.repository.AmenityRepository;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.StringReader;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -45,7 +58,7 @@ public class TourAmenityService {
 
     @Transactional
     public int fetchAndSaveAmenitiesByContentId(String contentId) throws Exception {
-        Optional<Accommodation> opt = accommodationRepository.findByTourApiId(contentId);
+        Optional<Accommodation> opt = accommodationRepository.findByContentId(contentId);
         if (opt.isEmpty()) return 0;
         return fetchAndSaveFor(opt.get());
     }
@@ -60,7 +73,7 @@ public class TourAmenityService {
 
     @Transactional
     protected int fetchAndSaveFor(Accommodation acc) throws Exception {
-        String contentId = acc.getTourApiId();
+        String contentId = acc.getContentId();
         if (contentId == null || contentId.isBlank()) return 0;
 
         Map<String, String> intro = fetchDetailIntro(contentId);
@@ -78,7 +91,7 @@ public class TourAmenityService {
         List<Amenity> toCreate = new ArrayList<>();
         for (String nm : names) {
             if (!byName.containsKey(nm)) {
-                toCreate.add(Amenity.builder().name(nm).iconUrl(null).build());
+                toCreate.add(Amenity.builder().name(nm).description(null).build());
             }
         }
         if (!toCreate.isEmpty()) {

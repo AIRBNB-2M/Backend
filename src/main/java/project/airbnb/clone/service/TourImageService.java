@@ -1,11 +1,5 @@
 package project.airbnb.clone.service;
 
-import java.io.StringReader;
-import java.net.URI;
-import java.util.*;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,10 +7,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-import project.airbnb.clone.entity.*;
-import project.airbnb.clone.repository.*;
+import project.airbnb.clone.entity.Accommodation;
+import project.airbnb.clone.entity.AccommodationImage;
+import project.airbnb.clone.repository.AccommodationImageRepository;
+import project.airbnb.clone.repository.AccommodationRepository;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.StringReader;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -45,7 +53,7 @@ public class TourImageService {
     @Transactional
     public int fetchAndSaveImagesByContentId(String contentId) throws Exception {
         log.info("[IMG] fetch contentId={}", contentId);
-        Optional<Accommodation> opt = accommodationRepository.findByTourApiId(contentId);
+        Optional<Accommodation> opt = accommodationRepository.findByContentId(contentId);
         log.info("[IMG] accommodation exists? {}", opt.isPresent());
         if (opt.isEmpty()) return 0;
         return fetchAndSaveImagesFor(opt.get());
@@ -53,7 +61,7 @@ public class TourImageService {
 
     @Transactional
     public int fetchAndSaveImagesFor(Accommodation accommodation) throws Exception {
-        String contentId = accommodation.getTourApiId();
+        String contentId = accommodation.getContentId();
         log.info("[IMG] fetchFor accId={}, contentId={}", accommodation.getId(), contentId);
         if (contentId == null || contentId.isBlank()) return 0;
 

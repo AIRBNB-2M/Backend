@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -12,7 +14,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 @Builder
 @Getter
@@ -42,8 +44,11 @@ public class Accommodation extends BaseEntity {
     @Column(name = "max_people", nullable = true)
     private Short maxPeople;
 
-    @Column(name = "price", nullable = true)
-    private Integer price;
+    @Column(name = "min_price", nullable = true)
+    private Integer minPrice;
+
+    @Column(name = "max_price", nullable = true)
+    private Integer maxPrice;
 
     @Column(name = "title", nullable = false, length = 255)
     private String title;
@@ -57,15 +62,22 @@ public class Accommodation extends BaseEntity {
     @Column(name = "number", nullable = true, length = 50)
     private String number;
     
-    @Column(name = "tour_api_id", nullable = false, length = 30)
-    private String tourApiId;
+    @Column(name = "content_id", nullable = false, length = 30)
+    private String contentId;
+
+    @Column(name = "modified_time", nullable = false)
+    private LocalDateTime modifiedTime;
+
+    @OneToOne
+    @JoinColumn(name = "signugu_code")
+    private SigunguCode sigunguCode;
     
     public void setMapX(Double mapX) { this.mapX = mapX; }
     public void setMapY(Double mapY) { this.mapY = mapY; }
     public void setDescription(String description) { this.description = description; }
     public void setAddress(String address) { this.address = address; }
     public void setMaxPeople(Short maxPeople) { this.maxPeople = maxPeople; }
-    public void setPrice(Integer price) { this.price = price; }
+    public void setMinPrice(Integer price) { this.minPrice = price; }
     public void setTitle(String title) { this.title = title; }
     public void setCheckIn(String checkIn) { this.checkIn = checkIn; }
     public void setCheckOut(String checkOut) { this.checkOut = checkOut; }

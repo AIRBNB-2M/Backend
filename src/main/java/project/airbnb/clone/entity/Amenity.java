@@ -34,9 +34,9 @@ public class Amenity extends BaseEntity {
     @Column(name = "amenity_id", nullable = false)
     private Long id;
 
-    @Column(name = "name", nullable = false, length = 10)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "icon_url", nullable = true)
-    private String iconUrl;
+    @Column(name = "description")
+    private String description;
 }
