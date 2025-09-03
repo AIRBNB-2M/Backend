@@ -11,6 +11,7 @@ import org.springframework.batch.item.support.CompositeItemProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.web.client.ResourceAccessException;
 import project.airbnb.clone.dto.AccommodationProcessorDto;
 
 import java.util.List;
@@ -40,6 +41,8 @@ public class AccommodationBatchConfig {
                 .reader(reader)
                 .processor(compositeProcessor())
                 .writer(writer)
+                .faultTolerant()
+                .skip(ResourceAccessException.class)
                 .build();
     }
 

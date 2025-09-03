@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import project.airbnb.clone.common.clients.TourApiClient;
-import project.airbnb.clone.consts.tourapi.IntroAmenity;
 import project.airbnb.clone.dto.AccommodationProcessorDto;
 import project.airbnb.clone.dto.TourApiResponse;
 
@@ -16,14 +16,14 @@ import java.util.Map;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DetailIntroProcessor implements ItemProcessor<AccommodationProcessorDto, AccommodationProcessorDto> {
+public class DetailImageProcessor implements ItemProcessor<AccommodationProcessorDto, AccommodationProcessorDto> {
 
     private final TourApiClient client;
 
     @Override
     public AccommodationProcessorDto process(AccommodationProcessorDto dto) {
         String contentId = dto.getContentId();
-        JsonNode response = client.detailIntro(contentId);
+        JsonNode response = client.detailImage(contentId);
 
         TourApiResponse apiResponse = new TourApiResponse(response);
 
@@ -39,14 +39,16 @@ public class DetailIntroProcessor implements ItemProcessor<AccommodationProcesso
             return null;
         }
 
-        Map<String, String> item = items.get(0);
+        if (items.size() > 10) {
+            log.info("detailImage 10개 이상, contentId: {}", dto.getContentId());
+        }
 
-        dto.setCheckIn(item.get("checkintime"));        //체크인
-        dto.setCheckOut(item.get("checkouttime"));      //체크아웃
+        for (Map<String, String> item : items) {
+            String url = item.get("originimgurl");
 
-        for (IntroAmenity amenity : IntroAmenity.values()) {
-            String amenityName = amenity.getKey();
-            dto.putIntroAmenities(amenityName, "1".equals(item.get(amenityName)));
+            if (StringUtils.hasText(url)) {
+                dto.addOriginImgUrl(url);
+            }
         }
 
         return dto;

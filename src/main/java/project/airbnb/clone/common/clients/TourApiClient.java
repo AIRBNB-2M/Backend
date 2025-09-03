@@ -9,32 +9,23 @@ import org.springframework.web.service.annotation.HttpExchange;
 public interface TourApiClient {
 
     @GetExchange("/areaBasedSyncList2?serviceKey={serviceKey}&MobileApp={MobileApp}&MobileOS={MobileOS}&_type={type}&contentTypeId={contentTypeId}")
-    JsonNode getAreaList(@RequestParam(value = "pageNo", defaultValue = "1") int pageNo,
-                         @RequestParam(value = "numOfRows", defaultValue = "30") int numOfRows);
+    JsonNode getAreaList(@RequestParam("pageNo") int pageNo,
+                         @RequestParam("numOfRows") int numOfRows);
 
     @GetExchange("/detailCommon2?serviceKey={serviceKey}&MobileApp={MobileApp}&MobileOS={MobileOS}&_type={type}")
-    JsonNode detailCommon(@RequestParam("contentId") String contentId,
-                          @RequestParam(value = "pageNo", defaultValue = "1") int pageNo,
-                          @RequestParam(value = "numOfRows", defaultValue = "30") int numOfRows);
+    JsonNode detailCommon(@RequestParam("contentId") String contentId);
 
     @GetExchange("/detailIntro2?serviceKey={serviceKey}&MobileApp={MobileApp}&MobileOS={MobileOS}&_type={type}&contentTypeId={contentTypeId}")
-    JsonNode detailIntro(@RequestParam(value = "contentId") String contentId,
-                         @RequestParam(value = "pageNo", defaultValue = "1") int pageNo,
-                         @RequestParam(value = "numOfRows", defaultValue = "30") int numOfRows);
+    JsonNode detailIntro(@RequestParam("contentId") String contentId);
 
     @GetExchange("/detailInfo2?serviceKey={serviceKey}&MobileApp={MobileApp}&MobileOS={MobileOS}&_type={type}&contentTypeId={contentTypeId}")
-    JsonNode detailInfo(@RequestParam(value = "contentId") String contentId,
-                        @RequestParam(value = "pageNo", defaultValue = "1") int pageNo,
-                        @RequestParam(value = "numOfRows", defaultValue = "30") int numOfRows);
+    JsonNode detailInfo(@RequestParam("contentId") String contentId);
 
     @GetExchange("/detailImage2?serviceKey={serviceKey}&MobileApp={MobileApp}&MobileOS={MobileOS}&_type={type}")
-    JsonNode detailImage(@RequestParam(value = "contentId") String contentId,
-                         @RequestParam(value = "pageNo", defaultValue = "1") int pageNo,
-                         @RequestParam(value = "numOfRows", defaultValue = "30") int numOfRows,
-                         @RequestParam(value = "imageYN", defaultValue = "Y") String imageYN);
+    JsonNode detailImage(@RequestParam("contentId") String contentId);
 
     @GetExchange("/areaCode2?serviceKey={serviceKey}&MobileApp={MobileApp}&MobileOS={MobileOS}&_type={type}")
-    JsonNode areaCode(@RequestParam(value = "pageNo", defaultValue = "1") int pageNo,
-                      @RequestParam(value = "numOfRows", defaultValue = "30") int numOfRows,
-                      @RequestParam(value = "areaCode") String areaCode);
+    JsonNode areaCode(@RequestParam("pageNo") int pageNo,
+                      @RequestParam("numOfRows") int numOfRows,
+                      @RequestParam("areaCode") String areaCode);
 }

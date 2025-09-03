@@ -29,14 +29,21 @@ public class AreaBasedSyncListReader implements ItemReader<AccommodationProcesso
     private final AccommodationRepository repository;
 
     private int pageNo = 1;
-    private int numOfRows = 1000;
     private Iterator<AccommodationProcessorDto> currentIter;
 
     @Override
     public AccommodationProcessorDto read() throws UnexpectedInputException, ParseException, NonTransientResourceException {
         if (currentIter == null || !currentIter.hasNext()) {
+            log.debug("남아있는 데이터가 없어 새로 요청");
+            int numOfRows = 100;
+
             JsonNode response = client.getAreaList(pageNo, numOfRows);
             TourApiResponse apiResponse = new TourApiResponse(response);
+
+            if (!apiResponse.getError().isEmpty()) {
+                log.error("TourAPI 요청 중 오류, {}", apiResponse.getError());
+                return null;
+            }
 
             List<Map<String, String>> items = apiResponse.getItems();
             if (items.isEmpty()) {
@@ -60,13 +67,11 @@ public class AreaBasedSyncListReader implements ItemReader<AccommodationProcesso
                                                                 ))
                                                         .filter(dto -> {
                                                             Accommodation existing = exisitings.get(dto.getContentId());
-                                                            return existing == null;
-/*
                                                             if (existing == null) {
+                                                                dto.setNew(true);
                                                                 return true;
                                                             }
                                                             return dto.getModifiedTime().isAfter(existing.getModifiedTime());
-*/
                                                         })
                                                         .toList();
             currentIter = dtos.iterator();
