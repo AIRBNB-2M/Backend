@@ -2,12 +2,14 @@ package project.airbnb.clone.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Getter
 public class TourApiResponse {
 
@@ -42,6 +44,13 @@ public class TourApiResponse {
             }
 
             this.items.add(itemMap);
+        }
+    }
+
+    public void validError() {
+        if (!error.isEmpty()) {
+            log.error("TourAPI 요청 중 오류, {}", error);
+            throw new RuntimeException("Tour API 요청 실패");
         }
     }
 }

@@ -12,5 +12,5 @@ public interface AccommodationImageRepository extends JpaRepository<Accommodatio
     List<AccommodationImage> findByAccommodation(Accommodation accommodation);
 
     @Modifying(clearAutomatically = true)
-    void deleteByAccommodation(Accommodation accommodation);
+    void deleteByAccommodationIn(List<Accommodation> accommodations);
 }
