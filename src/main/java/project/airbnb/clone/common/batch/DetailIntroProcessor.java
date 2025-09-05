@@ -1,17 +1,12 @@
 package project.airbnb.clone.common.batch;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 import project.airbnb.clone.common.clients.TourApiClient;
-import project.airbnb.clone.consts.tourapi.IntroAmenity;
 import project.airbnb.clone.dto.AccommodationProcessorDto;
-import project.airbnb.clone.dto.TourApiResponse;
-
-import java.util.List;
-import java.util.Map;
+import project.airbnb.clone.service.tour.workers.DetailIntroWorker;
 
 @Slf4j
 @Component
@@ -22,32 +17,8 @@ public class DetailIntroProcessor implements ItemProcessor<AccommodationProcesso
 
     @Override
     public AccommodationProcessorDto process(AccommodationProcessorDto dto) {
-        String contentId = dto.getContentId();
-        JsonNode response = client.detailIntro(contentId);
-
-        TourApiResponse apiResponse = new TourApiResponse(response);
-
-        if (!apiResponse.getError().isEmpty()) {
-            log.error("TourAPI 요청 중 오류, {}", apiResponse.getError());
-            throw new RuntimeException("Tour API 요청 실패");
-        }
-
-        List<Map<String, String>> items = apiResponse.getItems();
-
-        if (items.isEmpty()) {
-            log.debug("items.isEmpty == return null, contentId: {}", dto.getContentId());
-            return null;
-        }
-
-        Map<String, String> item = items.get(0);
-
-        dto.setCheckIn(item.get("checkintime"));        //체크인
-        dto.setCheckOut(item.get("checkouttime"));      //체크아웃
-
-        for (IntroAmenity amenity : IntroAmenity.values()) {
-            String amenityName = amenity.getKey();
-            dto.putIntroAmenities(amenityName, "1".equals(item.get(amenityName)));
-        }
+        DetailIntroWorker worker = new DetailIntroWorker(client, dto);
+        worker.run();
 
         return dto;
     }
