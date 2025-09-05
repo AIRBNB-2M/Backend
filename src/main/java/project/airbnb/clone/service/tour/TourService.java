@@ -5,14 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import project.airbnb.clone.common.clients.TourApiClient;
 import project.airbnb.clone.dto.AccommodationProcessorDto;
-import project.airbnb.clone.repository.AccommodationAmenityRepository;
-import project.airbnb.clone.repository.AccommodationImageRepository;
-import project.airbnb.clone.repository.AccommodationPriceRepository;
-import project.airbnb.clone.repository.AccommodationRepository;
-import project.airbnb.clone.repository.AmenityRepository;
-import project.airbnb.clone.repository.SigunguCodeRepository;
 import project.airbnb.clone.service.tour.workers.AccommodationSaveWorker;
 import project.airbnb.clone.service.tour.workers.AreaListWorker;
 import project.airbnb.clone.service.tour.workers.DetailCommonWorker;
@@ -30,17 +23,12 @@ import static org.springframework.util.StringUtils.hasText;
 @RequiredArgsConstructor
 public class TourService {
 
-    private final TourApiClient client;
-    private final AmenityRepository amenityRepository;
-    private final SigunguCodeRepository sigunguCodeRepository;
-    private final AccommodationImageRepository imageRepository;
-    private final AccommodationRepository accommodationRepository;
-    private final AccommodationPriceRepository accommodationPriceRepository;
-    private final AccommodationAmenityRepository accommodationAmenityRepository;
+    private final TourApiFacadeManager tourApiFacadeManager;
+    private final TourRepositoryFacadeManager tourRepositoryFacadeManager;
 
     @Transactional
     public void fetchAccommodations(int pageNo, int numOfRows) {
-        AreaListWorker worker = new AreaListWorker(client, accommodationRepository);
+        AreaListWorker worker = new AreaListWorker(tourApiFacadeManager, tourRepositoryFacadeManager);
         List<AccommodationProcessorDto> dtoList = worker.run(pageNo, numOfRows);
 
         dtoList.forEach(this::fillDto);
@@ -49,21 +37,16 @@ public class TourService {
     }
 
     private void fillDto(AccommodationProcessorDto dto) {
-        new DetailCommonWorker(client, dto).run();
-        new DetailIntroWorker(client, dto).run();
-        new DetailInfoWorker(client, dto).run();
-        new DetailImageWorker(client, dto).run();
+        new DetailCommonWorker(tourApiFacadeManager, dto).run();
+        new DetailIntroWorker(tourApiFacadeManager, dto).run();
+        new DetailInfoWorker(tourApiFacadeManager, dto).run();
+        new DetailImageWorker(tourApiFacadeManager, dto).run();
     }
 
     private void saveAccommodations(List<AccommodationProcessorDto> dtoList) {
         AccommodationSaveWorker worker = new AccommodationSaveWorker(
+                tourRepositoryFacadeManager,
                 dtoList,
-                amenityRepository,
-                sigunguCodeRepository,
-                imageRepository,
-                accommodationRepository,
-                accommodationPriceRepository,
-                accommodationAmenityRepository,
                 this::hasMandatoryFields
         );
 

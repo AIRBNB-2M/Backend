@@ -1,6 +1,5 @@
 package project.airbnb.clone.service.tour.workers;
 
-import jakarta.persistence.EntityNotFoundException;
 import project.airbnb.clone.consts.DayType;
 import project.airbnb.clone.consts.Season;
 import project.airbnb.clone.dto.AccommodationProcessorDto;
@@ -10,12 +9,7 @@ import project.airbnb.clone.entity.AccommodationImage;
 import project.airbnb.clone.entity.AccommodationPrice;
 import project.airbnb.clone.entity.Amenity;
 import project.airbnb.clone.entity.SigunguCode;
-import project.airbnb.clone.repository.AccommodationAmenityRepository;
-import project.airbnb.clone.repository.AccommodationImageRepository;
-import project.airbnb.clone.repository.AccommodationPriceRepository;
-import project.airbnb.clone.repository.AccommodationRepository;
-import project.airbnb.clone.repository.AmenityRepository;
-import project.airbnb.clone.repository.SigunguCodeRepository;
+import project.airbnb.clone.service.tour.TourRepositoryFacadeManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,13 +19,8 @@ import java.util.function.Predicate;
 import static org.springframework.util.StringUtils.hasText;
 
 public record AccommodationSaveWorker(
+        TourRepositoryFacadeManager tourRepositoryFacadeManager,
         List<? extends AccommodationProcessorDto> dtoList,
-        AmenityRepository amenityRepository,
-        SigunguCodeRepository sigunguCodeRepository,
-        AccommodationImageRepository imageRepository,
-        AccommodationRepository accommodationRepository,
-        AccommodationPriceRepository accommodationPriceRepository,
-        AccommodationAmenityRepository accommodationAmenityRepository,
         Predicate<AccommodationProcessorDto> validator) implements Runnable {
 
     @Override
@@ -44,10 +33,9 @@ public record AccommodationSaveWorker(
         for (AccommodationProcessorDto dto : dtoList) {
             if (!validator.test(dto)) continue;
 
-            Accommodation acc = accommodationRepository.findByContentId(dto.getContentId())
-                                                       .orElseGet(Accommodation::new);
-            SigunguCode sigunguCode = sigunguCodeRepository.findById(dto.getSigunguCode())
-                                                           .orElseThrow(() -> new EntityNotFoundException("Cannot found SigunguCode: " + dto.getSigunguCode()));
+            Accommodation acc = tourRepositoryFacadeManager.findAccByContentId(dto.getContentId()).orElseGet(Accommodation::new);
+            SigunguCode sigunguCode = tourRepositoryFacadeManager.findSigunguCode(dto.getSigunguCode());
+
             acc.updateOrInit(dto, sigunguCode);
 
             accommodations.add(acc);
@@ -56,15 +44,7 @@ public record AccommodationSaveWorker(
             addAccommodationPrice(dto, acc, allPrices);
         }
 
-        accommodationRepository.saveAll(accommodations);
-
-        accommodationPriceRepository.deleteByAccommodationIn(accommodations);
-        accommodationAmenityRepository.deleteByAccommodationIn(accommodations);
-        imageRepository.deleteByAccommodationIn(accommodations);
-
-        accommodationPriceRepository.saveAll(allPrices);
-        accommodationAmenityRepository.saveAll(allAmenities);
-        imageRepository.saveAll(allImages);
+        tourRepositoryFacadeManager.saveEntities(accommodations, allPrices, allAmenities, allImages);
     }
 
     private void addAccommodationAmenity(AccommodationProcessorDto dto, Accommodation acc, List<AccommodationAmenity> allAmenities) {
@@ -75,9 +55,7 @@ public record AccommodationSaveWorker(
     private void addEntityIfAvailable(List<AccommodationAmenity> allAmenities, Accommodation acc, Map<String, Boolean> amenities) {
         amenities.forEach((amenityName, available) -> {
             if (available) {
-                Amenity amenity = amenityRepository.findByName(amenityName)
-                                                   .orElseThrow(() -> new EntityNotFoundException("Cannot found Amenity: " + amenityName));
-
+                Amenity amenity = tourRepositoryFacadeManager.findAmenityByName(amenityName);
                 allAmenities.add(AccommodationAmenity.builder()
                                                      .accommodation(acc)
                                                      .amenity(amenity)

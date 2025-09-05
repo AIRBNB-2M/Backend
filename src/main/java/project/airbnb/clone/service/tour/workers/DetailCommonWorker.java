@@ -1,10 +1,8 @@
 package project.airbnb.clone.service.tour.workers;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
-import project.airbnb.clone.common.clients.TourApiClient;
 import project.airbnb.clone.dto.AccommodationProcessorDto;
-import project.airbnb.clone.dto.TourApiResponse;
+import project.airbnb.clone.service.tour.TourApiFacadeManager;
 
 import java.util.List;
 import java.util.Map;
@@ -14,25 +12,23 @@ import java.util.function.Function;
 import static org.springframework.util.StringUtils.hasText;
 
 @Slf4j
-public record DetailCommonWorker(TourApiClient client, AccommodationProcessorDto dto) implements Runnable {
+public record DetailCommonWorker(TourApiFacadeManager tourApiFacadeManager,
+                                 AccommodationProcessorDto dto) implements Runnable {
 
     @Override
     public void run() {
         String contentId = dto.getContentId();
-        JsonNode response = client.detailCommon(contentId);
 
-        TourApiResponse apiResponse = new TourApiResponse(response);
-        apiResponse.validError();
-
-        List<Map<String, String>> items = apiResponse.getItems();
+        List<Map<String, String>> items = tourApiFacadeManager.fetchItems(
+                client -> client.detailCommon(contentId),
+                itemList -> {
+                    if (itemList.size() > 1) {
+                        log.info("detailCommon 1개 이상, contentId: {}", contentId);
+                    }
+                });
 
         if (items.isEmpty()) {
-            log.debug("detailCommon.isEmpty, contentId: {}", dto.getContentId());
             return;
-        }
-
-        if (items.size() > 1) {
-            log.info("detailCommon 1개 이상, contentId: {}", dto.getContentId());
         }
 
         Map<String, String> item = items.get(0);

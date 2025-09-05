@@ -1,41 +1,26 @@
 package project.airbnb.clone.service.tour.workers;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
-import project.airbnb.clone.common.clients.TourApiClient;
 import project.airbnb.clone.dto.AccommodationProcessorDto;
-import project.airbnb.clone.dto.TourApiResponse;
 import project.airbnb.clone.entity.Accommodation;
-import project.airbnb.clone.repository.AccommodationRepository;
+import project.airbnb.clone.service.tour.TourApiFacadeManager;
+import project.airbnb.clone.service.tour.TourRepositoryFacadeManager;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Slf4j
-public record AreaListWorker(TourApiClient client, AccommodationRepository accommodationRepository) {
+public record AreaListWorker(TourApiFacadeManager tourApiFacadeManager, TourRepositoryFacadeManager tourRepositoryFacadeManager) {
 
     public List<AccommodationProcessorDto> run(int pageNo, int numOfRows) {
-        JsonNode areaList = client.getAreaList(pageNo, numOfRows);
-
-        TourApiResponse apiResponse = new TourApiResponse(areaList);
-        apiResponse.validError();
-
-        List<Map<String, String>> items = apiResponse.getItems();
-        if (items.isEmpty()) {
-            log.debug("getAreaList items.isEmpty");
-            return Collections.emptyList();
-        }
+        List<Map<String, String>> items = tourApiFacadeManager.fetchItems(client -> client.getAreaList(pageNo, numOfRows));
 
         List<String> contentIds = items.stream()
                                        .map(item -> item.get("contentid"))
                                        .toList();
 
-        Map<String, Accommodation> existings = accommodationRepository.findByContentIdIn(contentIds)
-                                                                      .stream()
-                                                                      .collect(Collectors.toMap(Accommodation::getContentId, Function.identity()));
+        Map<String, Accommodation> existings = tourRepositoryFacadeManager.findByContentIdInToMap(contentIds);
+
         return items.stream()
                     .map(item ->
                             new AccommodationProcessorDto(

@@ -7,9 +7,9 @@ import org.springframework.batch.item.NonTransientResourceException;
 import org.springframework.batch.item.ParseException;
 import org.springframework.batch.item.UnexpectedInputException;
 import org.springframework.stereotype.Component;
-import project.airbnb.clone.common.clients.TourApiClient;
 import project.airbnb.clone.dto.AccommodationProcessorDto;
-import project.airbnb.clone.repository.AccommodationRepository;
+import project.airbnb.clone.service.tour.TourApiFacadeManager;
+import project.airbnb.clone.service.tour.TourRepositoryFacadeManager;
 import project.airbnb.clone.service.tour.workers.AreaListWorker;
 
 import java.util.Iterator;
@@ -20,8 +20,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AreaBasedSyncListReader implements ItemReader<AccommodationProcessorDto> {
 
-    private final TourApiClient client;
-    private final AccommodationRepository repository;
+    private final TourApiFacadeManager tourApiFacadeManager;
+    private final TourRepositoryFacadeManager tourRepositoryFacadeManager;
 
     private int pageNo = 1;
     private Iterator<AccommodationProcessorDto> currentIter;
@@ -33,7 +33,7 @@ public class AreaBasedSyncListReader implements ItemReader<AccommodationProcesso
             int numOfRows = 100;
             log.debug("남아있는 데이터가 없어 새로 요청");
 
-            AreaListWorker worker = new AreaListWorker(client, repository);
+            AreaListWorker worker = new AreaListWorker(tourApiFacadeManager, tourRepositoryFacadeManager);
             List<AccommodationProcessorDto> dtos = worker.run(pageNo, numOfRows);
 
             currentIter = dtos.iterator();

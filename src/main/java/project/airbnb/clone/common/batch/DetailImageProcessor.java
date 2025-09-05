@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
-import project.airbnb.clone.common.clients.TourApiClient;
 import project.airbnb.clone.dto.AccommodationProcessorDto;
+import project.airbnb.clone.service.tour.TourApiFacadeManager;
 import project.airbnb.clone.service.tour.workers.DetailImageWorker;
 
 @Slf4j
@@ -13,11 +13,11 @@ import project.airbnb.clone.service.tour.workers.DetailImageWorker;
 @RequiredArgsConstructor
 public class DetailImageProcessor implements ItemProcessor<AccommodationProcessorDto, AccommodationProcessorDto> {
 
-    private final TourApiClient client;
+    private final TourApiFacadeManager tourApiFacadeManager;
 
     @Override
     public AccommodationProcessorDto process(AccommodationProcessorDto dto) {
-        DetailImageWorker worker = new DetailImageWorker(client, dto);
+        DetailImageWorker worker = new DetailImageWorker(tourApiFacadeManager, dto);
         worker.run();
 
         return dto.hasThumbnail() ? dto : null;

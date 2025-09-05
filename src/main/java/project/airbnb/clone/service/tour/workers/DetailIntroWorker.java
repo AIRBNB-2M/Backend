@@ -1,11 +1,9 @@
 package project.airbnb.clone.service.tour.workers;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
-import project.airbnb.clone.common.clients.TourApiClient;
 import project.airbnb.clone.consts.tourapi.IntroAmenity;
 import project.airbnb.clone.dto.AccommodationProcessorDto;
-import project.airbnb.clone.dto.TourApiResponse;
+import project.airbnb.clone.service.tour.TourApiFacadeManager;
 
 import java.util.List;
 import java.util.Map;
@@ -14,20 +12,16 @@ import java.util.function.Consumer;
 import static org.springframework.util.StringUtils.hasText;
 
 @Slf4j
-public record DetailIntroWorker(TourApiClient client, AccommodationProcessorDto dto) implements Runnable {
+public record DetailIntroWorker(TourApiFacadeManager tourApiFacadeManager,
+                                AccommodationProcessorDto dto) implements Runnable {
 
     @Override
     public void run() {
         String contentId = dto.getContentId();
-        JsonNode response = client.detailIntro(contentId);
 
-        TourApiResponse apiResponse = new TourApiResponse(response);
-        apiResponse.validError();
-
-        List<Map<String, String>> items = apiResponse.getItems();
+        List<Map<String, String>> items = tourApiFacadeManager.fetchItems(client -> client.detailIntro(contentId));
 
         if (items.isEmpty()) {
-            log.debug("detailIntro.isEmpty, contentId: {}", dto.getContentId());
             return;
         }
 

@@ -1,15 +1,13 @@
 package project.airbnb.clone.service.tour.workers;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
-import project.airbnb.clone.common.clients.TourApiClient;
 import project.airbnb.clone.consts.DayType;
 import project.airbnb.clone.consts.PriceKey;
 import project.airbnb.clone.consts.Season;
 import project.airbnb.clone.consts.tourapi.InfoAmenity;
 import project.airbnb.clone.consts.tourapi.InfoRoomImage;
 import project.airbnb.clone.dto.AccommodationProcessorDto;
-import project.airbnb.clone.dto.TourApiResponse;
+import project.airbnb.clone.service.tour.TourApiFacadeManager;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -18,25 +16,22 @@ import java.util.Map;
 import static org.springframework.util.StringUtils.hasText;
 
 @Slf4j
-public record DetailInfoWorker(TourApiClient client, AccommodationProcessorDto dto) implements Runnable {
+public record DetailInfoWorker(TourApiFacadeManager tourApiFacadeManager, AccommodationProcessorDto dto) implements Runnable {
 
     @Override
     public void run() {
         String contentId = dto.getContentId();
-        JsonNode response = client.detailInfo(contentId);
 
-        TourApiResponse apiResponse = new TourApiResponse(response);
-        apiResponse.validError();
-
-        List<Map<String, String>> items = apiResponse.getItems();
+        List<Map<String, String>> items = tourApiFacadeManager.fetchItems(
+                client -> client.detailInfo(contentId),
+                itemList -> {
+                    if (itemList.size() > 10) {
+                        log.info("detailInfo 10개 이상, contentId: {}", dto.getContentId());
+                    }
+                });
 
         if (items.isEmpty()) {
-            log.debug("detailInfo.isEmpty, contentId: {}", dto.getContentId());
             return;
-        }
-
-        if (items.size() > 10) {
-            log.info("detailInfo 10개 이상, contentId: {}", dto.getContentId());
         }
 
         setAmenities(items);
