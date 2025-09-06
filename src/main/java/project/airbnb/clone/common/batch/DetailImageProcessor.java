@@ -6,18 +6,18 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 import project.airbnb.clone.dto.AccommodationProcessorDto;
 import project.airbnb.clone.service.tour.TourApiTemplate;
-import project.airbnb.clone.service.tour.workers.DetailInfoWorker;
+import project.airbnb.clone.service.tour.workers.DetailImageWorker;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DetailInfoProcessor implements ItemProcessor<AccommodationProcessorDto, AccommodationProcessorDto> {
+public class DetailImageProcessor implements ItemProcessor<AccommodationProcessorDto, AccommodationProcessorDto> {
 
     private final TourApiTemplate tourApiTemplate;
 
     @Override
     public AccommodationProcessorDto process(AccommodationProcessorDto dto) {
-        DetailInfoWorker worker = new DetailInfoWorker(tourApiTemplate, dto);
+        DetailImageWorker worker = new DetailImageWorker(tourApiTemplate, dto);
         worker.run();
 
         return dto.hasThumbnail() ? dto : null;

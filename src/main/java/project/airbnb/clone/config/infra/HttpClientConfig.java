@@ -3,6 +3,7 @@ package project.airbnb.clone.config.infra;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.web.client.RestClient;
@@ -13,6 +14,8 @@ import project.airbnb.clone.common.clients.KakaoAppClient;
 import project.airbnb.clone.common.clients.NaverAppClient;
 import project.airbnb.clone.common.clients.TourApiClient;
 
+import java.net.http.HttpClient;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -85,11 +88,18 @@ public class HttpClientConfig {
 
     @Bean
     public RestClient.Builder restClientBuilder() {
+        HttpClient httpClient = HttpClient.newBuilder()
+                                          .connectTimeout(Duration.ofSeconds(5))
+                                          .build();
+
+        JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
+        requestFactory.setReadTimeout(Duration.ofSeconds(10));
+
         return RestClient.builder()
+                         .requestFactory(requestFactory)
                          .messageConverters(List.of(
-                                         new MappingJackson2HttpMessageConverter(),
-                                         new MappingJackson2XmlHttpMessageConverter())
+                                 new MappingJackson2HttpMessageConverter(),
+                                 new MappingJackson2XmlHttpMessageConverter())
                          );
     }
-
 }

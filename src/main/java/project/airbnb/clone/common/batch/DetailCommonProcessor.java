@@ -1,49 +1,33 @@
 package project.airbnb.clone.common.batch;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
-import project.airbnb.clone.common.clients.TourApiClient;
 import project.airbnb.clone.dto.AccommodationProcessorDto;
-import project.airbnb.clone.dto.TourApiResponse;
+import project.airbnb.clone.service.tour.TourApiTemplate;
+import project.airbnb.clone.service.tour.workers.DetailCommonWorker;
 
-import java.util.List;
-import java.util.Map;
+import static org.springframework.util.StringUtils.hasText;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class DetailCommonProcessor implements ItemProcessor<AccommodationProcessorDto, AccommodationProcessorDto> {
 
-    private final TourApiClient client;
+    private final TourApiTemplate tourApiTemplate;
 
     @Override
     public AccommodationProcessorDto process(AccommodationProcessorDto dto) {
-        String contentId = dto.getContentId();
-        JsonNode response = client.detailCommon(contentId, 0, 0);
+        DetailCommonWorker worker = new DetailCommonWorker(tourApiTemplate, dto);
+        worker.run();
 
-        TourApiResponse apiResponse = new TourApiResponse(response);
-        List<Map<String, String>> items = apiResponse.getItems();
+        return hasMandatoryFields(dto) ? dto : null;
+    }
 
-        if (items.isEmpty()) {
-            log.debug("items.isEmpty == return null");
-            return null;
-        }
-
-        Map<String, String> item = items.get(0);
-
-        dto.setTitle(item.get("title"));
-        dto.setNumber(item.get("tel"));
-        dto.setThumbnailUrl(item.get("firstimage"));
-        dto.setAreaCode(item.get("areacode"));
-        dto.setSigunguCode(item.get("sigungucode"));
-        dto.setAddress(item.get("addr1"));
-        dto.setMapX(Double.parseDouble(item.get("mapx")));
-        dto.setMapY(Double.parseDouble(item.get("mapy")));
-        dto.setDescription(item.get("overview"));
-
-        return dto;
+    private boolean hasMandatoryFields(AccommodationProcessorDto dto) {
+        return hasText(dto.getTitle()) && hasText(dto.getSigunguCode()) &&
+                hasText(dto.getAddress()) && dto.getMapX() != null && dto.getMapY() != null &&
+                hasText(dto.getContentId()) && dto.getModifiedTime() != null;
     }
 }
