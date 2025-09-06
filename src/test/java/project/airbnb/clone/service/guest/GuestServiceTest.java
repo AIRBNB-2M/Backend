@@ -15,7 +15,7 @@ import project.airbnb.clone.consts.SocialType;
 import project.airbnb.clone.dto.guest.SignupRequestDto;
 import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.model.ProviderUser;
-import project.airbnb.clone.repository.guest.GuestRepository;
+import project.airbnb.clone.repository.jpa.GuestRepository;
 
 import java.time.LocalDate;
 import java.util.List;

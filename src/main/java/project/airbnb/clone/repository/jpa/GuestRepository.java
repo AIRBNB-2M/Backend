@@ -1,4 +1,4 @@
-package project.airbnb.clone.repository.guest;
+package project.airbnb.clone.repository.jpa;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.jpa.repository.JpaRepository;

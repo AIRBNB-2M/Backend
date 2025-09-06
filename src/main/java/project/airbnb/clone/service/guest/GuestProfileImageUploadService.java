@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.airbnb.clone.common.exceptions.ImageUploadException;
 import project.airbnb.clone.entity.Guest;
-import project.airbnb.clone.repository.guest.GuestRepository;
+import project.airbnb.clone.repository.jpa.GuestRepository;
 import project.airbnb.clone.service.s3.S3Uploader;
 
 import java.util.UUID;

@@ -10,7 +10,7 @@ import project.airbnb.clone.common.converters.ProviderUserRequest;
 import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.model.PrincipalUser;
 import project.airbnb.clone.model.ProviderUser;
-import project.airbnb.clone.repository.guest.GuestRepository;
+import project.airbnb.clone.repository.jpa.GuestRepository;
 
 @Service
 @RequiredArgsConstructor

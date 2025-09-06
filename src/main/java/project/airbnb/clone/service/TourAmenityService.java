@@ -14,9 +14,9 @@ import org.xml.sax.InputSource;
 import project.airbnb.clone.entity.Accommodation;
 import project.airbnb.clone.entity.AccommodationAmenity;
 import project.airbnb.clone.entity.Amenity;
-import project.airbnb.clone.repository.AccommodationAmenityRepository;
-import project.airbnb.clone.repository.AccommodationRepository;
-import project.airbnb.clone.repository.AmenityRepository;
+import project.airbnb.clone.repository.jpa.AccommodationAmenityRepository;
+import project.airbnb.clone.repository.jpa.AccommodationRepository;
+import project.airbnb.clone.repository.jpa.AmenityRepository;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
