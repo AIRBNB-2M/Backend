@@ -2,7 +2,7 @@ package project.airbnb.clone.service.tour.workers;
 
 import lombok.extern.slf4j.Slf4j;
 import project.airbnb.clone.consts.tourapi.IntroAmenity;
-import project.airbnb.clone.dto.AccommodationProcessorDto;
+import project.airbnb.clone.dto.accommodation.AccommodationProcessorDto;
 import project.airbnb.clone.service.tour.TourApiTemplate;
 
 import java.util.List;

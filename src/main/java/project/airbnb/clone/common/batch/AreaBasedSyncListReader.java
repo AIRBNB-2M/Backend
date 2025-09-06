@@ -7,7 +7,7 @@ import org.springframework.batch.item.NonTransientResourceException;
 import org.springframework.batch.item.ParseException;
 import org.springframework.batch.item.UnexpectedInputException;
 import org.springframework.stereotype.Component;
-import project.airbnb.clone.dto.AccommodationProcessorDto;
+import project.airbnb.clone.dto.accommodation.AccommodationProcessorDto;
 import project.airbnb.clone.service.tour.TourApiTemplate;
 import project.airbnb.clone.service.tour.TourRepositoryFacadeManager;
 import project.airbnb.clone.service.tour.workers.AreaListWorker;

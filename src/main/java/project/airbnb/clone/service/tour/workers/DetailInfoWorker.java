@@ -6,7 +6,7 @@ import project.airbnb.clone.consts.PriceKey;
 import project.airbnb.clone.consts.Season;
 import project.airbnb.clone.consts.tourapi.InfoAmenity;
 import project.airbnb.clone.consts.tourapi.InfoRoomImage;
-import project.airbnb.clone.dto.AccommodationProcessorDto;
+import project.airbnb.clone.dto.accommodation.AccommodationProcessorDto;
 import project.airbnb.clone.service.tour.TourApiTemplate;
 
 import java.util.EnumMap;

@@ -12,7 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import project.airbnb.clone.dto.AccommodationProcessorDto;
+import project.airbnb.clone.dto.accommodation.AccommodationProcessorDto;
 
 import java.time.LocalDateTime;
 

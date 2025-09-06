@@ -1,4 +1,4 @@
-package project.airbnb.clone.dto;
+package project.airbnb.clone.dto.accommodation;
 
 import lombok.Data;
 import project.airbnb.clone.common.batch.DetailCommonProcessor;

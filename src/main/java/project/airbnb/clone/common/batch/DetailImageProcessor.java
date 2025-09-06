@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
-import project.airbnb.clone.dto.AccommodationProcessorDto;
+import project.airbnb.clone.dto.accommodation.AccommodationProcessorDto;
 import project.airbnb.clone.service.tour.TourApiTemplate;
 import project.airbnb.clone.service.tour.workers.DetailImageWorker;
 
