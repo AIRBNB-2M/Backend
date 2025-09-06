@@ -159,8 +159,8 @@ public class TourApiService {
                 acc.setMapX(mapX);
                 acc.setMapY(mapY);
                 acc.setDescription(safeDescription);
-                acc.setMaxPeople(maxPeople);
-                acc.setMinPrice(price);
+//                acc.setMaxPeople(maxPeople);
+//                acc.setMinPrice(price);
                 acc.setTitle(safeTitle);
                 acc.setCheckIn(safeCheckIn);
                 acc.setCheckOut(safeCheckOut);
@@ -173,8 +173,8 @@ public class TourApiService {
                         .mapX(mapX)
                         .mapY(mapY)
                         .description(safeDescription)
-                        .maxPeople(maxPeople)
-                        .minPrice(price)
+//                        .maxPeople(maxPeople)
+//                        .minPrice(price)
                         .title(safeTitle)
                         .checkIn(safeCheckIn)
                         .checkOut(safeCheckOut)
