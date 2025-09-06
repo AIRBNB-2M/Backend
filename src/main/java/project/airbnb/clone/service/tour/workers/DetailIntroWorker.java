@@ -3,7 +3,7 @@ package project.airbnb.clone.service.tour.workers;
 import lombok.extern.slf4j.Slf4j;
 import project.airbnb.clone.consts.tourapi.IntroAmenity;
 import project.airbnb.clone.dto.AccommodationProcessorDto;
-import project.airbnb.clone.service.tour.TourApiFacadeManager;
+import project.airbnb.clone.service.tour.TourApiTemplate;
 
 import java.util.List;
 import java.util.Map;
@@ -12,14 +12,14 @@ import java.util.function.Consumer;
 import static org.springframework.util.StringUtils.hasText;
 
 @Slf4j
-public record DetailIntroWorker(TourApiFacadeManager tourApiFacadeManager,
+public record DetailIntroWorker(TourApiTemplate tourApiTemplate,
                                 AccommodationProcessorDto dto) implements Runnable {
 
     @Override
     public void run() {
         String contentId = dto.getContentId();
 
-        List<Map<String, String>> items = tourApiFacadeManager.fetchItems(client -> client.detailIntro(contentId));
+        List<Map<String, String>> items = tourApiTemplate.fetchItems(client -> client.detailIntro(contentId));
 
         if (items.isEmpty()) {
             return;

@@ -13,7 +13,7 @@ import java.util.function.Function;
 
 @Component
 @RequiredArgsConstructor
-public class TourApiFacadeManager {
+public class TourApiTemplate {
 
     private final TourApiClient client;
 

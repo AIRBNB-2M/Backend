@@ -3,17 +3,17 @@ package project.airbnb.clone.service.tour.workers;
 import lombok.extern.slf4j.Slf4j;
 import project.airbnb.clone.dto.AccommodationProcessorDto;
 import project.airbnb.clone.entity.Accommodation;
-import project.airbnb.clone.service.tour.TourApiFacadeManager;
+import project.airbnb.clone.service.tour.TourApiTemplate;
 import project.airbnb.clone.service.tour.TourRepositoryFacadeManager;
 
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
-public record AreaListWorker(TourApiFacadeManager tourApiFacadeManager, TourRepositoryFacadeManager tourRepositoryFacadeManager) {
+public record AreaListWorker(TourApiTemplate tourApiTemplate, TourRepositoryFacadeManager tourRepositoryFacadeManager) {
 
     public List<AccommodationProcessorDto> run(int pageNo, int numOfRows) {
-        List<Map<String, String>> items = tourApiFacadeManager.fetchItems(client -> client.getAreaList(pageNo, numOfRows));
+        List<Map<String, String>> items = tourApiTemplate.fetchItems(client -> client.getAreaList(pageNo, numOfRows));
 
         List<String> contentIds = items.stream()
                                        .map(item -> item.get("contentid"))

@@ -23,12 +23,12 @@ import static org.springframework.util.StringUtils.hasText;
 @RequiredArgsConstructor
 public class TourService {
 
-    private final TourApiFacadeManager tourApiFacadeManager;
+    private final TourApiTemplate tourApiTemplate;
     private final TourRepositoryFacadeManager tourRepositoryFacadeManager;
 
     @Transactional
     public void fetchAccommodations(int pageNo, int numOfRows) {
-        AreaListWorker worker = new AreaListWorker(tourApiFacadeManager, tourRepositoryFacadeManager);
+        AreaListWorker worker = new AreaListWorker(tourApiTemplate, tourRepositoryFacadeManager);
         List<AccommodationProcessorDto> dtoList = worker.run(pageNo, numOfRows);
 
         dtoList.forEach(this::fillDto);
@@ -37,10 +37,10 @@ public class TourService {
     }
 
     private void fillDto(AccommodationProcessorDto dto) {
-        new DetailCommonWorker(tourApiFacadeManager, dto).run();
-        new DetailIntroWorker(tourApiFacadeManager, dto).run();
-        new DetailInfoWorker(tourApiFacadeManager, dto).run();
-        new DetailImageWorker(tourApiFacadeManager, dto).run();
+        new DetailCommonWorker(tourApiTemplate, dto).run();
+        new DetailIntroWorker(tourApiTemplate, dto).run();
+        new DetailInfoWorker(tourApiTemplate, dto).run();
+        new DetailImageWorker(tourApiTemplate, dto).run();
     }
 
     private void saveAccommodations(List<AccommodationProcessorDto> dtoList) {

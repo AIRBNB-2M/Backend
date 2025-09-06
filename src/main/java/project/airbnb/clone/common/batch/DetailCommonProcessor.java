@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 import project.airbnb.clone.dto.AccommodationProcessorDto;
-import project.airbnb.clone.service.tour.TourApiFacadeManager;
+import project.airbnb.clone.service.tour.TourApiTemplate;
 import project.airbnb.clone.service.tour.workers.DetailCommonWorker;
 
 import static org.springframework.util.StringUtils.hasText;
@@ -15,11 +15,11 @@ import static org.springframework.util.StringUtils.hasText;
 @RequiredArgsConstructor
 public class DetailCommonProcessor implements ItemProcessor<AccommodationProcessorDto, AccommodationProcessorDto> {
 
-    private final TourApiFacadeManager tourApiFacadeManager;
+    private final TourApiTemplate tourApiTemplate;
 
     @Override
     public AccommodationProcessorDto process(AccommodationProcessorDto dto) {
-        DetailCommonWorker worker = new DetailCommonWorker(tourApiFacadeManager, dto);
+        DetailCommonWorker worker = new DetailCommonWorker(tourApiTemplate, dto);
         worker.run();
 
         return hasMandatoryFields(dto) ? dto : null;

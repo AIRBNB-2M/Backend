@@ -7,7 +7,7 @@ import project.airbnb.clone.consts.Season;
 import project.airbnb.clone.consts.tourapi.InfoAmenity;
 import project.airbnb.clone.consts.tourapi.InfoRoomImage;
 import project.airbnb.clone.dto.AccommodationProcessorDto;
-import project.airbnb.clone.service.tour.TourApiFacadeManager;
+import project.airbnb.clone.service.tour.TourApiTemplate;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -16,13 +16,13 @@ import java.util.Map;
 import static org.springframework.util.StringUtils.hasText;
 
 @Slf4j
-public record DetailInfoWorker(TourApiFacadeManager tourApiFacadeManager, AccommodationProcessorDto dto) implements Runnable {
+public record DetailInfoWorker(TourApiTemplate tourApiTemplate, AccommodationProcessorDto dto) implements Runnable {
 
     @Override
     public void run() {
         String contentId = dto.getContentId();
 
-        List<Map<String, String>> items = tourApiFacadeManager.fetchItems(
+        List<Map<String, String>> items = tourApiTemplate.fetchItems(
                 client -> client.detailInfo(contentId),
                 itemList -> {
                     if (itemList.size() > 10) {
