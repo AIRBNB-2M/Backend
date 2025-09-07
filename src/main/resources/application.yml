@@ -75,3 +75,6 @@ cloudflare:
     bucket: ${R2_BUCKET_NAME}
     access-key: ${R2_ACCESS_KEY}
     secret-key: ${R2_SECRET_KEY}
+
+rest-day:
+  api-key: ${REST_DAY_API_KEY}
