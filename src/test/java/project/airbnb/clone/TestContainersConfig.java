@@ -8,7 +8,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
-public abstract class TestContainersConfig {
+public abstract class TestContainersConfig extends IntegrationTestSupport {
 
     public static final MySQLContainer<?> MYSQL_CONTAINER = new MySQLContainer<>("mysql:8.0.35")
             .withDatabaseName("testdb")

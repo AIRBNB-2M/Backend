@@ -49,7 +49,7 @@ public class OpenApiResponse {
 
     public void validError() {
         if (!error.isEmpty()) {
-            log.error("TourAPI 요청 중 오류, {}", error);
+            log.error("OpenAPI 요청 중 오류, {}", error);
             throw new RuntimeException("Tour API 요청 실패");
         }
     }

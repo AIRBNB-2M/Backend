@@ -2,6 +2,7 @@ package project.airbnb.clone.common.events;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import project.airbnb.clone.common.clients.HolidayApiClient;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+@Profile("!test")
 @Component
 @RequiredArgsConstructor
 public class HolidaysInitializer implements ApplicationListener<ContextRefreshedEvent> {
