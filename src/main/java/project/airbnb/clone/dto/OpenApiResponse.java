@@ -11,13 +11,13 @@ import java.util.Map;
 
 @Slf4j
 @Getter
-public class TourApiResponse {
+public class OpenApiResponse {
 
     private final List<Map<String, String>> items = new ArrayList<>();
     private final Map<String, String> error = new HashMap<>();
     private int totalCount;
 
-    public TourApiResponse(JsonNode response) {
+    public OpenApiResponse(JsonNode response) {
         JsonNode errorHeader = response.get("cmmMsgHeader");
         if (errorHeader != null) {
             error.put("errMsg", errorHeader.path("errMsg").asText());

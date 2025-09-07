@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import project.airbnb.clone.common.clients.TourApiClient;
 import project.airbnb.clone.dto.accommodation.AccommodationProcessorDto;
 import project.airbnb.clone.service.tour.workers.AccommodationSaveWorker;
 import project.airbnb.clone.service.tour.workers.AreaListWorker;
@@ -23,12 +24,12 @@ import static org.springframework.util.StringUtils.hasText;
 @RequiredArgsConstructor
 public class TourService {
 
-    private final TourApiTemplate tourApiTemplate;
+    private final HttpClientTemplate<TourApiClient> httpClientTemplate;
     private final TourRepositoryFacadeManager tourRepositoryFacadeManager;
 
     @Transactional
     public void fetchAccommodations(int pageNo, int numOfRows) {
-        AreaListWorker worker = new AreaListWorker(tourApiTemplate, tourRepositoryFacadeManager);
+        AreaListWorker worker = new AreaListWorker(httpClientTemplate, tourRepositoryFacadeManager);
         List<AccommodationProcessorDto> dtoList = worker.run(pageNo, numOfRows);
 
         dtoList.forEach(this::fillDto);
@@ -37,10 +38,10 @@ public class TourService {
     }
 
     private void fillDto(AccommodationProcessorDto dto) {
-        new DetailCommonWorker(tourApiTemplate, dto).run();
-        new DetailIntroWorker(tourApiTemplate, dto).run();
-        new DetailInfoWorker(tourApiTemplate, dto).run();
-        new DetailImageWorker(tourApiTemplate, dto).run();
+        new DetailCommonWorker(httpClientTemplate, dto).run();
+        new DetailIntroWorker(httpClientTemplate, dto).run();
+        new DetailInfoWorker(httpClientTemplate, dto).run();
+        new DetailImageWorker(httpClientTemplate, dto).run();
     }
 
     private void saveAccommodations(List<AccommodationProcessorDto> dtoList) {

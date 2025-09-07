@@ -1,27 +1,20 @@
 package project.airbnb.clone.service.tour;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-import project.airbnb.clone.common.clients.TourApiClient;
-import project.airbnb.clone.dto.TourApiResponse;
+import project.airbnb.clone.dto.OpenApiResponse;
 
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-@Component
-@RequiredArgsConstructor
-public class TourApiTemplate {
+public record HttpClientTemplate<T>(T client) {
 
-    private final TourApiClient client;
-
-    public List<Map<String, String>> fetchItems(Function<TourApiClient, JsonNode> apiCall,
+    public List<Map<String, String>> fetchItems(Function<T, JsonNode> apiCall,
                                                 Consumer<List<Map<String, String>>> postProcessor) {
         JsonNode response = apiCall.apply(client);
 
-        TourApiResponse apiResponse = new TourApiResponse(response);
+        OpenApiResponse apiResponse = new OpenApiResponse(response);
         apiResponse.validError();
 
         List<Map<String, String>> items = apiResponse.getItems();
@@ -35,7 +28,7 @@ public class TourApiTemplate {
         return items;
     }
 
-    public List<Map<String, String>> fetchItems(Function<TourApiClient, JsonNode> apiCall) {
-        return fetchItems(apiCall, items -> {});
+    public List<Map<String, String>> fetchItems(Function<T, JsonNode> apiCall) {
+        return fetchItems(apiCall, items -> { });
     }
 }

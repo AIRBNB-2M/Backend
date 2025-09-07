@@ -1,13 +1,14 @@
 package project.airbnb.clone.service.tour.workers;
 
 import lombok.extern.slf4j.Slf4j;
+import project.airbnb.clone.common.clients.TourApiClient;
 import project.airbnb.clone.consts.DayType;
 import project.airbnb.clone.consts.PriceKey;
 import project.airbnb.clone.consts.Season;
 import project.airbnb.clone.consts.tourapi.InfoAmenity;
 import project.airbnb.clone.consts.tourapi.InfoRoomImage;
 import project.airbnb.clone.dto.accommodation.AccommodationProcessorDto;
-import project.airbnb.clone.service.tour.TourApiTemplate;
+import project.airbnb.clone.service.tour.HttpClientTemplate;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -16,13 +17,14 @@ import java.util.Map;
 import static org.springframework.util.StringUtils.hasText;
 
 @Slf4j
-public record DetailInfoWorker(TourApiTemplate tourApiTemplate, AccommodationProcessorDto dto) implements Runnable {
+public record DetailInfoWorker(HttpClientTemplate<TourApiClient> httpClientTemplate,
+                               AccommodationProcessorDto dto) implements Runnable {
 
     @Override
     public void run() {
         String contentId = dto.getContentId();
 
-        List<Map<String, String>> items = tourApiTemplate.fetchItems(
+        List<Map<String, String>> items = httpClientTemplate.fetchItems(
                 client -> client.detailInfo(contentId),
                 itemList -> {
                     if (itemList.size() > 10) {
