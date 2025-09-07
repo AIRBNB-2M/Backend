@@ -48,7 +48,7 @@ public class Accommodation extends BaseEntity {
     private LocalDateTime modifiedTime;
 
     @ManyToOne
-    @JoinColumn(name = "signugu_code", nullable = false)
+    @JoinColumn(name = "sigungu_code", nullable = false)
     private SigunguCode sigunguCode;
 
     @Column(name = "description", columnDefinition = "TEXT")
