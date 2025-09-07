@@ -13,11 +13,12 @@ public class MainAccListResDto {
     private Long accommodationId;
     private String title;
     private int price;
-    private long reservationCount;
     private double avgRate;
     private String thumbnailUrl;
     private boolean likedMe;
 
+    @JsonIgnore
+    private long reservationCount;
     @JsonIgnore
     private String areaCode;
 }

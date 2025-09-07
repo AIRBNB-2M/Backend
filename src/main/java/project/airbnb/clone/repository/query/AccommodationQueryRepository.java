@@ -47,10 +47,10 @@ public class AccommodationQueryRepository {
                         acc.id,
                         acc.title,
                         ap.price,
-                        rs.count().coalesce(0L),
                         rv.rating.avg().coalesce(0.0),
                         ai.imageUrl,
                         getLikeExists(guestId),
+                        rs.count().coalesce(0L),
                         ac.codeName
                 ))
                 .from(acc)
