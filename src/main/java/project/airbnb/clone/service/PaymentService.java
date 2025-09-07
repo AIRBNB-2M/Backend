@@ -17,8 +17,8 @@ import project.airbnb.clone.dto.PaymentDtos.PrepareResponse;
 import project.airbnb.clone.entity.Payment;
 import project.airbnb.clone.entity.Reservation;
 import project.airbnb.clone.infra.PortOneClient;
-import project.airbnb.clone.repository.PaymentRepository;
-import project.airbnb.clone.repository.ReservationRepository;
+import project.airbnb.clone.repository.jpa.PaymentRepository;
+import project.airbnb.clone.repository.jpa.ReservationRepository;
 
 @Service
 @RequiredArgsConstructor

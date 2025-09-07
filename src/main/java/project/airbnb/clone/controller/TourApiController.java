@@ -29,7 +29,7 @@ public class TourApiController {
         }
 	}
 	
-	@GetMapping("/api/accommodations")
+//	@GetMapping("/api/accommodations")
 	public List<Accommodation> getAllAccommodations() {
 	    return tourApiService.getAllAccommodations();
 	}

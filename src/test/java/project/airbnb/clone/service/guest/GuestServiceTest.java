@@ -4,18 +4,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
 import project.airbnb.clone.TestContainersConfig;
 import project.airbnb.clone.common.exceptions.EmailAlreadyExistsException;
 import project.airbnb.clone.consts.SocialType;
 import project.airbnb.clone.dto.guest.SignupRequestDto;
 import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.model.ProviderUser;
-import project.airbnb.clone.repository.guest.GuestRepository;
+import project.airbnb.clone.repository.jpa.GuestRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,8 +21,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@SpringBootTest
-@Transactional
 class GuestServiceTest extends TestContainersConfig {
 
     @Autowired

@@ -2,6 +2,9 @@ tourapi:
   key: hello
 
 spring:
+  batch:
+    jdbc:
+      initialize-schema: always
   data:
     redis:
       host: localhost
@@ -46,3 +49,14 @@ jwt:
     expiration: 1000
   refresh-token:
     expiration: 1000
+
+cloudflare:
+  r2:
+    endpoint: http://test.com
+    bucket: test
+    access-key: test
+    secret-key: test
+
+portone:
+  api-key: test
+  api-secret: test

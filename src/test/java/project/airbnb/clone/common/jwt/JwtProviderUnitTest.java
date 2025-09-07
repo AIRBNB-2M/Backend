@@ -21,7 +21,7 @@ import project.airbnb.clone.config.security.jwt.JwtAuthenticationToken;
 import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.model.AuthProviderUser;
 import project.airbnb.clone.model.PrincipalUser;
-import project.airbnb.clone.repository.guest.GuestRepository;
+import project.airbnb.clone.repository.jpa.GuestRepository;
 
 import javax.crypto.SecretKey;
 import java.util.Base64;

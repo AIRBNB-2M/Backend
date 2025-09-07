@@ -4,8 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
-import project.airbnb.clone.dto.AccommodationProcessorDto;
-import project.airbnb.clone.service.tour.TourApiTemplate;
+import project.airbnb.clone.common.clients.TourApiClient;
+import project.airbnb.clone.dto.accommodation.AccommodationProcessorDto;
+import project.airbnb.clone.service.tour.HttpClientTemplate;
 import project.airbnb.clone.service.tour.workers.DetailIntroWorker;
 
 @Slf4j
@@ -13,11 +14,11 @@ import project.airbnb.clone.service.tour.workers.DetailIntroWorker;
 @RequiredArgsConstructor
 public class DetailIntroProcessor implements ItemProcessor<AccommodationProcessorDto, AccommodationProcessorDto> {
 
-    private final TourApiTemplate tourApiTemplate;
+    private final HttpClientTemplate<TourApiClient> httpClientTemplate;
 
     @Override
     public AccommodationProcessorDto process(AccommodationProcessorDto dto) {
-        DetailIntroWorker worker = new DetailIntroWorker(tourApiTemplate, dto);
+        DetailIntroWorker worker = new DetailIntroWorker(httpClientTemplate, dto);
         worker.run();
 
         return dto;

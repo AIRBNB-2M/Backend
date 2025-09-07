@@ -1,15 +1,15 @@
-package project.airbnb.clone.repository;
+package project.airbnb.clone.repository.jpa;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import project.airbnb.clone.entity.Accommodation;
-import project.airbnb.clone.entity.AccommodationImage;
+import project.airbnb.clone.entity.AccommodationAmenity;
 
 import java.util.List;
 
-public interface AccommodationImageRepository extends JpaRepository<AccommodationImage, Long> {
+public interface AccommodationAmenityRepository extends JpaRepository<AccommodationAmenity, Long> {
 
-    List<AccommodationImage> findByAccommodation(Accommodation accommodation);
+    List<AccommodationAmenity> findByAccommodation(Accommodation accommodation);
 
     @Modifying(clearAutomatically = true)
     void deleteByAccommodationIn(List<Accommodation> accommodations);

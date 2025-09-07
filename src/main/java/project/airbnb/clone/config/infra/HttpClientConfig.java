@@ -10,6 +10,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 import project.airbnb.clone.common.clients.GitHubAppClient;
+import project.airbnb.clone.common.clients.HolidayApiClient;
 import project.airbnb.clone.common.clients.KakaoAppClient;
 import project.airbnb.clone.common.clients.NaverAppClient;
 import project.airbnb.clone.common.clients.TourApiClient;
@@ -84,6 +85,23 @@ public class HttpClientConfig {
         return HttpServiceProxyFactory.builderFor(RestClientAdapter.create(restClient))
                                       .build()
                                       .createClient(TourApiClient.class);
+    }
+
+    @Bean
+    public HolidayApiClient holidayApiClient(RestClient.Builder builder,
+                                             @Value("${rest-day.api-key}") String apiKey) {
+        RestClient restClient = builder.baseUrl("https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService")
+                                       .defaultUriVariables(
+                                               Map.of(
+                                                       "serviceKey", apiKey,
+                                                       "type", "json",
+                                                       "numOfRows", "50"
+                                               ))
+                                       .build();
+
+        return HttpServiceProxyFactory.builderFor(RestClientAdapter.create(restClient))
+                                      .build()
+                                      .createClient(HolidayApiClient.class);
     }
 
     @Bean

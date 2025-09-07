@@ -30,6 +30,10 @@ public interface ProviderUser {
         return null;
     }
 
+    default Long getId() {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * {@link OAuth2AuthorizedClientService}.loadAuthorizedClient()에 사용될 principalName(식별자)
      */

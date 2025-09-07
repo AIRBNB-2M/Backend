@@ -12,12 +12,12 @@ import project.airbnb.clone.entity.AccommodationImage;
 import project.airbnb.clone.entity.AccommodationPrice;
 import project.airbnb.clone.entity.Amenity;
 import project.airbnb.clone.entity.SigunguCode;
-import project.airbnb.clone.repository.AccommodationAmenityRepository;
-import project.airbnb.clone.repository.AccommodationImageRepository;
-import project.airbnb.clone.repository.AccommodationPriceRepository;
-import project.airbnb.clone.repository.AccommodationRepository;
-import project.airbnb.clone.repository.AmenityRepository;
-import project.airbnb.clone.repository.SigunguCodeRepository;
+import project.airbnb.clone.repository.jpa.AccommodationAmenityRepository;
+import project.airbnb.clone.repository.jpa.AccommodationImageRepository;
+import project.airbnb.clone.repository.jpa.AccommodationPriceRepository;
+import project.airbnb.clone.repository.jpa.AccommodationRepository;
+import project.airbnb.clone.repository.jpa.AmenityRepository;
+import project.airbnb.clone.repository.jpa.SigunguCodeRepository;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;

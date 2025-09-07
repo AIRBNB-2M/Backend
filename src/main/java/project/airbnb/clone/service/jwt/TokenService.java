@@ -15,7 +15,7 @@ import project.airbnb.clone.common.jwt.JwtProperties;
 import project.airbnb.clone.common.jwt.JwtProvider;
 import project.airbnb.clone.dto.jwt.TokenResponse;
 import project.airbnb.clone.entity.Guest;
-import project.airbnb.clone.repository.guest.GuestRepository;
+import project.airbnb.clone.repository.jpa.GuestRepository;
 import project.airbnb.clone.repository.redis.RedisRepository;
 
 import java.time.Duration;

@@ -11,13 +11,13 @@ import java.util.Map;
 
 @Slf4j
 @Getter
-public class TourApiResponse {
+public class OpenApiResponse {
 
     private final List<Map<String, String>> items = new ArrayList<>();
     private final Map<String, String> error = new HashMap<>();
     private int totalCount;
 
-    public TourApiResponse(JsonNode response) {
+    public OpenApiResponse(JsonNode response) {
         JsonNode errorHeader = response.get("cmmMsgHeader");
         if (errorHeader != null) {
             error.put("errMsg", errorHeader.path("errMsg").asText());
@@ -49,7 +49,7 @@ public class TourApiResponse {
 
     public void validError() {
         if (!error.isEmpty()) {
-            log.error("TourAPI 요청 중 오류, {}", error);
+            log.error("OpenAPI 요청 중 오류, {}", error);
             throw new RuntimeException("Tour API 요청 실패");
         }
     }

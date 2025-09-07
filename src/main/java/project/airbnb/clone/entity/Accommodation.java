@@ -12,7 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import project.airbnb.clone.dto.AccommodationProcessorDto;
+import project.airbnb.clone.dto.accommodation.AccommodationProcessorDto;
 
 import java.time.LocalDateTime;
 
@@ -48,7 +48,7 @@ public class Accommodation extends BaseEntity {
     private LocalDateTime modifiedTime;
 
     @ManyToOne
-    @JoinColumn(name = "signugu_code", nullable = false)
+    @JoinColumn(name = "sigungu_code", nullable = false)
     private SigunguCode sigunguCode;
 
     @Column(name = "description", columnDefinition = "TEXT")

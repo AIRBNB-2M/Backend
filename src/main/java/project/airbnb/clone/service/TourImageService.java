@@ -13,8 +13,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import project.airbnb.clone.entity.Accommodation;
 import project.airbnb.clone.entity.AccommodationImage;
-import project.airbnb.clone.repository.AccommodationImageRepository;
-import project.airbnb.clone.repository.AccommodationRepository;
+import project.airbnb.clone.repository.jpa.AccommodationImageRepository;
+import project.airbnb.clone.repository.jpa.AccommodationRepository;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
