@@ -38,18 +38,18 @@ class AccommodationControllerTest extends RestDocsTestSupport {
     void getAccommodations() throws Exception {
         // given
         List<MainAccListResDto> seoulAcc = List.of(
-                new MainAccListResDto(1L, "호텔A", 100000, 4.5, "https://example.com/a.jpg", true, 5, "SEOUL"),
-                new MainAccListResDto(2L, "호텔B", 200000, 3.8, "https://example.com/b.jpg", false, 10, "SEOUL")
+                new MainAccListResDto(1L, "호텔A", 100000, 4.5, "https://example.com/a.jpg", true),
+                new MainAccListResDto(2L, "호텔B", 200000, 3.8, "https://example.com/b.jpg", false)
         );
         List<MainAccListResDto> gyeonggiAcc = List.of(
-                new MainAccListResDto(3L, "호텔C", 150000, 4.3, "https://example.com/c.jpg", false, 7, "GYEONGGI"),
-                new MainAccListResDto(4L, "호텔D", 250000, 4.7, "https://example.com/d.jpg", true, 9, "GYEONGGI"),
-                new MainAccListResDto(5L, "호텔E", 300000, 3.3, "https://example.com/e.jpg", true, 15, "GYEONGGI")
+                new MainAccListResDto(3L, "호텔C", 150000, 4.3, "https://example.com/c.jpg", false),
+                new MainAccListResDto(4L, "호텔D", 250000, 4.7, "https://example.com/d.jpg", true),
+                new MainAccListResDto(5L, "호텔E", 300000, 3.3, "https://example.com/e.jpg", true)
         );
 
         List<AreaListResDto<MainAccListResDto>> result = List.of(
-                new AreaListResDto<>("서울", seoulAcc),
-                new AreaListResDto<>("경기도", gyeonggiAcc)
+                new AreaListResDto<>("서울", "code-1", seoulAcc),
+                new AreaListResDto<>("경기도", "code-2", gyeonggiAcc)
         );
 
         given(accommodationService.getAccommodations(any())).willReturn(result);
@@ -73,6 +73,9 @@ class AccommodationControllerTest extends RestDocsTestSupport {
                                fieldWithPath("[].areaName")
                                        .attributes(field("path", "areaName"))
                                        .description("지역명"),
+                               fieldWithPath("[].areaCode")
+                                       .attributes(field("path", "areaCode"))
+                                       .description("지역 코드"),
                                fieldWithPath("[].accommodations[].accommodationId")
                                        .attributes(field("path", "accommodationId"))
                                        .description("숙소 ID"),

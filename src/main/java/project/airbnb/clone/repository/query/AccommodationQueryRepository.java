@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import project.airbnb.clone.consts.DayType;
 import project.airbnb.clone.consts.Season;
-import project.airbnb.clone.dto.accommodation.MainAccListResDto;
+import project.airbnb.clone.dto.accommodation.MainAccListQueryDto;
 import project.airbnb.clone.entity.QAccommodation;
 import project.airbnb.clone.entity.QAccommodationImage;
 import project.airbnb.clone.entity.QAccommodationPrice;
@@ -34,7 +34,7 @@ public class AccommodationQueryRepository {
 
     private final JPAQueryFactory queryFactory;
 
-    public List<MainAccListResDto> getAreaAccommodations(Season season, DayType dayType, Long guestId) {
+    public List<MainAccListQueryDto> getAreaAccommodations(Season season, DayType dayType, Long guestId) {
         QAccommodation acc = accommodation;
         QAccommodationImage ai = accommodationImage;
         QAccommodationPrice ap = accommodationPrice;
@@ -43,7 +43,7 @@ public class AccommodationQueryRepository {
         QAreaCode ac = areaCode;
 
         return queryFactory
-                .select(constructor(MainAccListResDto.class,
+                .select(constructor(MainAccListQueryDto.class,
                         acc.id,
                         acc.title,
                         ap.price,
@@ -51,7 +51,8 @@ public class AccommodationQueryRepository {
                         ai.imageUrl,
                         getLikeExists(guestId),
                         rs.count().coalesce(0L),
-                        ac.codeName
+                        ac.codeName,
+                        ac.code
                 ))
                 .from(acc)
                 .join(ai).on(ai.accommodation.eq(acc)
