@@ -1,0 +1,97 @@
+package project.airbnb.clone.controller.accommodation;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import project.airbnb.clone.controller.RestDocsTestSupport;
+import project.airbnb.clone.dto.accommodation.AreaListResDto;
+import project.airbnb.clone.dto.accommodation.MainAccListResDto;
+import project.airbnb.clone.service.AccommodationService;
+import project.airbnb.clone.service.jwt.TokenService;
+
+import java.util.List;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static project.airbnb.clone.config.RestDocsConfig.field;
+
+@WebMvcTest(AccommodationController.class)
+class AccommodationControllerTest extends RestDocsTestSupport {
+
+    @MockitoBean
+    AccommodationService accommodationService;
+    @MockitoBean
+    TokenService tokenService;
+
+    @Test
+    @DisplayName("메인 페이지 숙소 목록 조회")
+    void getAccommodations() throws Exception {
+        // given
+        List<MainAccListResDto> seoulAcc = List.of(
+                new MainAccListResDto(1L, "호텔A", 100000, 4.5, "https://example.com/a.jpg", true, 5, "SEOUL"),
+                new MainAccListResDto(2L, "호텔B", 200000, 3.8, "https://example.com/b.jpg", false, 10, "SEOUL")
+        );
+        List<MainAccListResDto> gyeonggiAcc = List.of(
+                new MainAccListResDto(3L, "호텔C", 150000, 4.3, "https://example.com/c.jpg", false, 7, "GYEONGGI"),
+                new MainAccListResDto(4L, "호텔D", 250000, 4.7, "https://example.com/d.jpg", true, 9, "GYEONGGI"),
+                new MainAccListResDto(5L, "호텔E", 300000, 3.3, "https://example.com/e.jpg", true, 15, "GYEONGGI")
+        );
+
+        List<AreaListResDto<MainAccListResDto>> result = List.of(
+                new AreaListResDto<>("서울", seoulAcc),
+                new AreaListResDto<>("경기도", gyeonggiAcc)
+        );
+
+        given(accommodationService.getAccommodations(any())).willReturn(result);
+
+        //when
+        //then
+        mockMvc.perform(get("/api/accommodations"))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$", hasSize(result.size())))
+               .andExpect(jsonPath("$[0].areaName").value(result.get(0).areaName()))
+               .andExpect(jsonPath("$[1].areaName").value(result.get(1).areaName()))
+               .andExpect(jsonPath("$[0].accommodations", hasSize(result.get(0).accommodations().size())))
+               .andExpect(jsonPath("$[1].accommodations", hasSize(result.get(1).accommodations().size())))
+               .andExpect(jsonPath("$[0].accommodations[0].reservationCount").doesNotExist())
+               .andExpect(jsonPath("$[0].accommodations[0].areaCode").doesNotExist())
+               .andDo(restDocs.document(
+                       requestHeaders(
+                               headerWithName(AUTHORIZATION).optional().description("Bearer {액세스 토큰}")
+                       ),
+                       responseFields(
+                               fieldWithPath("[].areaName")
+                                       .attributes(field("path", "areaName"))
+                                       .description("지역명"),
+                               fieldWithPath("[].accommodations[].accommodationId")
+                                       .attributes(field("path", "accommodationId"))
+                                       .description("숙소 ID"),
+                               fieldWithPath("[].accommodations[].title")
+                                       .attributes(field("path", "title"))
+                                       .description("숙소 이름"),
+                               fieldWithPath("[].accommodations[].price")
+                                       .attributes(field("path", "price"))
+                                       .description("숙소 가격"),
+                               fieldWithPath("[].accommodations[].avgRate")
+                                       .attributes(field("path", "avgRate"))
+                                       .description("평균 평점"),
+                               fieldWithPath("[].accommodations[].thumbnailUrl")
+                                       .attributes(field("path", "thumbnailUrl"))
+                                       .description("썸네일 URL"),
+                               fieldWithPath("[].accommodations[].likedMe")
+                                       .attributes(field("path", "likedMe"))
+                                       .description("좋아요 여부")
+                       )
+               ));
+    }
+}

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import project.airbnb.clone.service.tour.TourService;
 
+//TODO : @Profile 대신 시큐리티 권한 기능 도입
 @Profile("local")
 @RestController
 @RequiredArgsConstructor

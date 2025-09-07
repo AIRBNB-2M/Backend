@@ -16,3 +16,8 @@ include::guest-signup.adoc[]
 == Token API
 
 include::token.adoc[]
+
+[[Accommodation-API]]
+== Accommodation API
+
+include::accommodation.adoc[]
