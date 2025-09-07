@@ -60,3 +60,6 @@ cloudflare:
 portone:
   api-key: test
   api-secret: test
+
+rest-day:
+  api-key: test
