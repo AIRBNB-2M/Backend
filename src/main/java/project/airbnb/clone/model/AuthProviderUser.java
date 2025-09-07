@@ -42,4 +42,9 @@ public record AuthProviderUser(Guest guest, String principalName) implements Pro
     public String getPrincipalName() {
         return principalName;
     }
+
+    @Override
+    public Long getId() {
+        return guest.getId();
+    }
 }
