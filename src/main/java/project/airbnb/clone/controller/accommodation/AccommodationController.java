@@ -24,7 +24,7 @@ public class AccommodationController {
     private final AccommodationService accommodationService;
 
     @GetMapping("/accommodations")
-    public ResponseEntity<List<MainAccResDto>> getAccommodations(@CurrentGuestId Long id) {
+    public ResponseEntity<List<MainAccResDto>> getAccommodations(@CurrentGuestId(required = false) Long id) {
         List<MainAccResDto> result = accommodationService.getAccommodations(id);
 
         return ResponseEntity.ok(result);
@@ -32,7 +32,7 @@ public class AccommodationController {
 
     @GetMapping("/accommodations/search")
     public ResponseEntity<PageResponseDto<FilteredAccListResDto>> getFilteredPagingAccommodations(@ModelAttribute AccSearchCondDto searchDto,
-                                                                                                  @CurrentGuestId Long id,
+                                                                                                  @CurrentGuestId(required = false) Long id,
                                                                                                   Pageable pageable) {
         PageResponseDto<FilteredAccListResDto> result = accommodationService.getFilteredPagingAccommodations(searchDto, id, pageable);
         return ResponseEntity.ok(result);

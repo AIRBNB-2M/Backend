@@ -3,6 +3,7 @@ package project.airbnb.clone.common.resolvers;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -20,18 +21,31 @@ public class CurrentGuestIdArgumentResolver implements HandlerMethodArgumentReso
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        Authentication authentication = SecurityContextHolder.getContextHolderStrategy().getContext().getAuthentication();
+    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+        CurrentGuestId annotation = parameter.getParameterAnnotation(CurrentGuestId.class);
+        Assert.notNull(annotation, "Cannot be empty @CurrentGuestId");
+
+        Authentication authentication = SecurityContextHolder.getContextHolderStrategy()
+                                                             .getContext()
+                                                             .getAuthentication();
+        boolean required = annotation.required();
+
         if (authentication == null) {
+            if (required) {
+                throw new IllegalStateException("Authentication is required but not found");
+            }
             return null;
         }
 
-        Object principal = authentication.getPrincipal();
-
-        if (principal instanceof PrincipalUser principalUser) {
+        if (authentication.getPrincipal() instanceof PrincipalUser principalUser) {
             if (principalUser.providerUser() instanceof AuthProviderUser authProviderUser) {
                 return authProviderUser.getId();
             }
+        }
+
+        if (required) {
+            throw new IllegalStateException("Principal type is invalid");
         }
 
         return null;
