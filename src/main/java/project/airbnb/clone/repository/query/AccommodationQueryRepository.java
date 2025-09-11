@@ -3,6 +3,7 @@ package project.airbnb.clone.repository.query;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -13,18 +14,24 @@ import org.springframework.stereotype.Repository;
 import project.airbnb.clone.consts.DayType;
 import project.airbnb.clone.consts.Season;
 import project.airbnb.clone.dto.accommodation.AccSearchCondDto;
+import project.airbnb.clone.repository.dto.DetailAccommodationQueryDto;
+import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailReviewDto;
 import project.airbnb.clone.dto.accommodation.FilteredAccListResDto;
-import project.airbnb.clone.dto.accommodation.MainAccListQueryDto;
+import project.airbnb.clone.repository.dto.ImageDataQueryDto;
+import project.airbnb.clone.repository.dto.MainAccListQueryDto;
 import project.airbnb.clone.entity.QAccommodation;
 import project.airbnb.clone.entity.QAccommodationAmenity;
 import project.airbnb.clone.entity.QAccommodationImage;
 import project.airbnb.clone.entity.QAccommodationPrice;
+import project.airbnb.clone.entity.QAmenity;
 import project.airbnb.clone.entity.QAreaCode;
+import project.airbnb.clone.entity.QGuest;
 import project.airbnb.clone.entity.QReservation;
 import project.airbnb.clone.entity.QReview;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.querydsl.core.types.Projections.constructor;
 import static com.querydsl.core.types.dsl.Expressions.asBoolean;
@@ -39,6 +46,7 @@ import static project.airbnb.clone.entity.QAccommodationImage.accommodationImage
 import static project.airbnb.clone.entity.QAccommodationPrice.accommodationPrice;
 import static project.airbnb.clone.entity.QAmenity.amenity;
 import static project.airbnb.clone.entity.QAreaCode.areaCode;
+import static project.airbnb.clone.entity.QGuest.guest;
 import static project.airbnb.clone.entity.QLike.like;
 import static project.airbnb.clone.entity.QReservation.reservation;
 import static project.airbnb.clone.entity.QReview.review;
@@ -175,6 +183,82 @@ public class AccommodationQueryRepository {
                 );
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+    }
+
+    public Optional<DetailAccommodationQueryDto> findAccommodation(Long accId, Long guestId, Season season, DayType dayType) {
+        QAccommodation acc = accommodation;
+        QAccommodationPrice ap = accommodationPrice;
+
+        return Optional.ofNullable(
+                queryFactory
+                        .select(constructor(DetailAccommodationQueryDto.class,
+                                acc.id, acc.title, acc.maxPeople, acc.address,
+                                acc.mapX, acc.mapY, acc.checkIn, acc.checkOut, acc.description,
+                                acc.number, acc.refundRegulation, ap.price,
+                                isLikedSubquery(guestId),
+                                avgRateSubquery(accId)
+                        ))
+                        .from(acc)
+                        .join(ap).on(ap.accommodation.eq(acc)
+                                                     .and(ap.season.eq(season).and(ap.dayType.eq(dayType))))
+                        .where(acc.id.eq(accId))
+                        .fetchOne()
+        );
+    }
+
+    public List<ImageDataQueryDto> findImages(Long accId) {
+        QAccommodationImage ai = accommodationImage;
+        return queryFactory
+                .select(constructor(ImageDataQueryDto.class,
+                        ai.thumbnail,
+                        ai.imageUrl
+                ))
+                .from(ai)
+                .where(ai.accommodation.id.eq(accId))
+                .fetch();
+    }
+
+    public List<String> findAmenities(Long accId) {
+        QAccommodationAmenity aa = accommodationAmenity;
+        QAmenity am = amenity;
+        return queryFactory
+                .select(am.description)
+                .from(aa)
+                .join(aa.amenity, am)
+                .where(aa.accommodation.id.eq(accId))
+                .fetch();
+    }
+
+    public List<DetailReviewDto> findReviews(Long accId) {
+        QGuest g = guest;
+        QReview rv = review;
+        QReservation rs = reservation;
+
+        return queryFactory
+                .select(constructor(DetailReviewDto.class,
+                        g.id,
+                        g.name,
+                        g.profileUrl,
+                        g.createdAt,
+                        rv.createdAt,
+                        rv.rating,
+                        rv.content
+                ))
+                .from(rs)
+                .join(rv).on(rv.reservation.eq(rs))
+                .join(rv.guest, g)
+                .where(rs.accommodation.id.eq(accId))
+                .orderBy(rv.createdAt.desc())
+                .fetch();
+    }
+
+    private JPQLQuery<Double> avgRateSubquery(Long accId) {
+        QReservation rs = reservation;
+        QReview rv = review;
+        return JPAExpressions.select(rv.rating.avg().coalesce(0.0))
+                             .from(rs)
+                             .join(rv).on(rv.reservation.eq(rs))
+                             .where(rs.accommodation.id.eq(accId));
     }
 
     private BooleanExpression isLikedSubquery(Long guestId) {

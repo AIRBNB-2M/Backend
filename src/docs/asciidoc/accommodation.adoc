@@ -5,3 +5,7 @@ operation::accommodation-controller-test/get-accommodations[snippets='http-reque
 [[Accommodation-API-search]]
 === 숙소 검색 조회
 operation::accommodation-controller-test/get-filtered-paging-accommodations[snippets='httpie-request,query-parameters,request-headers,response-body,response-fields']
+
+[[Accommodation-API-detail]]
+=== 숙소 상세 조회
+operation::accommodation-controller-test/get-accommodation[snippets='http-request,path-parameters,request-headers,response-body,response-fields']

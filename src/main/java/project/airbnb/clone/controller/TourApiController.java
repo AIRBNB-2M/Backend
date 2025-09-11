@@ -34,7 +34,7 @@ public class TourApiController {
 	    return tourApiService.getAllAccommodations();
 	}
 
-	@GetMapping("/api/accommodations/{id}")
+//	@GetMapping("/api/accommodations/{id}")
 	public ResponseEntity<Accommodation> getAccommodation(@PathVariable Long id) {
 	    return tourApiService.getAccommodation(id)
 	        .map(ResponseEntity::ok)
