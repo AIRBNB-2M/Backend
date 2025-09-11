@@ -20,19 +20,19 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/api/accommodations")
 public class AccommodationController {
 
     private final AccommodationService accommodationService;
 
-    @GetMapping("/accommodations")
+    @GetMapping
     public ResponseEntity<List<MainAccResDto>> getAccommodations(@CurrentGuestId(required = false) Long id) {
         List<MainAccResDto> result = accommodationService.getAccommodations(id);
 
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/accommodations/search")
+    @GetMapping("/search")
     public ResponseEntity<PageResponseDto<FilteredAccListResDto>> getFilteredPagingAccommodations(@ModelAttribute AccSearchCondDto searchDto,
                                                                                                   @CurrentGuestId(required = false) Long id,
                                                                                                   Pageable pageable) {
