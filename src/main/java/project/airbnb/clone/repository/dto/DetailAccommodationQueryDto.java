@@ -1,4 +1,4 @@
-package project.airbnb.clone.dto.accommodation;
+package project.airbnb.clone.repository.dto;
 
 public record DetailAccommodationQueryDto(
         Long accommodationId,

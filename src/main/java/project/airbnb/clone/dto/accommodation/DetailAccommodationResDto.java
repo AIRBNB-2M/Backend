@@ -1,5 +1,7 @@
 package project.airbnb.clone.dto.accommodation;
 
+import project.airbnb.clone.repository.dto.DetailAccommodationQueryDto;
+
 import java.time.LocalDateTime;
 import java.util.List;
 

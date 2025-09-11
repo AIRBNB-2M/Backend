@@ -1,5 +1,7 @@
 package project.airbnb.clone.dto.accommodation;
 
+import project.airbnb.clone.repository.dto.MainAccListQueryDto;
+
 /**
  * 메인 화면 지역별 각 숙소 최소 정보
  */
