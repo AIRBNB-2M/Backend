@@ -5,11 +5,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import project.airbnb.clone.common.annotations.CurrentGuestId;
 import project.airbnb.clone.dto.PageResponseDto;
 import project.airbnb.clone.dto.accommodation.AccSearchCondDto;
+import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto;
 import project.airbnb.clone.dto.accommodation.FilteredAccListResDto;
 import project.airbnb.clone.dto.accommodation.MainAccResDto;
 import project.airbnb.clone.service.AccommodationService;
@@ -35,6 +37,13 @@ public class AccommodationController {
                                                                                                   @CurrentGuestId(required = false) Long id,
                                                                                                   Pageable pageable) {
         PageResponseDto<FilteredAccListResDto> result = accommodationService.getFilteredPagingAccommodations(searchDto, id, pageable);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<DetailAccommodationResDto> getAccommodation(@PathVariable("id") Long accId,
+                                                                      @CurrentGuestId(required = false) Long guestId) {
+        DetailAccommodationResDto result = accommodationService.getDetailAccommodation(accId, guestId);
         return ResponseEntity.ok(result);
     }
 }

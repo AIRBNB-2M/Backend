@@ -1,5 +1,6 @@
 package project.airbnb.clone.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,10 +10,15 @@ import project.airbnb.clone.consts.DayType;
 import project.airbnb.clone.consts.Season;
 import project.airbnb.clone.dto.PageResponseDto;
 import project.airbnb.clone.dto.accommodation.AccSearchCondDto;
+import project.airbnb.clone.dto.accommodation.DetailAccommodationQueryDto;
+import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto;
+import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailImageDto;
+import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailReviewDto;
 import project.airbnb.clone.dto.accommodation.FilteredAccListResDto;
-import project.airbnb.clone.dto.accommodation.MainAccResDto;
+import project.airbnb.clone.dto.accommodation.ImageDataQueryDto;
 import project.airbnb.clone.dto.accommodation.MainAccListQueryDto;
 import project.airbnb.clone.dto.accommodation.MainAccListResDto;
+import project.airbnb.clone.dto.accommodation.MainAccResDto;
 import project.airbnb.clone.repository.query.AccommodationQueryRepository;
 
 import java.time.LocalDate;
@@ -72,5 +78,30 @@ public class AccommodationService {
                               .pageSize(pageable.getPageSize())
                               .total(result.getTotalElements())
                               .build();
+    }
+
+    public DetailAccommodationResDto getDetailAccommodation(Long accId, Long guestId) {
+        LocalDate now = LocalDate.now();
+        Season season = dateManager.getSeason(now);
+        DayType dayType = dateManager.getDayType(now);
+
+        DetailAccommodationQueryDto detailAccQueryDto = accommodationQueryRepository.findAccommodation(accId, guestId, season, dayType)
+                                                                                    .orElseThrow(() -> new EntityNotFoundException("Cannot found accommodation from : " + accId));
+        List<ImageDataQueryDto> images = accommodationQueryRepository.findImages(accId);
+        List<String> amenities = accommodationQueryRepository.findAmenities(accId);
+        List<DetailReviewDto> reviews = accommodationQueryRepository.findReviews(accId);
+
+        String thumbnail = images.stream()
+                                 .filter(ImageDataQueryDto::isThumbnail)
+                                 .map(ImageDataQueryDto::imageUrl)
+                                 .findFirst()
+                                 .orElse(null);
+        List<String> others = images.stream()
+                                    .filter(dto -> !dto.isThumbnail())
+                                    .map(ImageDataQueryDto::imageUrl)
+                                    .toList();
+        DetailImageDto detailImageDto = new DetailImageDto(thumbnail, others);
+
+        return DetailAccommodationResDto.from(detailAccQueryDto, detailImageDto, amenities, reviews);
     }
 }
