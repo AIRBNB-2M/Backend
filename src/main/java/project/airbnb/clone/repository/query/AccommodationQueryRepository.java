@@ -222,7 +222,7 @@ public class AccommodationQueryRepository {
         QAccommodationAmenity aa = accommodationAmenity;
         QAmenity am = amenity;
         return queryFactory
-                .select(am.name)
+                .select(am.description)
                 .from(aa)
                 .join(aa.amenity, am)
                 .where(aa.accommodation.id.eq(accId))

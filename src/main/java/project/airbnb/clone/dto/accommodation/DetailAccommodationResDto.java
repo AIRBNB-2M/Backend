@@ -21,9 +21,9 @@ public record DetailAccommodationResDto(
         int price,
         boolean likedMe,
         double avgRate,
-        DetailImageDto imageDto,
+        DetailImageDto images,
         List<String> amenities,
-        List<DetailReviewDto> reviewDtos
+        List<DetailReviewDto> reviews
 ) {
 
     public record DetailImageDto(
