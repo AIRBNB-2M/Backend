@@ -1,6 +1,8 @@
 package project.airbnb.clone.common.resolvers;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.Assert;
@@ -33,7 +35,7 @@ public class CurrentGuestIdArgumentResolver implements HandlerMethodArgumentReso
 
         if (authentication == null) {
             if (required) {
-                throw new IllegalStateException("Authentication is required but not found");
+                throw new AuthenticationCredentialsNotFoundException("Authentication is required but not found");
             }
             return null;
         }
@@ -45,7 +47,7 @@ public class CurrentGuestIdArgumentResolver implements HandlerMethodArgumentReso
         }
 
         if (required) {
-            throw new IllegalStateException("Principal type is invalid");
+            throw new AccessDeniedException("Principal type is invalid");
         }
 
         return null;

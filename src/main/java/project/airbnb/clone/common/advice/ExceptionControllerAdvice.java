@@ -9,6 +9,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -93,6 +95,38 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
                                                            .build();
 
         return new ResponseEntity<>(errorResponse, serverError);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<?> handleAuthenticationException(AuthenticationException e, HttpServletRequest request) {
+        log.debug("ExceptionControllerAdvice.AuthenticationException: {}", e.getMessage());
+
+        HttpStatus unauthorized = HttpStatus.UNAUTHORIZED;
+
+        ErrorResponse<String> errorResponse = ErrorResponse.<String>builder()
+                                                           .status(unauthorized.value())
+                                                           .error(unauthorized.getReasonPhrase())
+                                                           .message("unauthorized")
+                                                           .path(request.getRequestURI())
+                                                           .build();
+
+        return new ResponseEntity<>(errorResponse, unauthorized);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException e, HttpServletRequest request) {
+        log.debug("ExceptionControllerAdvice.AccessDeniedException: {}", e.getMessage());
+
+        HttpStatus forbidden = HttpStatus.FORBIDDEN;
+
+        ErrorResponse<String> errorResponse = ErrorResponse.<String>builder()
+                                                           .status(forbidden.value())
+                                                           .error(forbidden.getReasonPhrase())
+                                                           .message("Access Denied")
+                                                           .path(request.getRequestURI())
+                                                           .build();
+
+        return new ResponseEntity<>(errorResponse, forbidden);
     }
 
     @ExceptionHandler(Exception.class)
