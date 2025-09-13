@@ -12,7 +12,7 @@ import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailRe
 import project.airbnb.clone.dto.accommodation.FilteredAccListResDto;
 import project.airbnb.clone.dto.accommodation.MainAccListResDto;
 import project.airbnb.clone.dto.accommodation.MainAccResDto;
-import project.airbnb.clone.service.AccommodationService;
+import project.airbnb.clone.service.accommodation.AccommodationService;
 import project.airbnb.clone.service.jwt.TokenService;
 
 import java.time.LocalDateTime;

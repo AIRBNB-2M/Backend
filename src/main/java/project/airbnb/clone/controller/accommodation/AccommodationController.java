@@ -14,7 +14,7 @@ import project.airbnb.clone.dto.accommodation.AccSearchCondDto;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto;
 import project.airbnb.clone.dto.accommodation.FilteredAccListResDto;
 import project.airbnb.clone.dto.accommodation.MainAccResDto;
-import project.airbnb.clone.service.AccommodationService;
+import project.airbnb.clone.service.accommodation.AccommodationService;
 
 import java.util.List;
 
