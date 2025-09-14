@@ -26,6 +26,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.requestF
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static project.airbnb.clone.config.RestDocsConfig.field;
@@ -96,6 +97,27 @@ class WishlistControllerTest extends RestDocsTestSupport {
                        requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}")),
                        pathParameters(parameterWithName("wishlistId").description("숙소를 저장할 위시리스트 ID")),
                        requestFields(fieldWithPath("accommodationId").description("저장할 숙소 ID"))
+               ));
+    }
+
+    @Test
+    @DisplayName("위시리스트에서 숙소 제거")
+    @WithMockGuest
+    void removeAccommodation() throws Exception {
+        //given
+
+        //when
+        //then
+        mockMvc.perform(delete("/api/wishlists/{wishlistId}/accommodations/{accommodationId}", 1L, 1L)
+                       .header(AUTHORIZATION,"Bearer {access-token}")
+               )
+               .andExpect(status().isNoContent())
+               .andDo(restDocs.document(
+                       requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}")),
+                       pathParameters(
+                               parameterWithName("wishlistId").description("숙소를 제거할 위시리스트 ID"),
+                               parameterWithName("accommodationId").description("제거할 숙소 ID")
+                       )
                ));
     }
 }

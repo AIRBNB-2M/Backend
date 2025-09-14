@@ -87,6 +87,26 @@ class WishlistServiceTest extends TestContainersConfig {
         assertThat(result.getAccommodation().getId()).isEqualTo(accommodation.getId());
     }
 
+    @Test
+    @DisplayName("위시리스트에서 숙소를 제거한다.")
+    void removeAccommodationFromWishlist() {
+        //given
+        Wishlist wishlist = savedAndGetWishlist();
+        Accommodation accommodation = saveAndGetAccommodation();
+
+        //when
+        wishlistService.removeAccommodationFromWishlist(wishlist.getId(), accommodation.getId(), guest.getId());
+        em.flush();
+        em.clear();
+
+        //then
+        List<WishlistAccommodation> result = em.createQuery("SELECT wa FROM WishlistAccommodation wa WHERE wa.accommodation.id = :accommodationId AND wa.wishlist.id = :wishlistId", WishlistAccommodation.class)
+                                               .setParameter("accommodationId", accommodation.getId())
+                                               .setParameter("wishlistId", wishlist.getId())
+                                               .getResultList();
+        assertThat(result).isEmpty();
+    }
+
     private Wishlist savedAndGetWishlist() {
         return wishlistRepository.save(Wishlist.builder()
                                                .guest(guest)
@@ -110,7 +130,6 @@ class WishlistServiceTest extends TestContainersConfig {
                                                    .sigunguCode(sigunguCode)
                                                    .build();
         em.persist(accommodation);
-
-        return em.find(Accommodation.class, accommodation.getId());
+        return accommodation;
     }
 }
