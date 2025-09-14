@@ -68,6 +68,13 @@ public class WishlistService {
         wishlist.updateName(reqDto.wishlistName());
     }
 
+    @Transactional
+    public void removeWishlist(Long wishlistId, Long guestId) {
+        Wishlist wishlist = getWishlistByIdAndGuestId(wishlistId, guestId);
+        wishlistAccommodationRepository.deleteByWishlist(wishlist);
+        wishlistRepository.delete(wishlist);
+    }
+
     private Wishlist getWishlistByIdAndGuestId(Long wishlistId, Long guestId) {
         return wishlistRepository.findByIdAndGuestId(wishlistId, guestId).orElseThrow(
                 () -> new EntityNotFoundException("Cannot be found wishlist for wishlistId: " + wishlistId + ", guestId: " + guestId));

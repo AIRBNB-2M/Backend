@@ -55,4 +55,12 @@ public class WishlistController {
         wishlistService.updateWishlistName(wishlistId, reqDto, guestId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @DeleteMapping("/{wishlistId}")
+    public ResponseEntity<?> removeWishlist(@PathVariable("wishlistId") Long wishlistId,
+                                            @CurrentGuestId Long guestId) {
+
+        wishlistService.removeWishlist(wishlistId, guestId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
