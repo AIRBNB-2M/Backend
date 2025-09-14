@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import project.airbnb.clone.dto.wishlist.AddAccToWishlistReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateResDto;
+import project.airbnb.clone.dto.wishlist.WishlistUpdateReqDto;
 import project.airbnb.clone.entity.Accommodation;
 import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.entity.Wishlist;
@@ -59,6 +60,12 @@ public class WishlistService {
         Accommodation accommodation = getAccommodationById(accommodationId);
 
         wishlistAccommodationRepository.deleteByWishlistAndAccommodation(wishlist, accommodation);
+    }
+
+    @Transactional
+    public void updateWishlistName(Long wishlistId, WishlistUpdateReqDto reqDto, Long guestId) {
+        Wishlist wishlist = getWishlistByIdAndGuestId(wishlistId, guestId);
+        wishlist.updateName(reqDto.wishlistName());
     }
 
     private Wishlist getWishlistByIdAndGuestId(Long wishlistId, Long guestId) {

@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,6 +15,7 @@ import project.airbnb.clone.common.annotations.CurrentGuestId;
 import project.airbnb.clone.dto.wishlist.AddAccToWishlistReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateResDto;
+import project.airbnb.clone.dto.wishlist.WishlistUpdateReqDto;
 import project.airbnb.clone.service.accommodation.WishlistService;
 
 @RestController
@@ -43,6 +45,14 @@ public class WishlistController {
                                                  @PathVariable("accommodationId") Long accommodationId,
                                                  @CurrentGuestId Long guestId) {
         wishlistService.removeAccommodationFromWishlist(wishlistId, accommodationId, guestId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PutMapping("/{wishlistId}")
+    public ResponseEntity<?> updateWishlistName(@PathVariable("wishlistId") Long wishlistId,
+                                                @Valid @RequestBody WishlistUpdateReqDto reqDto,
+                                                @CurrentGuestId Long guestId) {
+        wishlistService.updateWishlistName(wishlistId, reqDto, guestId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

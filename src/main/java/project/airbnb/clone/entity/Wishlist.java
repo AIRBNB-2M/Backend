@@ -34,4 +34,8 @@ public class Wishlist extends BaseEntity {
 
     @Column(name = "name", length = 50, nullable = false)
     private String name;
+
+    public void updateName(String newName) {
+        this.name = newName;
+    }
 }
