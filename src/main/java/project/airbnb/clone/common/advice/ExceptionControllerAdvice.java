@@ -2,6 +2,7 @@ package project.airbnb.clone.common.advice;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -93,6 +94,16 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
         ErrorResponse<String> errorResponse = createErrorResponse(forbidden, "Access Denied", request);
 
         return new ResponseEntity<>(errorResponse, forbidden);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<?> handleEntityNotFoundException(EntityNotFoundException e, HttpServletRequest request) {
+        log.debug("ExceptionControllerAdvice.EntityNotFoundException: {}", e.getMessage());
+
+        HttpStatus notFound = HttpStatus.NOT_FOUND;
+        ErrorResponse<String> errorResponse = createErrorResponse(notFound, "Data not found in the database", request);
+
+        return new ResponseEntity<>(errorResponse, notFound);
     }
 
     @ExceptionHandler(Exception.class)
