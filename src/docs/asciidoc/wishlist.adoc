@@ -9,3 +9,7 @@ operation::wishlist-controller-test/add-accommodation[snippets='http-request,pat
 [[Wishlist-API-remove-accommodation]]
 === 위시리스트에서 숙소 제거
 operation::wishlist-controller-test/remove-accommodation[snippets='http-request,path-parameters,request-headers,http-response']
+
+[[Wishlist-API-update-wishlist-name]]
+=== 위시리스트의 이름 변경
+operation::wishlist-controller-test/update-wishlist-name[snippets='http-request,path-parameters,request-headers,request-body,request-fields,http-response']

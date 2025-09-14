@@ -9,6 +9,7 @@ import project.airbnb.clone.TestContainersConfig;
 import project.airbnb.clone.dto.wishlist.AddAccToWishlistReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateResDto;
+import project.airbnb.clone.dto.wishlist.WishlistUpdateReqDto;
 import project.airbnb.clone.entity.Accommodation;
 import project.airbnb.clone.entity.AreaCode;
 import project.airbnb.clone.entity.Guest;
@@ -105,6 +106,23 @@ class WishlistServiceTest extends TestContainersConfig {
                                                .setParameter("wishlistId", wishlist.getId())
                                                .getResultList();
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("위시리스트의 이름을 변경한다.")
+    void updateWishlistName() {
+        //given
+        Wishlist wishlist = savedAndGetWishlist();
+        WishlistUpdateReqDto reqDto = new WishlistUpdateReqDto("test-new-wishlist-name");
+
+        //when
+        wishlistService.updateWishlistName(wishlist.getId(), reqDto, guest.getId());
+        em.flush();
+        em.clear();
+
+        //then
+        Wishlist result = wishlistRepository.findById(wishlist.getId()).get();
+        assertThat(result.getName()).isEqualTo(reqDto.wishlistName());
     }
 
     private Wishlist savedAndGetWishlist() {

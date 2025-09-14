@@ -11,6 +11,7 @@ import project.airbnb.clone.controller.RestDocsTestSupport;
 import project.airbnb.clone.dto.wishlist.AddAccToWishlistReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateResDto;
+import project.airbnb.clone.dto.wishlist.WishlistUpdateReqDto;
 import project.airbnb.clone.service.accommodation.WishlistService;
 import project.airbnb.clone.service.jwt.TokenService;
 
@@ -27,6 +28,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static project.airbnb.clone.config.RestDocsConfig.field;
@@ -118,6 +120,30 @@ class WishlistControllerTest extends RestDocsTestSupport {
                                parameterWithName("wishlistId").description("숙소를 제거할 위시리스트 ID"),
                                parameterWithName("accommodationId").description("제거할 숙소 ID")
                        )
+               ));
+    }
+
+    @Test
+    @DisplayName("위시리스트의 이름 변경")
+    @WithMockGuest
+    void updateWishlistName() throws Exception {
+        //given
+        WishlistUpdateReqDto requestDto = new WishlistUpdateReqDto("test-new-wishlist-name");
+
+        //when
+        //then
+        mockMvc.perform(put("/api/wishlists/{wishlistId}", 1L)
+                       .header(AUTHORIZATION, "Bearer {access-token}")
+                       .contentType(MediaType.APPLICATION_JSON_VALUE)
+                       .content(creatJson(requestDto))
+               )
+               .andExpect(status().isNoContent())
+               .andDo(restDocs.document(
+                       requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}")),
+                       pathParameters(parameterWithName("wishlistId").description("이름을 변경할 위시리스트 ID")),
+                       requestFields(fieldWithPath("wishlistName")
+                               .attributes(field("constraints", "1 ~ 50자 제한"))
+                               .description("새로 변경할 위시리스트의 이름"))
                ));
     }
 }
