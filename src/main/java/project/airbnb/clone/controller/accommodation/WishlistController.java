@@ -4,11 +4,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import project.airbnb.clone.common.annotations.CurrentGuestId;
+import project.airbnb.clone.dto.wishlist.AddAccToWishlistReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateResDto;
 import project.airbnb.clone.service.accommodation.WishlistService;
@@ -25,5 +27,13 @@ public class WishlistController {
                                                                @CurrentGuestId Long guestId) {
         WishlistCreateResDto resDto = wishlistService.createWishlist(reqDto, guestId);
         return new ResponseEntity<>(resDto, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/{wishlistId}/accommodations")
+    public ResponseEntity<?> addAccommodation(@PathVariable("wishlistId") Long wishlistId,
+                                              @RequestBody AddAccToWishlistReqDto reqDto,
+                                              @CurrentGuestId Long guestId) {
+        wishlistService.addAccommodationToWishlist(wishlistId, reqDto, guestId);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }
