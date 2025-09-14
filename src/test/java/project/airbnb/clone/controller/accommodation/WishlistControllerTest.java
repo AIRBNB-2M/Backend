@@ -146,4 +146,22 @@ class WishlistControllerTest extends RestDocsTestSupport {
                                .description("새로 변경할 위시리스트의 이름"))
                ));
     }
+
+    @Test
+    @DisplayName("위시리스트 제거")
+    @WithMockGuest
+    void removeWishlist() throws Exception {
+        //given
+
+        //when
+        //then
+        mockMvc.perform(delete("/api/wishlists/{wishlistId}", 1L)
+                       .header(AUTHORIZATION,"Bearer {access-token}")
+               )
+               .andExpect(status().isNoContent())
+               .andDo(restDocs.document(
+                       requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}")),
+                       pathParameters(parameterWithName("wishlistId").description("제거할 위시리스트 ID"))
+               ));
+    }
 }

@@ -125,6 +125,39 @@ class WishlistServiceTest extends TestContainersConfig {
         assertThat(result.getName()).isEqualTo(reqDto.wishlistName());
     }
 
+    @Test
+    @DisplayName("특정 위시리스트를 삭제한다.")
+    void removeWishlist() {
+        //given
+        Wishlist wishlist = savedAndGetWishlist();
+        Accommodation acc1 = saveAndGetAccommodation();
+        Accommodation acc2 = saveAndGetAccommodation();
+
+        WishlistAccommodation wa1 = saveAndGetWishlistAccommodation(wishlist, acc1);
+        WishlistAccommodation wa2 = saveAndGetWishlistAccommodation(wishlist, acc2);
+
+        //when
+        wishlistService.removeWishlist(wishlist.getId(), guest.getId());
+        em.flush();
+        em.clear();
+
+        //then
+        WishlistAccommodation waResult1 = wishlistAccommodationRepository.findById(wa1.getId()).orElse(null);
+        WishlistAccommodation waResult2 = wishlistAccommodationRepository.findById(wa2.getId()).orElse(null);
+        assertThat(waResult1).isNull();
+        assertThat(waResult2).isNull();
+
+        Wishlist result = wishlistRepository.findById(wishlist.getId()).orElse(null);
+        assertThat(result).isNull();
+    }
+
+    private WishlistAccommodation saveAndGetWishlistAccommodation(Wishlist wishlist, Accommodation acc) {
+        return wishlistAccommodationRepository.save(WishlistAccommodation.builder()
+                                                                  .wishlist(wishlist)
+                                                                  .accommodation(acc)
+                                                                  .build());
+    }
+
     private Wishlist savedAndGetWishlist() {
         return wishlistRepository.save(Wishlist.builder()
                                                .guest(guest)
@@ -133,8 +166,8 @@ class WishlistServiceTest extends TestContainersConfig {
     }
 
     private Accommodation saveAndGetAccommodation() {
-        AreaCode areaCode = new AreaCode("test-code", "test-codeName");
-        SigunguCode sigunguCode = new SigunguCode("test-code", "test-codeName", areaCode);
+        AreaCode areaCode = new AreaCode(UUID.randomUUID().toString(), "test-codeName");
+        SigunguCode sigunguCode = new SigunguCode(UUID.randomUUID().toString(), "test-codeName", areaCode);
         em.persist(areaCode);
         em.persist(sigunguCode);
 
@@ -143,7 +176,7 @@ class WishlistServiceTest extends TestContainersConfig {
                                                    .mapY(1.0)
                                                    .title("test-title")
                                                    .address("test-address")
-                                                   .contentId("test-contentId")
+                                                   .contentId(UUID.randomUUID().toString())
                                                    .modifiedTime(LocalDateTime.now())
                                                    .sigunguCode(sigunguCode)
                                                    .build();
