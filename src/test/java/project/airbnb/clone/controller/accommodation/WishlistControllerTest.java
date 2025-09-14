@@ -8,6 +8,7 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import project.airbnb.clone.WithMockGuest;
 import project.airbnb.clone.controller.RestDocsTestSupport;
+import project.airbnb.clone.dto.wishlist.AddAccToWishlistReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateResDto;
 import project.airbnb.clone.service.accommodation.WishlistService;
@@ -23,6 +24,8 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static project.airbnb.clone.config.RestDocsConfig.field;
@@ -71,6 +74,28 @@ class WishlistControllerTest extends RestDocsTestSupport {
                                fieldWithPath("wishlistId").description("생성된 위시리스트 아이디"),
                                fieldWithPath("wishlistName").description("생성된 위시리스트 이름")
                        )
+               ));
+    }
+
+    @Test
+    @DisplayName("위시리스트에 숙소 추가")
+    @WithMockGuest
+    void addAccommodation() throws Exception {
+        //given
+        AddAccToWishlistReqDto requestDto = new AddAccToWishlistReqDto(1L);
+
+        //when
+        //then
+        mockMvc.perform(post("/api/wishlists/{wishlistId}/accommodations", 1L)
+                       .header(AUTHORIZATION,"Bearer {access-token}")
+                       .contentType(MediaType.APPLICATION_JSON_VALUE)
+                       .content(creatJson(requestDto))
+               )
+               .andExpect(status().isCreated())
+               .andDo(restDocs.document(
+                       requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}")),
+                       pathParameters(parameterWithName("wishlistId").description("숙소를 저장할 위시리스트 ID")),
+                       requestFields(fieldWithPath("accommodationId").description("저장할 숙소 ID"))
                ));
     }
 }

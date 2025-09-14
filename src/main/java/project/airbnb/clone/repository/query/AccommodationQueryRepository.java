@@ -261,6 +261,7 @@ public class AccommodationQueryRepository {
                              .where(rs.accommodation.id.eq(accId));
     }
 
+    //TODO : Like 제거 후 Wishlist로 조회
     private BooleanExpression isLikedSubquery(Long guestId) {
         return (guestId != null)
                 ? JPAExpressions.selectOne()
