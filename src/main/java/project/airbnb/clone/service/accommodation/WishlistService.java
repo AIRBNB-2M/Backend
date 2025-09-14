@@ -53,6 +53,14 @@ public class WishlistService {
                                                                   .build());
     }
 
+    @Transactional
+    public void removeAccommodationFromWishlist(Long wishlistId, Long accommodationId, Long guestId) {
+        Wishlist wishlist = getWishlistByIdAndGuestId(wishlistId, guestId);
+        Accommodation accommodation = getAccommodationById(accommodationId);
+
+        wishlistAccommodationRepository.deleteByWishlistAndAccommodation(wishlist, accommodation);
+    }
+
     private Wishlist getWishlistByIdAndGuestId(Long wishlistId, Long guestId) {
         return wishlistRepository.findByIdAndGuestId(wishlistId, guestId).orElseThrow(
                 () -> new EntityNotFoundException("Cannot be found wishlist for wishlistId: " + wishlistId + ", guestId: " + guestId));

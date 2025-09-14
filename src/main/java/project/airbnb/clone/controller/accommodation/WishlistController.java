@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,5 +36,13 @@ public class WishlistController {
                                               @CurrentGuestId Long guestId) {
         wishlistService.addAccommodationToWishlist(wishlistId, reqDto, guestId);
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/{wishlistId}/accommodations/{accommodationId}")
+    public ResponseEntity<?> removeAccommodation(@PathVariable("wishlistId") Long wishlistId,
+                                                 @PathVariable("accommodationId") Long accommodationId,
+                                                 @CurrentGuestId Long guestId) {
+        wishlistService.removeAccommodationFromWishlist(wishlistId, accommodationId, guestId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
