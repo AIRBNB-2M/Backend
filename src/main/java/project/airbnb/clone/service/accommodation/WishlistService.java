@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.airbnb.clone.dto.wishlist.AddAccToWishlistReqDto;
+import project.airbnb.clone.dto.wishlist.MemoUpdateReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateResDto;
 import project.airbnb.clone.dto.wishlist.WishlistDetailResDto;
@@ -83,6 +84,13 @@ public class WishlistService {
         Wishlist wishlist = getWishlistByIdAndGuestId(wishlistId, guestId);
         wishlistAccommodationRepository.deleteByWishlist(wishlist);
         wishlistRepository.delete(wishlist);
+    }
+
+    @Transactional
+    public void updateMemo(Long wishlistId, Long accommodationId, Long guestId, MemoUpdateReqDto reqDto) {
+        WishlistAccommodation wishlistAccommodation = wishlistAccommodationRepository.findByAllIds(wishlistId, accommodationId, guestId)
+                                                                                     .orElseThrow(() -> new EntityNotFoundException("Cannot be found wishlistAccommodation for wishlistId: " + wishlistId + ", accommodationId: " + accommodationId + ", guestId: " + guestId));
+        wishlistAccommodation.updateMemo(reqDto.memo());
     }
 
     public List<WishlistDetailResDto> getAccommodationsFromWishlist(Long wishlistId, Long guestId) {

@@ -38,4 +38,11 @@ public class WishlistAccommodation extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "accommodation_id", nullable = false)
     private Accommodation accommodation;
+
+    @Column(name = "memo", length = 250)
+    private String memo;
+
+    public void updateMemo(String newMemo) {
+        this.memo = newMemo;
+    }
 }

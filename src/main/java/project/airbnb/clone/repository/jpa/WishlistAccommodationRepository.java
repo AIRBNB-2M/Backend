@@ -8,6 +8,8 @@ import project.airbnb.clone.entity.Accommodation;
 import project.airbnb.clone.entity.Wishlist;
 import project.airbnb.clone.entity.WishlistAccommodation;
 
+import java.util.Optional;
+
 public interface WishlistAccommodationRepository extends JpaRepository<WishlistAccommodation, Long> {
 
     @Modifying(clearAutomatically = true)
@@ -16,4 +18,16 @@ public interface WishlistAccommodationRepository extends JpaRepository<WishlistA
     @Modifying(clearAutomatically = true)
     @Query("DELETE FROM WishlistAccommodation wa WHERE wa.wishlist = :wishlist")
     void deleteByWishlist(@Param("wishlist") Wishlist wishlist);
+
+    @Query("""
+                SELECT wa
+                FROM WishlistAccommodation wa
+                JOIN wa.wishlist w
+                WHERE wa.accommodation.id = :accommodationId
+                AND w.id = :wishlistId
+                AND w.guest.id = :guestId
+            """)
+    Optional<WishlistAccommodation> findByAllIds(@Param("wishlistId") Long wishlistId,
+                                                 @Param("accommodationId") Long accommodationId,
+                                                 @Param("guestId") Long guestId);
 }
