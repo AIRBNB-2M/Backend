@@ -9,6 +9,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import project.airbnb.clone.WithMockGuest;
 import project.airbnb.clone.controller.RestDocsTestSupport;
 import project.airbnb.clone.dto.wishlist.AddAccToWishlistReqDto;
+import project.airbnb.clone.dto.wishlist.MemoUpdateReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateResDto;
 import project.airbnb.clone.dto.wishlist.WishlistDetailResDto;
@@ -207,6 +208,33 @@ class WishlistControllerTest extends RestDocsTestSupport {
                                fieldWithPath("[].imageUrls").attributes(field("path", "imageUrls")).description("숙소 전체 이미지 목록"),
                                fieldWithPath("[].memo").attributes(field("path", "memo")).optional().description("작성한 메모 내용")
                        )
+               ));
+    }
+
+    @Test
+    @DisplayName("위시리스트 내에 있는 숙소에 메모 수정(저장)")
+    @WithMockGuest
+    void updateMemo() throws Exception {
+        //given
+        MemoUpdateReqDto requestDto = new MemoUpdateReqDto("new-memo");
+
+        //when
+        //then
+        mockMvc.perform(put("/api/wishlists/{wishlistId}/accommodations/{accommodationId}", 1L, 1L)
+                       .header(AUTHORIZATION,"Bearer {access-token}")
+                       .contentType(MediaType.APPLICATION_JSON_VALUE)
+                       .content(creatJson(requestDto))
+               )
+               .andExpect(status().isNoContent())
+               .andDo(restDocs.document(
+                       requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}")),
+                       pathParameters(
+                               parameterWithName("wishlistId").description("메모를 수정(저장)할 숙소가 있는 위시리스트 ID"),
+                               parameterWithName("accommodationId").description("메모 수정(저장) 대상 숙소 ID")
+                       ),
+                       requestFields(fieldWithPath("memo")
+                               .attributes(field("constraints", "1 ~ 250자 제한"))
+                               .description("수정(저장)할 메모 내용"))
                ));
     }
 }

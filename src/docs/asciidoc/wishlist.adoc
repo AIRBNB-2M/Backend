@@ -21,3 +21,7 @@ operation::wishlist-controller-test/remove-wishlist[snippets='http-request,path-
 [[Wishlist-API-wishlist]]
 === 위시리스트 조회
 operation::wishlist-controller-test/get-accommodations-from-wishlist[snippets='http-request,path-parameters,request-headers,http-response,response-body,response-fields']
+
+[[Wishlist-API-update-memo]]
+=== 위시리스트 숙소의 메모 수정
+operation::wishlist-controller-test/update-memo[snippets='http-request,path-parameters,request-headers,request-body,request-fields,http-response']

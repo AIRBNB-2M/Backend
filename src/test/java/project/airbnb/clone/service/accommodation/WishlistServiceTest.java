@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import project.airbnb.clone.TestContainersConfig;
 import project.airbnb.clone.dto.wishlist.AddAccToWishlistReqDto;
+import project.airbnb.clone.dto.wishlist.MemoUpdateReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateResDto;
 import project.airbnb.clone.dto.wishlist.WishlistDetailResDto;
@@ -195,6 +196,25 @@ class WishlistServiceTest extends TestContainersConfig {
         assertThat(dto2.mapX()).isEqualTo(acc2.getMapX());
         assertThat(dto2.mapY()).isEqualTo(acc2.getMapY());
         assertThat(dto2.imageUrls()).hasSize(1).containsExactlyInAnyOrder("https://image3.com");
+    }
+
+    @Test
+    @DisplayName("위시리스트 내에 있는 숙소에 메모를 수정(저장)한다.")
+    void updateMemo() {
+        //given
+        Wishlist wishlist = savedAndGetWishlist();
+        Accommodation acc = saveAndGetAccommodation();
+        saveAndGetWishlistAccommodation(wishlist, acc);
+        MemoUpdateReqDto reqDto = new MemoUpdateReqDto("new-memo");
+
+        //when
+        wishlistService.updateMemo(wishlist.getId(), acc.getId(), guest.getId(), reqDto);
+        em.flush();
+        em.clear();
+
+        //then
+        WishlistAccommodation result = wishlistAccommodationRepository.findByAllIds(wishlist.getId(), acc.getId(), guest.getId()).get();
+        assertThat(result.getMemo()).isEqualTo(reqDto.memo());
     }
 
     private void saveAccommodationImage(Accommodation acc, String url) {
