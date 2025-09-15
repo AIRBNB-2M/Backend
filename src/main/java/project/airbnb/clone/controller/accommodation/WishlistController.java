@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -15,8 +16,11 @@ import project.airbnb.clone.common.annotations.CurrentGuestId;
 import project.airbnb.clone.dto.wishlist.AddAccToWishlistReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateResDto;
+import project.airbnb.clone.dto.wishlist.WishlistDetailResDto;
 import project.airbnb.clone.dto.wishlist.WishlistUpdateReqDto;
 import project.airbnb.clone.service.accommodation.WishlistService;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -59,8 +63,14 @@ public class WishlistController {
     @DeleteMapping("/{wishlistId}")
     public ResponseEntity<?> removeWishlist(@PathVariable("wishlistId") Long wishlistId,
                                             @CurrentGuestId Long guestId) {
-
         wishlistService.removeWishlist(wishlistId, guestId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/{wishlistId}")
+    public ResponseEntity<List<WishlistDetailResDto>> getAccommodationsFromWishlist(@PathVariable("wishlistId") Long wishlistId,
+                                                                                    @CurrentGuestId Long guestId) {
+        List<WishlistDetailResDto> result = wishlistService.getAccommodationsFromWishlist(wishlistId, guestId);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }
