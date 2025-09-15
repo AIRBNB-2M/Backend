@@ -11,9 +11,12 @@ import project.airbnb.clone.controller.RestDocsTestSupport;
 import project.airbnb.clone.dto.wishlist.AddAccToWishlistReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateResDto;
+import project.airbnb.clone.dto.wishlist.WishlistDetailResDto;
 import project.airbnb.clone.dto.wishlist.WishlistUpdateReqDto;
 import project.airbnb.clone.service.accommodation.WishlistService;
 import project.airbnb.clone.service.jwt.TokenService;
+
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -28,6 +31,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -162,6 +166,47 @@ class WishlistControllerTest extends RestDocsTestSupport {
                .andDo(restDocs.document(
                        requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}")),
                        pathParameters(parameterWithName("wishlistId").description("제거할 위시리스트 ID"))
+               ));
+    }
+
+    @Test
+    @DisplayName("위시리스트 조회")
+    @WithMockGuest
+    void getAccommodationsFromWishlist() throws Exception {
+        //given
+        List<WishlistDetailResDto> response = List.of(
+                new WishlistDetailResDto(1L, "호텔A", "호텔A-설명", 35.3, 42.4, 4.5,
+                        List.of("https://example.com/a.jpg", "https://example.com/b.jpg"), "호텔A-메모"),
+                new WishlistDetailResDto(2L, "호텔B", "호텔B-설명", 25.3, 47.8, 4.8,
+                        List.of("https://example.com/c.jpg", "https://example.com/d.jpg"), "호텔B-메모")
+        );
+
+        given(wishlistService.getAccommodationsFromWishlist(anyLong(), anyLong())).willReturn(response);
+
+        //when
+        //then
+        mockMvc.perform(get("/api/wishlists/{wishlistId}", 1L)
+                       .header(AUTHORIZATION, "Bearer {access-token}")
+               )
+               .andExpectAll(
+                       status().isOk(),
+                       jsonPath("$.length()").value(response.size()),
+                       jsonPath("$[0].accommodationId").value(response.get(0).accommodationId()),
+                       jsonPath("$[1].accommodationId").value(response.get(1).accommodationId())
+               )
+               .andDo(restDocs.document(
+                       requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}")),
+                       pathParameters(parameterWithName("wishlistId").description("조회할 위시리스트 ID")),
+                       responseFields(
+                               fieldWithPath("[].accommodationId").attributes(field("path", "accommodationId")).description("숙소 ID"),
+                               fieldWithPath("[].title").attributes(field("path", "title")).description("숙소 제목"),
+                               fieldWithPath("[].description").attributes(field("path", "description")).description("숙소 설명"),
+                               fieldWithPath("[].mapX").attributes(field("path", "mapX")).description("숙소 위치 X 좌표"),
+                               fieldWithPath("[].mapY").attributes(field("path", "mapY")).description("숙소 위치 Y 좌표"),
+                               fieldWithPath("[].avgRate").attributes(field("path", "avgRate")).description("숙소 평균 평점"),
+                               fieldWithPath("[].imageUrls").attributes(field("path", "imageUrls")).description("숙소 전체 이미지 목록"),
+                               fieldWithPath("[].memo").attributes(field("path", "memo")).optional().description("작성한 메모 내용")
+                       )
                ));
     }
 }

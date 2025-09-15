@@ -9,8 +9,10 @@ import project.airbnb.clone.TestContainersConfig;
 import project.airbnb.clone.dto.wishlist.AddAccToWishlistReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateResDto;
+import project.airbnb.clone.dto.wishlist.WishlistDetailResDto;
 import project.airbnb.clone.dto.wishlist.WishlistUpdateReqDto;
 import project.airbnb.clone.entity.Accommodation;
+import project.airbnb.clone.entity.AccommodationImage;
 import project.airbnb.clone.entity.AreaCode;
 import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.entity.SigunguCode;
@@ -149,6 +151,58 @@ class WishlistServiceTest extends TestContainersConfig {
 
         Wishlist result = wishlistRepository.findById(wishlist.getId()).orElse(null);
         assertThat(result).isNull();
+    }
+
+    @Test
+    @DisplayName("특정 위시리스트에 있는 숙소 목록을 조회한다.")
+    void getAccommodationsFromWishlist() {
+        //given
+        Wishlist wishlist = savedAndGetWishlist();
+        Accommodation acc1 = saveAndGetAccommodation();
+        Accommodation acc2 = saveAndGetAccommodation();
+
+        saveAccommodationImage(acc1, "https://image1.com");
+        saveAccommodationImage(acc1, "https://image2.com");
+        saveAccommodationImage(acc2, "https://image3.com");
+
+        saveAndGetWishlistAccommodation(wishlist, acc1);
+        saveAndGetWishlistAccommodation(wishlist, acc2);
+
+        //when
+        List<WishlistDetailResDto> result = wishlistService.getAccommodationsFromWishlist(wishlist.getId(), guest.getId());
+        em.flush();
+        em.clear();
+
+        //then
+        assertThat(result).hasSize(2);
+
+        WishlistDetailResDto dto1 = result.stream()
+                                          .filter(dto -> dto.accommodationId().equals(acc1.getId()))
+                                          .findFirst()
+                                          .orElseThrow();
+        assertThat(dto1.accommodationId()).isEqualTo(acc1.getId());
+        assertThat(dto1.title()).isEqualTo(acc1.getTitle());
+        assertThat(dto1.mapX()).isEqualTo(acc1.getMapX());
+        assertThat(dto1.mapY()).isEqualTo(acc1.getMapY());
+        assertThat(dto1.imageUrls()).hasSize(2).containsExactlyInAnyOrder("https://image1.com", "https://image2.com");
+
+        WishlistDetailResDto dto2 = result.stream()
+                                          .filter(dto -> dto.accommodationId().equals(acc2.getId()))
+                                          .findFirst()
+                                          .orElseThrow();
+        assertThat(dto2.accommodationId()).isEqualTo(acc2.getId());
+        assertThat(dto2.title()).isEqualTo(acc2.getTitle());
+        assertThat(dto2.mapX()).isEqualTo(acc2.getMapX());
+        assertThat(dto2.mapY()).isEqualTo(acc2.getMapY());
+        assertThat(dto2.imageUrls()).hasSize(1).containsExactlyInAnyOrder("https://image3.com");
+    }
+
+    private void saveAccommodationImage(Accommodation acc, String url) {
+        em.persist(AccommodationImage.builder()
+                                     .accommodation(acc)
+                                     .thumbnail(false)
+                                     .imageUrl(url)
+                                     .build());
     }
 
     private WishlistAccommodation saveAndGetWishlistAccommodation(Wishlist wishlist, Accommodation acc) {
