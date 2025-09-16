@@ -9,5 +9,6 @@ public record FilteredAccListResDto(
         double avgRate,
         int avgCount,
         List<String> imageUrls,
-        boolean likedMe) {
+        boolean isInWishlist,
+        Long wishlistId) {
 }

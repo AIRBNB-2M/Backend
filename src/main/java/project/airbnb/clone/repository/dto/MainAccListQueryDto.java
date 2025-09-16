@@ -6,7 +6,8 @@ public record MainAccListQueryDto(
         int price,
         double avgRate,
         String thumbnailUrl,
-        boolean likedMe,
+        boolean isInWishlist,
+        Long wishlistId,
         long reservationCount,
         String areaName,
         String areaCode) {

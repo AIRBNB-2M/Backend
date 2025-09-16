@@ -2,7 +2,6 @@ package project.airbnb.clone.repository.query;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -27,6 +26,7 @@ import project.airbnb.clone.entity.QAreaCode;
 import project.airbnb.clone.entity.QGuest;
 import project.airbnb.clone.entity.QReservation;
 import project.airbnb.clone.entity.QReview;
+import project.airbnb.clone.entity.QWishlist;
 import project.airbnb.clone.entity.QWishlistAccommodation;
 import project.airbnb.clone.repository.dto.DetailAccommodationQueryDto;
 import project.airbnb.clone.repository.dto.ImageDataQueryDto;
@@ -52,6 +52,7 @@ import static project.airbnb.clone.entity.QGuest.guest;
 import static project.airbnb.clone.entity.QReservation.reservation;
 import static project.airbnb.clone.entity.QReview.review;
 import static project.airbnb.clone.entity.QSigunguCode.sigunguCode;
+import static project.airbnb.clone.entity.QWishlist.wishlist;
 import static project.airbnb.clone.entity.QWishlistAccommodation.wishlistAccommodation;
 
 @Repository
@@ -68,6 +69,7 @@ public class AccommodationQueryRepository {
         QReview rv = review;
         QAreaCode ac = areaCode;
         QWishlistAccommodation wa = wishlistAccommodation;
+        QWishlist w = wishlist;
 
         return queryFactory
                 .select(constructor(MainAccListQueryDto.class,
@@ -76,7 +78,8 @@ public class AccommodationQueryRepository {
                         ap.price,
                         rv.rating.avg().coalesce(0.0),
                         ai.imageUrl,
-                        isInWishlist(wa),
+                        wa.isNotNull(),
+                        wa.wishlist.id,
                         rs.count().coalesce(0L),
                         ac.codeName,
                         ac.code
@@ -88,8 +91,8 @@ public class AccommodationQueryRepository {
                                              .and(ap.season.eq(season).and(ap.dayType.eq(dayType))))
                 .join(acc.sigunguCode, sigunguCode)
                 .join(sigunguCode.areaCode, ac)
-                .leftJoin(wa).on(wa.accommodation.eq(acc)
-                                                 .and(guestId != null ? wa.wishlist.guest.id.eq(guestId) : Expressions.FALSE))
+                .leftJoin(wa).on(guestId != null ? wa.accommodation.eq(acc) : Expressions.FALSE)
+                .leftJoin(wa.wishlist, w).on(guestId != null ? w.guest.id.eq(guestId) : Expressions.FALSE)
                 .leftJoin(rs).on(rs.accommodation.eq(acc))
                 .leftJoin(rv).on(rv.reservation.eq(rs))
                 .groupBy(acc.id, acc.title, ap.price, ai.imageUrl, wa, ac.codeName, ac.code)
@@ -107,20 +110,22 @@ public class AccommodationQueryRepository {
         QReview rv = review;
         QAreaCode ac = areaCode;
         QWishlistAccommodation wa = wishlistAccommodation;
+        QWishlist w = wishlist;
 
         //이미지 목록 제외 필드 조회
         List<Tuple> tuples = queryFactory
                 .select(acc.id, acc.title, ap.price,
                         rv.rating.avg().coalesce(0.0),
                         rv.count().intValue().coalesce(0),
-                        isInWishlist(wa)
+                        wa.isNotNull(),
+                        w.id
                 )
                 .from(acc)
                 .leftJoin(ai).on(ai.accommodation.eq(acc))
                 .leftJoin(rs).on(rs.accommodation.eq(acc))
                 .leftJoin(rv).on(rv.reservation.eq(rs))
-                .leftJoin(wa).on(wa.accommodation.eq(acc)
-                                                 .and(guestId != null ? wa.wishlist.guest.id.eq(guestId) : Expressions.FALSE))
+                .leftJoin(wa).on(guestId != null ? wa.accommodation.eq(acc) : Expressions.FALSE)
+                .leftJoin(wa.wishlist, w).on(guestId != null ? w.guest.id.eq(guestId) : Expressions.FALSE)
                 .join(ap).on(ap.accommodation.eq(acc)
                                              .and(ap.season.eq(season).and(ap.dayType.eq(dayType))))
                 .join(acc.sigunguCode, sigunguCode)
@@ -170,7 +175,8 @@ public class AccommodationQueryRepository {
                             t.get(rv.rating.avg().coalesce(0.0)),
                             t.get(rv.count().intValue().coalesce(0)),
                             imagesMap.getOrDefault(accommodationId, List.of()),
-                            t.get(5, Boolean.class)
+                            t.get(wa.isNotNull()),
+                            t.get(w.id)
                     );
                 })
                 .toList();
@@ -197,20 +203,22 @@ public class AccommodationQueryRepository {
         QAccommodation acc = accommodation;
         QAccommodationPrice ap = accommodationPrice;
         QWishlistAccommodation wa = wishlistAccommodation;
+        QWishlist w = wishlist;
 
         return Optional.ofNullable(
                 queryFactory.select(constructor(DetailAccommodationQueryDto.class,
                                     acc.id, acc.title, acc.maxPeople, acc.address,
                                     acc.mapX, acc.mapY, acc.checkIn, acc.checkOut, acc.description,
                                     acc.number, acc.refundRegulation, ap.price,
-                                    isInWishlist(wa),
+                                    wa.isNotNull(),
+                                    w.id,
                                     avgRateSubquery(accId)
                             ))
                             .from(acc)
                             .join(ap).on(ap.accommodation.eq(acc)
                                                          .and(ap.season.eq(season).and(ap.dayType.eq(dayType))))
-                            .leftJoin(wa).on(wa.accommodation.eq(acc)
-                                                             .and(guestId != null ? wa.wishlist.guest.id.eq(guestId) : Expressions.FALSE))
+                            .leftJoin(wa).on(guestId != null ? wa.accommodation.eq(acc) : Expressions.FALSE)
+                            .leftJoin(wa.wishlist, w).on(guestId != null ? w.guest.id.eq(guestId) : Expressions.FALSE)
                             .where(acc.id.eq(accId))
                             .fetchOne()
         );
@@ -269,12 +277,6 @@ public class AccommodationQueryRepository {
                              .from(rv)
                              .join(rv.reservation, rs)
                              .where(rs.accommodation.id.eq(accId));
-    }
-
-    private BooleanExpression isInWishlist(QWishlistAccommodation wa) {
-        return new CaseBuilder().when(wa.isNotNull())
-                                .then(true)
-                                .otherwise(false);
     }
 
     private BooleanExpression eqAreaCode(String code) {

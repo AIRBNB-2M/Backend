@@ -19,17 +19,16 @@ public record DetailAccommodationResDto(
         String refundRegulation,
 
         int price,
-        boolean likedMe,
+        boolean isInWishlist,
+        Long wishlistId,
         double avgRate,
         DetailImageDto images,
         List<String> amenities,
-        List<DetailReviewDto> reviews
-) {
+        List<DetailReviewDto> reviews) {
 
     public record DetailImageDto(
             String thumbnail,
-            List<String> others
-    ) {
+            List<String> others) {
     }
 
     public record DetailReviewDto(
@@ -39,8 +38,7 @@ public record DetailAccommodationResDto(
             LocalDateTime guestCreatedDate,
             LocalDateTime reviewCreatedDate,
             double rating,
-            String content
-    ) {
+            String content) {
     }
 
     public static DetailAccommodationResDto from(DetailAccommodationQueryDto queryDto,
@@ -60,7 +58,8 @@ public record DetailAccommodationResDto(
                 queryDto.number(),
                 queryDto.refundRegulation(),
                 queryDto.price(),
-                queryDto.likedMe(),
+                queryDto.isInWishlist(),
+                queryDto.wishlistId(),
                 queryDto.avgRate(),
                 imageDto,
                 amenities,
