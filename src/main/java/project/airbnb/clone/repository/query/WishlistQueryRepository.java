@@ -97,19 +97,22 @@ public class WishlistQueryRepository {
         QWishlistAccommodation waSub = new QWishlistAccommodation("waSub");
         JPQLQuery<Long> recentAccIdSubquery = JPAExpressions.select(waSub.accommodation.id)
                                                             .from(waSub)
-                                                            .where(waSub.wishlist.id.eq(w.id))
-                                                            .orderBy(waSub.createdAt.desc())
-                                                            .limit(1);
+                                                            .where(waSub.wishlist.eq(w)
+                                                                                 .and(waSub.id.eq(
+                                                                                         JPAExpressions.select(waSub.id.max())
+                                                                                                       .from(waSub)
+                                                                                                       .where(waSub.wishlist.eq(w))
+                                                                                 )));
 
         return queryFactory.select(constructor(WishlistsResDto.class,
                                    w.id,
                                    w.name,
                                    ai.imageUrl,
-                                   wa.accommodation.count().intValue()
+                                   wa.accommodation.count().intValue().coalesce(0)
                            ))
                            .from(w)
                            .join(w.guest, g)
-                           .join(wa).on(wa.wishlist.eq(w))
+                           .leftJoin(wa).on(wa.wishlist.eq(w))
                            .leftJoin(acc).on(acc.id.eq(recentAccIdSubquery))
                            .leftJoin(ai).on(ai.accommodation.eq(acc).and(ai.thumbnail.isTrue()))
                            .where(g.id.eq(guestId))
