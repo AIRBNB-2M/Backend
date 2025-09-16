@@ -1,6 +1,5 @@
 package project.airbnb.clone.repository.query;
 
-import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
@@ -28,7 +27,9 @@ import project.airbnb.clone.entity.QReservation;
 import project.airbnb.clone.entity.QReview;
 import project.airbnb.clone.entity.QWishlist;
 import project.airbnb.clone.entity.QWishlistAccommodation;
+import project.airbnb.clone.repository.dto.AccAllImagesQueryDto;
 import project.airbnb.clone.repository.dto.DetailAccommodationQueryDto;
+import project.airbnb.clone.repository.dto.FilteredAccListQueryDto;
 import project.airbnb.clone.repository.dto.ImageDataQueryDto;
 import project.airbnb.clone.repository.dto.MainAccListQueryDto;
 
@@ -113,13 +114,16 @@ public class AccommodationQueryRepository {
         QWishlist w = wishlist;
 
         //이미지 목록 제외 필드 조회
-        List<Tuple> tuples = queryFactory
-                .select(acc.id, acc.title, ap.price,
+        List<FilteredAccListQueryDto> queryDtos = queryFactory
+                .select(constructor(FilteredAccListQueryDto.class,
+                        acc.id,
+                        acc.title,
+                        ap.price,
                         rv.rating.avg().coalesce(0.0),
                         rv.count().intValue().coalesce(0),
                         wa.isNotNull(),
                         w.id
-                )
+                ))
                 .from(acc)
                 .leftJoin(ai).on(ai.accommodation.eq(acc))
                 .leftJoin(rs).on(rs.accommodation.eq(acc))
@@ -136,26 +140,27 @@ public class AccommodationQueryRepository {
                         loePrice(searchDto.priceLoe()),
                         hasAllAmenities(searchDto.amenities())
                 )
-                .groupBy(acc.id, acc.title, ap.price, wa)
+                .groupBy(acc.id, acc.title, ap.price, wa, w)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
         //in절로 조회된 숙소의 이미지 목록 조회(전체)
-        List<Long> accIds = tuples.stream().map(t -> t.get(acc.id)).toList();
-        List<Tuple> imageTuples = queryFactory.select(ai.accommodation.id, ai.imageUrl)
-                                              .from(ai)
-                                              .where(ai.accommodation.id.in(accIds))
-                                              .orderBy(ai.id.desc())
-                                              .fetch();
+        List<Long> accIds = queryDtos.stream().map(FilteredAccListQueryDto::accommodationId).toList();
+        List<AccAllImagesQueryDto> imagesQueryDtos = queryFactory.select(constructor(AccAllImagesQueryDto.class,
+                                                                         ai.accommodation.id, ai.imageUrl))
+                                                                 .from(ai)
+                                                                 .where(ai.accommodation.id.in(accIds))
+                                                                 .orderBy(ai.id.desc())
+                                                                 .fetch();
 
         //직접 숙소당 최대 10개 이미지 목록 매핑
-        Map<Long, List<String>> imagesMap = imageTuples
+        Map<Long, List<String>> imagesMap = imagesQueryDtos
                 .stream()
                 .collect(groupingBy(
-                        t -> t.get(ai.accommodation.id),
+                        AccAllImagesQueryDto::accommodationId,
                         mapping(
-                                t -> t.get(ai.imageUrl),
+                                AccAllImagesQueryDto::imageUrl,
                                 collectingAndThen(
                                         toList(),
                                         list -> list.stream().limit(10).toList()
@@ -164,22 +169,9 @@ public class AccommodationQueryRepository {
                 ));
 
         //응답 DTO 매핑
-        List<FilteredAccListResDto> content = tuples
-                .stream()
-                .map(t -> {
-                    Long accommodationId = t.get(acc.id);
-                    return new FilteredAccListResDto(
-                            accommodationId,
-                            t.get(acc.title),
-                            t.get(ap.price),
-                            t.get(rv.rating.avg().coalesce(0.0)),
-                            t.get(rv.count().intValue().coalesce(0)),
-                            imagesMap.getOrDefault(accommodationId, List.of()),
-                            t.get(wa.isNotNull()),
-                            t.get(w.id)
-                    );
-                })
-                .toList();
+        List<FilteredAccListResDto> content = queryDtos.stream()
+                                                       .map(dto -> FilteredAccListResDto.from(dto, imagesMap.getOrDefault(dto.accommodationId(), List.of())))
+                                                       .toList();
 
         //카운트쿼리
         JPAQuery<Long> countQuery = queryFactory

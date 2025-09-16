@@ -196,8 +196,8 @@ class AccommodationControllerTest extends RestDocsTestSupport {
                                fieldWithPath("contents[].avgRate")
                                        .attributes(field("path", "avgRate"))
                                        .description("평균 평점"),
-                               fieldWithPath("contents[].avgCount")
-                                       .attributes(field("path", "avgCount"))
+                               fieldWithPath("contents[].reviewCount")
+                                       .attributes(field("path", "reviewCount"))
                                        .description("리뷰 개수"),
                                fieldWithPath("contents[].imageUrls")
                                        .attributes(field("path", "imageUrls"))
