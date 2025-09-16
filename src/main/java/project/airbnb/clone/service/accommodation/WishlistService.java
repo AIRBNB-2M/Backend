@@ -10,6 +10,7 @@ import project.airbnb.clone.dto.wishlist.WishlistCreateReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateResDto;
 import project.airbnb.clone.dto.wishlist.WishlistDetailResDto;
 import project.airbnb.clone.dto.wishlist.WishlistUpdateReqDto;
+import project.airbnb.clone.dto.wishlist.WishlistsResDto;
 import project.airbnb.clone.entity.Accommodation;
 import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.entity.Wishlist;
@@ -109,6 +110,10 @@ public class WishlistService {
         return detailQueryDtos.stream()
                               .map(dto -> WishlistDetailResDto.from(dto, imagesMap.getOrDefault(dto.accommodationId(), List.of())))
                               .toList();
+    }
+
+    public List<WishlistsResDto> getAllWishlists(Long guestId) {
+        return wishlistQueryRepository.getAllWishlists(guestId);
     }
 
     private Wishlist getWishlistByIdAndGuestId(Long wishlistId, Long guestId) {

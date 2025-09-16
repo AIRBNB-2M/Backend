@@ -19,6 +19,7 @@ import project.airbnb.clone.dto.wishlist.WishlistCreateReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateResDto;
 import project.airbnb.clone.dto.wishlist.WishlistDetailResDto;
 import project.airbnb.clone.dto.wishlist.WishlistUpdateReqDto;
+import project.airbnb.clone.dto.wishlist.WishlistsResDto;
 import project.airbnb.clone.service.accommodation.WishlistService;
 
 import java.util.List;
@@ -81,6 +82,12 @@ public class WishlistController {
     public ResponseEntity<List<WishlistDetailResDto>> getAccommodationsFromWishlist(@PathVariable("wishlistId") Long wishlistId,
                                                                                     @CurrentGuestId Long guestId) {
         List<WishlistDetailResDto> result = wishlistService.getAccommodationsFromWishlist(wishlistId, guestId);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<WishlistsResDto>> getAllWishlists(@CurrentGuestId Long guestId) {
+        List<WishlistsResDto> result = wishlistService.getAllWishlists(guestId);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }
