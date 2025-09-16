@@ -12,6 +12,7 @@ import project.airbnb.clone.dto.wishlist.WishlistCreateReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateResDto;
 import project.airbnb.clone.dto.wishlist.WishlistDetailResDto;
 import project.airbnb.clone.dto.wishlist.WishlistUpdateReqDto;
+import project.airbnb.clone.dto.wishlist.WishlistsResDto;
 import project.airbnb.clone.entity.Accommodation;
 import project.airbnb.clone.entity.AccommodationImage;
 import project.airbnb.clone.entity.AreaCode;
@@ -162,9 +163,9 @@ class WishlistServiceTest extends TestContainersConfig {
         Accommodation acc1 = saveAndGetAccommodation();
         Accommodation acc2 = saveAndGetAccommodation();
 
-        saveAccommodationImage(acc1, "https://image1.com");
-        saveAccommodationImage(acc1, "https://image2.com");
-        saveAccommodationImage(acc2, "https://image3.com");
+        saveAccommodationImage(acc1, "https://image1.com", false);
+        saveAccommodationImage(acc1, "https://image2.com", false);
+        saveAccommodationImage(acc2, "https://image3.com", false);
 
         saveAndGetWishlistAccommodation(wishlist, acc1);
         saveAndGetWishlistAccommodation(wishlist, acc2);
@@ -217,10 +218,46 @@ class WishlistServiceTest extends TestContainersConfig {
         assertThat(result.getMemo()).isEqualTo(reqDto.memo());
     }
 
-    private void saveAccommodationImage(Accommodation acc, String url) {
+    @Test
+    @DisplayName("위시리스트 전체 목록을 조회한다.")
+    void getAllWishlists() {
+        //given
+        Wishlist wishlist1 = savedAndGetWishlist();
+        Wishlist wishlist2 = savedAndGetWishlist();
+
+        Accommodation acc1 = saveAndGetAccommodation();
+        Accommodation acc2 = saveAndGetAccommodation();
+
+        saveAccommodationImage(acc1, "https://image1.com", false);
+        saveAccommodationImage(acc1, "https://image2.com", true);
+        saveAccommodationImage(acc2, "https://image3.com", true);
+
+        saveAndGetWishlistAccommodation(wishlist1, acc1);
+        saveAndGetWishlistAccommodation(wishlist2, acc2);
+
+        //when
+        List<WishlistsResDto> result = wishlistService.getAllWishlists(guest.getId());
+        em.flush();
+        em.clear();
+
+        //then
+        assertThat(result).hasSize(2);
+
+        assertThat(result.get(0).wishlistId()).isEqualTo(wishlist1.getId());
+        assertThat(result.get(0).name()).isEqualTo(wishlist1.getName());
+        assertThat(result.get(0).thumbnailUrl()).isEqualTo("https://image2.com");
+        assertThat(result.get(0).savedAccommodations()).isEqualTo(1);
+
+        assertThat(result.get(1).wishlistId()).isEqualTo(wishlist2.getId());
+        assertThat(result.get(1).name()).isEqualTo(wishlist2.getName());
+        assertThat(result.get(1).thumbnailUrl()).isEqualTo("https://image3.com");
+        assertThat(result.get(1).savedAccommodations()).isEqualTo(1);
+    }
+
+    private void saveAccommodationImage(Accommodation acc, String url, boolean thumbnail) {
         em.persist(AccommodationImage.builder()
                                      .accommodation(acc)
-                                     .thumbnail(false)
+                                     .thumbnail(thumbnail)
                                      .imageUrl(url)
                                      .build());
     }

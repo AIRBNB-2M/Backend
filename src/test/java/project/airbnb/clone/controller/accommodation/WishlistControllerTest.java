@@ -14,6 +14,7 @@ import project.airbnb.clone.dto.wishlist.WishlistCreateReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateResDto;
 import project.airbnb.clone.dto.wishlist.WishlistDetailResDto;
 import project.airbnb.clone.dto.wishlist.WishlistUpdateReqDto;
+import project.airbnb.clone.dto.wishlist.WishlistsResDto;
 import project.airbnb.clone.service.accommodation.WishlistService;
 import project.airbnb.clone.service.jwt.TokenService;
 
@@ -221,7 +222,7 @@ class WishlistControllerTest extends RestDocsTestSupport {
         //when
         //then
         mockMvc.perform(put("/api/wishlists/{wishlistId}/accommodations/{accommodationId}", 1L, 1L)
-                       .header(AUTHORIZATION,"Bearer {access-token}")
+                       .header(AUTHORIZATION, "Bearer {access-token}")
                        .contentType(MediaType.APPLICATION_JSON_VALUE)
                        .content(creatJson(requestDto))
                )
@@ -235,6 +236,48 @@ class WishlistControllerTest extends RestDocsTestSupport {
                        requestFields(fieldWithPath("memo")
                                .attributes(field("constraints", "1 ~ 250자 제한"))
                                .description("수정(저장)할 메모 내용"))
+               ));
+    }
+
+    @Test
+    @DisplayName("위시리스트 목록 조회")
+    @WithMockGuest
+    void getAllWishlists() throws Exception {
+        //given
+        List<WishlistsResDto> response = List.of(
+                new WishlistsResDto(1L, "my-wishlist-1", "https://example.com/a.jpg", 3),
+                new WishlistsResDto(2L, "my-wishlist-2", "https://example.com/b.jpg", 5)
+        );
+
+        given(wishlistService.getAllWishlists(anyLong())).willReturn(response);
+
+        //when
+        //then
+        mockMvc.perform(get("/api/wishlists")
+                       .header(AUTHORIZATION, "Bearer {access-token}")
+               )
+               .andExpectAll(
+                       status().isOk(),
+                       jsonPath("$.length()").value(response.size()),
+
+                       jsonPath("$[0].wishlistId").value(response.get(0).wishlistId()),
+                       jsonPath("$[0].name").value(response.get(0).name()),
+                       jsonPath("$[0].thumbnailUrl").value(response.get(0).thumbnailUrl()),
+                       jsonPath("$[0].savedAccommodations").value(response.get(0).savedAccommodations()),
+
+                       jsonPath("$[1].wishlistId").value(response.get(1).wishlistId()),
+                       jsonPath("$[1].name").value(response.get(1).name()),
+                       jsonPath("$[1].thumbnailUrl").value(response.get(1).thumbnailUrl()),
+                       jsonPath("$[1].savedAccommodations").value(response.get(1).savedAccommodations())
+               )
+               .andDo(restDocs.document(
+                       requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}")),
+                       responseFields(
+                               fieldWithPath("[].wishlistId").attributes(field("path", "wishlistId")).description("위시리스트 ID"),
+                               fieldWithPath("[].name").attributes(field("path", "name")).description("위시리스트 이름"),
+                               fieldWithPath("[].thumbnailUrl").attributes(field("path", "thumbnailUrl")).description("해당 위시리스트에 가장 최근 저장된 숙소의 썸네일"),
+                               fieldWithPath("[].savedAccommodations").attributes(field("path", "savedAccommodations")).description("위시리스트에 저장된 숙소의 개수")
+                       )
                ));
     }
 }
