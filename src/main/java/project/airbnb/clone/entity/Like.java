@@ -13,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+//TODO : wishlists 테이블로 대체, likes 테이블 제거 가능
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
