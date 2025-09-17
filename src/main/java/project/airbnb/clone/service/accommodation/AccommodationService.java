@@ -1,4 +1,4 @@
-package project.airbnb.clone.service;
+package project.airbnb.clone.service.accommodation;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +20,7 @@ import project.airbnb.clone.repository.dto.MainAccListQueryDto;
 import project.airbnb.clone.dto.accommodation.MainAccListResDto;
 import project.airbnb.clone.dto.accommodation.MainAccResDto;
 import project.airbnb.clone.repository.query.AccommodationQueryRepository;
+import project.airbnb.clone.service.DateManager;
 
 import java.time.LocalDate;
 import java.util.List;

@@ -1,7 +1,7 @@
 package project.airbnb.clone.repository.query;
 
-import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -14,11 +14,8 @@ import org.springframework.stereotype.Repository;
 import project.airbnb.clone.consts.DayType;
 import project.airbnb.clone.consts.Season;
 import project.airbnb.clone.dto.accommodation.AccSearchCondDto;
-import project.airbnb.clone.repository.dto.DetailAccommodationQueryDto;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailReviewDto;
 import project.airbnb.clone.dto.accommodation.FilteredAccListResDto;
-import project.airbnb.clone.repository.dto.ImageDataQueryDto;
-import project.airbnb.clone.repository.dto.MainAccListQueryDto;
 import project.airbnb.clone.entity.QAccommodation;
 import project.airbnb.clone.entity.QAccommodationAmenity;
 import project.airbnb.clone.entity.QAccommodationImage;
@@ -28,13 +25,19 @@ import project.airbnb.clone.entity.QAreaCode;
 import project.airbnb.clone.entity.QGuest;
 import project.airbnb.clone.entity.QReservation;
 import project.airbnb.clone.entity.QReview;
+import project.airbnb.clone.entity.QWishlist;
+import project.airbnb.clone.entity.QWishlistAccommodation;
+import project.airbnb.clone.repository.dto.AccAllImagesQueryDto;
+import project.airbnb.clone.repository.dto.DetailAccommodationQueryDto;
+import project.airbnb.clone.repository.dto.FilteredAccListQueryDto;
+import project.airbnb.clone.repository.dto.ImageDataQueryDto;
+import project.airbnb.clone.repository.dto.MainAccListQueryDto;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static com.querydsl.core.types.Projections.constructor;
-import static com.querydsl.core.types.dsl.Expressions.asBoolean;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
@@ -47,10 +50,11 @@ import static project.airbnb.clone.entity.QAccommodationPrice.accommodationPrice
 import static project.airbnb.clone.entity.QAmenity.amenity;
 import static project.airbnb.clone.entity.QAreaCode.areaCode;
 import static project.airbnb.clone.entity.QGuest.guest;
-import static project.airbnb.clone.entity.QLike.like;
 import static project.airbnb.clone.entity.QReservation.reservation;
 import static project.airbnb.clone.entity.QReview.review;
 import static project.airbnb.clone.entity.QSigunguCode.sigunguCode;
+import static project.airbnb.clone.entity.QWishlist.wishlist;
+import static project.airbnb.clone.entity.QWishlistAccommodation.wishlistAccommodation;
 
 @Repository
 @RequiredArgsConstructor
@@ -65,6 +69,8 @@ public class AccommodationQueryRepository {
         QReservation rs = reservation;
         QReview rv = review;
         QAreaCode ac = areaCode;
+        QWishlistAccommodation wa = wishlistAccommodation;
+        QWishlist w = wishlist;
 
         return queryFactory
                 .select(constructor(MainAccListQueryDto.class,
@@ -73,7 +79,8 @@ public class AccommodationQueryRepository {
                         ap.price,
                         rv.rating.avg().coalesce(0.0),
                         ai.imageUrl,
-                        isLikedSubquery(guestId),
+                        wa.isNotNull(),
+                        wa.wishlist.id,
                         rs.count().coalesce(0L),
                         ac.codeName,
                         ac.code
@@ -85,9 +92,14 @@ public class AccommodationQueryRepository {
                                              .and(ap.season.eq(season).and(ap.dayType.eq(dayType))))
                 .join(acc.sigunguCode, sigunguCode)
                 .join(sigunguCode.areaCode, ac)
+                .leftJoin(wa).on(
+                        guestId != null
+                                ? wa.accommodation.eq(acc).and(wa.wishlist.guest.id.eq(guestId))
+                                : Expressions.FALSE
+                )
                 .leftJoin(rs).on(rs.accommodation.eq(acc))
                 .leftJoin(rv).on(rv.reservation.eq(rs))
-                .groupBy(acc.id, acc.title, ap.price, ai.imageUrl, ac.codeName)
+                .groupBy(acc.id, acc.title, ap.price, ai.imageUrl, wa, ac.codeName, ac.code)
                 .orderBy(rs.count().desc())
                 .fetch();
     }
@@ -101,18 +113,29 @@ public class AccommodationQueryRepository {
         QReservation rs = reservation;
         QReview rv = review;
         QAreaCode ac = areaCode;
+        QWishlistAccommodation wa = wishlistAccommodation;
+        QWishlist w = wishlist;
 
         //이미지 목록 제외 필드 조회
-        List<Tuple> tuples = queryFactory
-                .select(acc.id, acc.title, ap.price,
+        List<FilteredAccListQueryDto> queryDtos = queryFactory
+                .select(constructor(FilteredAccListQueryDto.class,
+                        acc.id,
+                        acc.title,
+                        ap.price,
                         rv.rating.avg().coalesce(0.0),
                         rv.count().intValue().coalesce(0),
-                        isLikedSubquery(guestId).as("likedMe")
-                )
+                        wa.isNotNull(),
+                        w.id
+                ))
                 .from(acc)
                 .leftJoin(ai).on(ai.accommodation.eq(acc))
                 .leftJoin(rs).on(rs.accommodation.eq(acc))
                 .leftJoin(rv).on(rv.reservation.eq(rs))
+                .leftJoin(wa).on(
+                        guestId != null
+                                ? wa.accommodation.eq(acc).and(wa.wishlist.guest.id.eq(guestId))
+                                : Expressions.FALSE
+                )
                 .join(ap).on(ap.accommodation.eq(acc)
                                              .and(ap.season.eq(season).and(ap.dayType.eq(dayType))))
                 .join(acc.sigunguCode, sigunguCode)
@@ -123,26 +146,27 @@ public class AccommodationQueryRepository {
                         loePrice(searchDto.priceLoe()),
                         hasAllAmenities(searchDto.amenities())
                 )
-                .groupBy(acc.id, acc.title, ap.price)
+                .groupBy(acc.id, acc.title, ap.price, wa, w)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
         //in절로 조회된 숙소의 이미지 목록 조회(전체)
-        List<Long> accIds = tuples.stream().map(t -> t.get(acc.id)).toList();
-        List<Tuple> imageTuples = queryFactory.select(ai.accommodation.id, ai.imageUrl)
-                                              .from(ai)
-                                              .where(ai.accommodation.id.in(accIds))
-                                              .orderBy(ai.id.desc())
-                                              .fetch();
+        List<Long> accIds = queryDtos.stream().map(FilteredAccListQueryDto::accommodationId).toList();
+        List<AccAllImagesQueryDto> imagesQueryDtos = queryFactory.select(constructor(AccAllImagesQueryDto.class,
+                                                                         ai.accommodation.id, ai.imageUrl))
+                                                                 .from(ai)
+                                                                 .where(ai.accommodation.id.in(accIds))
+                                                                 .orderBy(ai.id.desc())
+                                                                 .fetch();
 
         //직접 숙소당 최대 10개 이미지 목록 매핑
-        Map<Long, List<String>> imagesMap = imageTuples
+        Map<Long, List<String>> imagesMap = imagesQueryDtos
                 .stream()
                 .collect(groupingBy(
-                        t -> t.get(ai.accommodation.id),
+                        AccAllImagesQueryDto::accommodationId,
                         mapping(
-                                t -> t.get(ai.imageUrl),
+                                AccAllImagesQueryDto::imageUrl,
                                 collectingAndThen(
                                         toList(),
                                         list -> list.stream().limit(10).toList()
@@ -151,21 +175,9 @@ public class AccommodationQueryRepository {
                 ));
 
         //응답 DTO 매핑
-        List<FilteredAccListResDto> content = tuples
-                .stream()
-                .map(t -> {
-                    Long accommodationId = t.get(acc.id);
-                    return new FilteredAccListResDto(
-                            accommodationId,
-                            t.get(acc.title),
-                            t.get(ap.price),
-                            t.get(rv.rating.avg().coalesce(0.0)),
-                            t.get(rv.count().intValue().coalesce(0)),
-                            imagesMap.getOrDefault(accommodationId, List.of()),
-                            t.get(5, Boolean.class)
-                    );
-                })
-                .toList();
+        List<FilteredAccListResDto> content = queryDtos.stream()
+                                                       .map(dto -> FilteredAccListResDto.from(dto, imagesMap.getOrDefault(dto.accommodationId(), List.of())))
+                                                       .toList();
 
         //카운트쿼리
         JPAQuery<Long> countQuery = queryFactory
@@ -188,21 +200,28 @@ public class AccommodationQueryRepository {
     public Optional<DetailAccommodationQueryDto> findAccommodation(Long accId, Long guestId, Season season, DayType dayType) {
         QAccommodation acc = accommodation;
         QAccommodationPrice ap = accommodationPrice;
+        QWishlistAccommodation wa = wishlistAccommodation;
+        QWishlist w = wishlist;
 
         return Optional.ofNullable(
-                queryFactory
-                        .select(constructor(DetailAccommodationQueryDto.class,
-                                acc.id, acc.title, acc.maxPeople, acc.address,
-                                acc.mapX, acc.mapY, acc.checkIn, acc.checkOut, acc.description,
-                                acc.number, acc.refundRegulation, ap.price,
-                                isLikedSubquery(guestId),
-                                avgRateSubquery(accId)
-                        ))
-                        .from(acc)
-                        .join(ap).on(ap.accommodation.eq(acc)
-                                                     .and(ap.season.eq(season).and(ap.dayType.eq(dayType))))
-                        .where(acc.id.eq(accId))
-                        .fetchOne()
+                queryFactory.select(constructor(DetailAccommodationQueryDto.class,
+                                    acc.id, acc.title, acc.maxPeople, acc.address,
+                                    acc.mapX, acc.mapY, acc.checkIn, acc.checkOut, acc.description,
+                                    acc.number, acc.refundRegulation, ap.price,
+                                    wa.isNotNull(),
+                                    w.id,
+                                    avgRateSubquery(accId)
+                            ))
+                            .from(acc)
+                            .join(ap).on(ap.accommodation.eq(acc)
+                                                         .and(ap.season.eq(season).and(ap.dayType.eq(dayType))))
+                            .leftJoin(wa).on(
+                                    guestId != null
+                                            ? wa.accommodation.eq(acc).and(wa.wishlist.guest.id.eq(guestId))
+                                            : Expressions.FALSE
+                            )
+                            .where(acc.id.eq(accId))
+                            .fetchOne()
         );
     }
 
@@ -256,18 +275,9 @@ public class AccommodationQueryRepository {
         QReservation rs = reservation;
         QReview rv = review;
         return JPAExpressions.select(rv.rating.avg().coalesce(0.0))
-                             .from(rs)
-                             .join(rv).on(rv.reservation.eq(rs))
+                             .from(rv)
+                             .join(rv.reservation, rs)
                              .where(rs.accommodation.id.eq(accId));
-    }
-
-    private BooleanExpression isLikedSubquery(Long guestId) {
-        return (guestId != null)
-                ? JPAExpressions.selectOne()
-                                .from(like)
-                                .where(like.accommodation.eq(accommodation).and(like.guest.id.eq(guestId)))
-                                .exists()
-                : asBoolean(false);
     }
 
     private BooleanExpression eqAreaCode(String code) {

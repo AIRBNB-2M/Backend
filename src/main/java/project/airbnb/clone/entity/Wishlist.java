@@ -10,26 +10,32 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-//TODO : wishlists 테이블로 대체, likes 테이블 제거 가능
-@Getter
 @Entity
+@Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "likes")
-public class Like extends BaseEntity {
+@Table(name = "wishlists")
+public class Wishlist extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "like_id", nullable = false)
+    @Column(name = "wishlist_id", nullable = false)
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "accommodation_id", nullable = false)
-    private Accommodation accommodation;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "guest_id", nullable = false)
     private Guest guest;
+
+    @Column(name = "name", length = 50, nullable = false)
+    private String name;
+
+    public void updateName(String newName) {
+        this.name = newName;
+    }
 }

@@ -21,3 +21,8 @@ include::token.adoc[]
 == Accommodation API
 
 include::accommodation.adoc[]
+
+[[Wishlist-API]]
+== Wishlist API
+
+include::wishlist.adoc[]

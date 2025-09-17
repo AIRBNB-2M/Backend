@@ -11,7 +11,8 @@ public record MainAccListResDto(
         int price,
         double avgRate,
         String thumbnailUrl,
-        boolean likedMe) {
+        boolean isInWishlist,
+        Long wishlistId) {
 
     public static MainAccListResDto from(MainAccListQueryDto queryDto) {
         return new MainAccListResDto(
@@ -20,7 +21,8 @@ public record MainAccListResDto(
                 queryDto.price(),
                 queryDto.avgRate(),
                 queryDto.thumbnailUrl(),
-                queryDto.likedMe()
+                queryDto.isInWishlist(),
+                queryDto.wishlistId()
         );
     }
 }

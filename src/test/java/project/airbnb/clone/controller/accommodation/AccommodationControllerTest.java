@@ -12,7 +12,7 @@ import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailRe
 import project.airbnb.clone.dto.accommodation.FilteredAccListResDto;
 import project.airbnb.clone.dto.accommodation.MainAccListResDto;
 import project.airbnb.clone.dto.accommodation.MainAccResDto;
-import project.airbnb.clone.service.AccommodationService;
+import project.airbnb.clone.service.accommodation.AccommodationService;
 import project.airbnb.clone.service.jwt.TokenService;
 
 import java.time.LocalDateTime;
@@ -47,13 +47,13 @@ class AccommodationControllerTest extends RestDocsTestSupport {
     void getAccommodations() throws Exception {
         // given
         List<MainAccListResDto> seoulAcc = List.of(
-                new MainAccListResDto(1L, "호텔A", 100000, 4.5, "https://example.com/a.jpg", true),
-                new MainAccListResDto(2L, "호텔B", 200000, 3.8, "https://example.com/b.jpg", false)
+                new MainAccListResDto(1L, "호텔A", 100000, 4.5, "https://example.com/a.jpg", true, 1L),
+                new MainAccListResDto(2L, "호텔B", 200000, 3.8, "https://example.com/b.jpg", false, null)
         );
         List<MainAccListResDto> gyeonggiAcc = List.of(
-                new MainAccListResDto(3L, "호텔C", 150000, 4.3, "https://example.com/c.jpg", false),
-                new MainAccListResDto(4L, "호텔D", 250000, 4.7, "https://example.com/d.jpg", true),
-                new MainAccListResDto(5L, "호텔E", 300000, 3.3, "https://example.com/e.jpg", true)
+                new MainAccListResDto(3L, "호텔C", 150000, 4.3, "https://example.com/c.jpg", false, null),
+                new MainAccListResDto(4L, "호텔D", 250000, 4.7, "https://example.com/d.jpg", true, 2L),
+                new MainAccListResDto(5L, "호텔E", 300000, 3.3, "https://example.com/e.jpg", true, 2L)
         );
 
         List<MainAccResDto> result = List.of(
@@ -100,9 +100,13 @@ class AccommodationControllerTest extends RestDocsTestSupport {
                                fieldWithPath("[].accommodations[].thumbnailUrl")
                                        .attributes(field("path", "thumbnailUrl"))
                                        .description("썸네일 URL"),
-                               fieldWithPath("[].accommodations[].likedMe")
-                                       .attributes(field("path", "likedMe"))
-                                       .description("좋아요 여부")
+                               fieldWithPath("[].accommodations[].isInWishlist")
+                                       .attributes(field("path", "isInWishlist"))
+                                       .description("위시리스트에 저장된 숙소인지 여부"),
+                               fieldWithPath("[].accommodations[].wishlistId")
+                                       .attributes(field("path", "wishlistId"))
+                                       .optional()
+                                       .description("저장된 위시리스트 ID (isInWishlist = true일 때만, false면 null)")
                        )
                ));
     }
@@ -113,9 +117,9 @@ class AccommodationControllerTest extends RestDocsTestSupport {
         //given
         List<FilteredAccListResDto> dtos = List.of(
                 new FilteredAccListResDto(1L, "title-1", 50000, 4.3, 10,
-                        List.of("https://example.com/a.jpg", "https://example.com/b.jpg"), false),
+                        List.of("https://example.com/a.jpg", "https://example.com/b.jpg"), false, null),
                 new FilteredAccListResDto(2L, "title-2", 80000, 4.5, 23,
-                        List.of("https://example.com/c.jpg", "https://example.com/d.jpg"), true)
+                        List.of("https://example.com/c.jpg", "https://example.com/d.jpg"), true, 1L)
         );
 
         PageResponseDto<FilteredAccListResDto> response = PageResponseDto.<FilteredAccListResDto>builder()
@@ -192,15 +196,19 @@ class AccommodationControllerTest extends RestDocsTestSupport {
                                fieldWithPath("contents[].avgRate")
                                        .attributes(field("path", "avgRate"))
                                        .description("평균 평점"),
-                               fieldWithPath("contents[].avgCount")
-                                       .attributes(field("path", "avgCount"))
+                               fieldWithPath("contents[].reviewCount")
+                                       .attributes(field("path", "reviewCount"))
                                        .description("리뷰 개수"),
                                fieldWithPath("contents[].imageUrls")
                                        .attributes(field("path", "imageUrls"))
                                        .description("숙소의 이미지 목록(최대 10장)"),
-                               fieldWithPath("contents[].likedMe")
-                                       .attributes(field("path", "likedMe"))
-                                       .description("좋아요 여부")
+                               fieldWithPath("contents[].isInWishlist")
+                                       .attributes(field("path", "isInWishlist"))
+                                       .description("위시리스트에 저장된 숙소인지 여부"),
+                               fieldWithPath("contents[].wishlistId")
+                                       .attributes(field("path", "wishlistId"))
+                                       .optional()
+                                       .description("저장된 위시리스트 ID (isInWishlist = true일 때만, false면 null)")
                        )
                ));
     }
@@ -223,7 +231,7 @@ class AccommodationControllerTest extends RestDocsTestSupport {
         );
         DetailAccommodationResDto response = new DetailAccommodationResDto(accommodationId, "acc-title", 5, "경기도 부천시...", 35.3, 40.1,
                 "10:00", "14:00", "acc-overview", "054-855-8552", "7일 이내 100%",
-                55000, true, 4.8, detailImageDto, amenities, reviewDtos
+                55000, true, 1L, 4.8, detailImageDto, amenities, reviewDtos
         );
 
         given(accommodationService.getDetailAccommodation(any(), any())).willReturn(response);
@@ -245,7 +253,8 @@ class AccommodationControllerTest extends RestDocsTestSupport {
                        jsonPath("$.number").value(response.number()),
                        jsonPath("$.refundRegulation").value(response.refundRegulation()),
                        jsonPath("$.price").value(response.price()),
-                       jsonPath("$.likedMe").value(response.likedMe()),
+                       jsonPath("$.isInWishlist").value(response.isInWishlist()),
+                       jsonPath("$.wishlistId").value(response.wishlistId()),
                        jsonPath("$.avgRate").value(response.avgRate()),
                        jsonPath("$.images.thumbnail").value(detailImageDto.thumbnail()),
                        jsonPath("$.images.others.length()").value(detailImageDto.others().size()),
@@ -302,9 +311,13 @@ class AccommodationControllerTest extends RestDocsTestSupport {
                                fieldWithPath("price")
                                        .attributes(field("path", "price"))
                                        .description("숙소 가격"),
-                               fieldWithPath("likedMe")
-                                       .attributes(field("path", "likedMe"))
-                                       .description("좋아요 여부"),
+                               fieldWithPath("isInWishlist")
+                                       .attributes(field("path", "isInWishlist"))
+                                       .description("위시리스트에 저장된 숙소인지 여부"),
+                               fieldWithPath("wishlistId")
+                                       .attributes(field("path", "wishlistId"))
+                                       .optional()
+                                       .description("저장된 위시리스트 ID (isInWishlist = true일 때만, false면 null)"),
                                fieldWithPath("avgRate")
                                        .attributes(field("path", "avgRate"))
                                        .description("평균 평점"),
