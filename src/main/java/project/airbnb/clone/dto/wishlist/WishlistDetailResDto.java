@@ -6,6 +6,7 @@ import java.util.List;
 
 public record WishlistDetailResDto(
         Long accommodationId,
+        String wishlistName,
         String title,
         String description,
         double mapX,
@@ -17,6 +18,7 @@ public record WishlistDetailResDto(
     public static WishlistDetailResDto from(WishlistDetailQueryDto queryDto, List<String> imageUrls) {
         return new WishlistDetailResDto(
                 queryDto.accommodationId(),
+                queryDto.wishlistName(),
                 queryDto.title(),
                 queryDto.description(),
                 queryDto.mapX(),

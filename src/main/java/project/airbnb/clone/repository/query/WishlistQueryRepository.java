@@ -57,6 +57,7 @@ public class WishlistQueryRepository {
         return queryFactory
                 .select(constructor(WishlistDetailQueryDto.class,
                         acc.id,
+                        w.name,
                         acc.title,
                         acc.description,
                         acc.mapX,
@@ -72,7 +73,7 @@ public class WishlistQueryRepository {
                 .where(w.id.eq(wishlistId),
                         w.guest.id.eq(guestId)
                 )
-                .groupBy(acc.id, acc.title, acc.description, acc.mapX, acc.mapY, wa.memo)
+                .groupBy(acc.id, w.name, acc.title, acc.description, acc.mapX, acc.mapY, wa.memo)
                 .fetch();
     }
 
