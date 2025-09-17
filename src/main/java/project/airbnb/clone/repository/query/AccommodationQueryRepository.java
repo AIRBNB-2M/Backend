@@ -92,8 +92,11 @@ public class AccommodationQueryRepository {
                                              .and(ap.season.eq(season).and(ap.dayType.eq(dayType))))
                 .join(acc.sigunguCode, sigunguCode)
                 .join(sigunguCode.areaCode, ac)
-                .leftJoin(wa).on(guestId != null ? wa.accommodation.eq(acc) : Expressions.FALSE)
-                .leftJoin(wa.wishlist, w).on(guestId != null ? w.guest.id.eq(guestId) : Expressions.FALSE)
+                .leftJoin(wa).on(
+                        guestId != null
+                                ? wa.accommodation.eq(acc).and(wa.wishlist.guest.id.eq(guestId))
+                                : Expressions.FALSE
+                )
                 .leftJoin(rs).on(rs.accommodation.eq(acc))
                 .leftJoin(rv).on(rv.reservation.eq(rs))
                 .groupBy(acc.id, acc.title, ap.price, ai.imageUrl, wa, ac.codeName, ac.code)
@@ -128,8 +131,11 @@ public class AccommodationQueryRepository {
                 .leftJoin(ai).on(ai.accommodation.eq(acc))
                 .leftJoin(rs).on(rs.accommodation.eq(acc))
                 .leftJoin(rv).on(rv.reservation.eq(rs))
-                .leftJoin(wa).on(guestId != null ? wa.accommodation.eq(acc) : Expressions.FALSE)
-                .leftJoin(wa.wishlist, w).on(guestId != null ? w.guest.id.eq(guestId) : Expressions.FALSE)
+                .leftJoin(wa).on(
+                        guestId != null
+                                ? wa.accommodation.eq(acc).and(wa.wishlist.guest.id.eq(guestId))
+                                : Expressions.FALSE
+                )
                 .join(ap).on(ap.accommodation.eq(acc)
                                              .and(ap.season.eq(season).and(ap.dayType.eq(dayType))))
                 .join(acc.sigunguCode, sigunguCode)
@@ -209,8 +215,11 @@ public class AccommodationQueryRepository {
                             .from(acc)
                             .join(ap).on(ap.accommodation.eq(acc)
                                                          .and(ap.season.eq(season).and(ap.dayType.eq(dayType))))
-                            .leftJoin(wa).on(guestId != null ? wa.accommodation.eq(acc) : Expressions.FALSE)
-                            .leftJoin(wa.wishlist, w).on(guestId != null ? w.guest.id.eq(guestId) : Expressions.FALSE)
+                            .leftJoin(wa).on(
+                                    guestId != null
+                                            ? wa.accommodation.eq(acc).and(wa.wishlist.guest.id.eq(guestId))
+                                            : Expressions.FALSE
+                            )
                             .where(acc.id.eq(accId))
                             .fetchOne()
         );
