@@ -177,9 +177,9 @@ class WishlistControllerTest extends RestDocsTestSupport {
     void getAccommodationsFromWishlist() throws Exception {
         //given
         List<WishlistDetailResDto> response = List.of(
-                new WishlistDetailResDto(1L, "호텔A", "호텔A-설명", 35.3, 42.4, 4.5,
+                new WishlistDetailResDto(1L, "wishlist-1", "호텔A", "호텔A-설명", 35.3, 42.4, 4.5,
                         List.of("https://example.com/a.jpg", "https://example.com/b.jpg"), "호텔A-메모"),
-                new WishlistDetailResDto(2L, "호텔B", "호텔B-설명", 25.3, 47.8, 4.8,
+                new WishlistDetailResDto(2L, "wishlist-2", "호텔B", "호텔B-설명", 25.3, 47.8, 4.8,
                         List.of("https://example.com/c.jpg", "https://example.com/d.jpg"), "호텔B-메모")
         );
 
@@ -201,6 +201,7 @@ class WishlistControllerTest extends RestDocsTestSupport {
                        pathParameters(parameterWithName("wishlistId").description("조회할 위시리스트 ID")),
                        responseFields(
                                fieldWithPath("[].accommodationId").attributes(field("path", "accommodationId")).description("숙소 ID"),
+                               fieldWithPath("[].wishlistName").attributes(field("path", "wishlistName")).description("위시리스트 이름"),
                                fieldWithPath("[].title").attributes(field("path", "title")).description("숙소 제목"),
                                fieldWithPath("[].description").attributes(field("path", "description")).description("숙소 설명"),
                                fieldWithPath("[].mapX").attributes(field("path", "mapX")).description("숙소 위치 X 좌표"),
