@@ -1,8 +1,12 @@
+import org.yaml.snakeyaml.Yaml
+import org.yaml.snakeyaml.DumperOptions
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.3'
     id 'io.spring.dependency-management' version '1.1.7'
-    id "org.asciidoctor.jvm.convert" version "3.3.2"
+    id 'com.epages.restdocs-api-spec' version '0.18.4'
+    id 'org.hidetake.swagger.generator' version '2.19.2'
 }
 
 group = 'project.airbnb'
@@ -25,8 +29,13 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
+swaggerSources {
+    sample {
+        setInputFile(file("${project.buildDir}/api-spec/openapi3.yaml"))
+    }
+}
 
+dependencies {
     // starter
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
@@ -59,10 +68,12 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.3'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    implementation 'org.yaml:snakeyaml:2.0'
 
-    // RestDocs
-    asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
+    // RestDocs + Swagger
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+    testImplementation 'com.epages:restdocs-api-spec-mockmvc:0.18.4'
+    swaggerUI 'org.webjars:swagger-ui:4.15.5'
 
     // test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -82,45 +93,107 @@ clean {
     delete file('src/main/generated')
 }
 
-ext { // 전역 변수
-    snippetsDir = file('build/generated-snippets')
+// OpenAPI3 설정
+openapi3 {
+    server = 'http://localhost:8081'
+    title = "Airbnb-2M 백엔드 API 문서"
+    description = "RestDocsWithSwagger Docs"
+    version = "0.0.1"
+    format = "yaml"
 }
 
-test {
-    outputs.dir snippetsDir
-}
+tasks.register('copyOasToSwagger', Copy) {
+    delete "src/main/resources/static/swagger-ui/openapi3.yaml"
+    from "${buildDir}/api-spec/openapi3.yaml"
+    into "src/main/resources/static/swagger-ui/"
+    dependsOn "openapi3"
 
-asciidoctor {
-    inputs.dir snippetsDir
-    configurations 'asciidoctorExt'
+    doLast {
+        def swaggerFile = file("src/main/resources/static/swagger-ui/openapi3.yaml")
 
-    sources { // 특정 파일만 html로 만든다.
-        include("**/index.adoc")
-    }
-    baseDirFollowsSourceFile() // 다른 adoc 파일을 include 할 때 경로를 baseDir로 맞춘다.
-    dependsOn test
-}
+        // 1. 기존 YAML 로드
+        Yaml yaml = new Yaml()
+        def swaggerContent = swaggerFile.text
+        def swaggerMap = yaml.load(swaggerContent) ?: [:]
 
-// static/docs 폴더 비우기
-asciidoctor.doFirst {
-    delete file('src/main/resources/static/docs')
-}
+        // 2. 로그인 스펙 정의
+        def authSpec = [
+                paths: [
+                        "/api/auth/login": [
+                                post: [
+                                        tags: ["Guest-API"],
+                                        summary: "사용자 로그인",
+                                        description: "이메일과 비밀번호로 사용자 인증",
+                                        requestBody: [
+                                                required: true,
+                                                content: [
+                                                        "application/json": [
+                                                                schema: [
+                                                                        $ref: "#/components/schemas/LoginRequest"
+                                                                ]
+                                                        ]
+                                                ]
+                                        ],
+                                        responses: [
+                                                '200': [
+                                                        description: "인증 성공",
+                                                        headers: [
+                                                                authorization: [description: "Bearer {AccessToken}", schema: [type: "string"]],
+                                                                "Set-Cookie": [description: "RefreshToken={RefreshToken} HttpOnly (개발자 도구에서 확인)", schema: [type: "string"]]
+                                                        ]
+                                                ]
+                                        ]
+                                ]
+                        ]
+                ],
+                components: [
+                        securitySchemes: [
+                                BearerAuth: [type: "apiKey", name: "Authorization", in: "header"],
+                                CookieAuth: [type: "apiKey", name: "RefreshToken", in: "cookie"]
+                        ]
+                ],
+                security: [[BearerAuth: []], [CookieAuth: []]]
+        ]
 
-// asccidoctor 작업 이후 생성된 HTML 파일을 static/docs 로 copy
-tasks.register('copyDocument', Copy) {
-    dependsOn asciidoctor
-    from file("build/docs/asciidoc")
-    into file("src/main/resources/static/docs")
-}
+        def schemas = [
+                LoginRequest: [
+                        title: "LoginRequest",
+                        type: "object",
+                        properties: [
+                                email: [type: "string",
+                                        example: "user@example.com",
+                                        description: "이메일"
+                                ],
+                                password: [type: "string",
+                                           example: "Abcd1234!",
+                                           description: "비밀번호"
+                                ]
+                        ],
+                        required: ["email", "password"]
+                ]
+        ]
 
-// build 의 의존작업 명시
-build {
-    dependsOn copyDocument
-}
+        // 3. 병합: paths
+        swaggerMap.paths = swaggerMap.paths ?: [:]
+        swaggerMap.paths.putAll(authSpec.paths)
 
-bootJar {
-    dependsOn asciidoctor
-    from("${asciidoctor.outputDir}/html5") {
-        into 'static/docs'
+        // 4. 병합: components.securitySchemes
+        swaggerMap.components = swaggerMap.components ?: [:]
+        swaggerMap.components.securitySchemes = swaggerMap.components.securitySchemes ?: [:]
+        swaggerMap.components.securitySchemes.putAll(authSpec.components.securitySchemes)
+
+        // 5. 병합: security
+        swaggerMap.security = (swaggerMap.security ?: []) + authSpec.security
+
+        swaggerMap.components.schemas = swaggerMap.components.schemas ?: [:]
+        swaggerMap.components.schemas.putAll(schemas)
+
+        // 6. YAML로 다시 저장
+        DumperOptions options = new DumperOptions()
+        options.defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
+        Yaml yamlDumper = new Yaml(options)
+        swaggerFile.text = yamlDumper.dump(swaggerMap)
+
+        println "Auth spec merged into ${swaggerFile}"
     }
 }

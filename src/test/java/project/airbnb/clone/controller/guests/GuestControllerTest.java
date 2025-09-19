@@ -13,14 +13,19 @@ import project.airbnb.clone.service.jwt.TokenService;
 
 import java.time.LocalDate;
 
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
+import static com.epages.restdocs.apispec.ResourceSnippetParameters.builder;
+import static com.epages.restdocs.apispec.Schema.schema;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static project.airbnb.clone.config.RestDocsConfig.field;
 
 @WebMvcTest(GuestController.class)
 class GuestControllerTest extends RestDocsTestSupport {
+
+    private static final String GUEST_API_TAG = "Guest-API";
 
     @MockitoBean GuestService guestService;
     @MockitoBean TokenService tokenService;
@@ -39,19 +44,37 @@ class GuestControllerTest extends RestDocsTestSupport {
                        .contentType(MediaType.APPLICATION_JSON_VALUE)
                        .content(creatJson(requestDto))
                )
-               .andExpect(status().isCreated())
-               .andDo(restDocs.document(
-                       requestFields(
-                               fieldWithPath("name").description("name").type(JsonFieldType.STRING),
-                               fieldWithPath("email").description("email").type(JsonFieldType.STRING)
-                                                     .attributes(field("constraints", "이메일 형식 준수")),
-                               fieldWithPath("number").description("phone number").optional().type(JsonFieldType.STRING)
-                                       .attributes(field("constraints", "전화번호 형식 준수(하이픈(-) 제외")),
-                               fieldWithPath("birthDate").description("birthDate").optional().type(JsonFieldType.STRING)
-                                       .attributes(field("constraints", "과거 날짜")),
-                               fieldWithPath("password").description("password").type(JsonFieldType.STRING)
-                                                        .attributes(field("constraints", "8~15자, 특수문자 포함"))
-                       )
-               ));
+               .andExpectAll(
+                       handler().handlerType(GuestController.class),
+                       handler().methodName("signup"),
+                       status().isCreated()
+               )
+               .andDo(document("rest-signup",
+                       resource(
+                               builder()
+                                       .tag(GUEST_API_TAG)
+                                       .summary("REST 회원 가입")
+                                       .requestFields(
+                                               fieldWithPath("name")
+                                                       .type(JsonFieldType.STRING)
+                                                       .description("이름"),
+                                               fieldWithPath("email")
+                                                       .type(JsonFieldType.STRING)
+                                                       .description("이메일 (제약사항 : 이메일 형식 준수)"),
+                                               fieldWithPath("number")
+                                                       .type(JsonFieldType.STRING)
+                                                       .description("전화번호 (제약사항 : 하이픈(-) 제외)")
+                                                       .optional(),
+                                               fieldWithPath("birthDate")
+                                                       .type(JsonFieldType.STRING)
+                                                       .description("생일 (제약사항 : 과거일)")
+                                                       .optional(),
+                                               fieldWithPath("password")
+                                                       .type(JsonFieldType.STRING)
+                                                       .description("비밀번호 (제약사항 : 8~15자리, 특수문자 포함)")
+                                       )
+                                       .requestSchema(schema("SignupRequest"))
+                                       .build()
+                       )));
     }
 }
