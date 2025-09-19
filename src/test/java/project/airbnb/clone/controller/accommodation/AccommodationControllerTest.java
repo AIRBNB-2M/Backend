@@ -18,29 +18,34 @@ import project.airbnb.clone.service.jwt.TokenService;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
+import static com.epages.restdocs.apispec.ResourceSnippetParameters.builder;
+import static com.epages.restdocs.apispec.Schema.schema;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
-import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.payload.JsonFieldType.ARRAY;
+import static org.springframework.restdocs.payload.JsonFieldType.BOOLEAN;
+import static org.springframework.restdocs.payload.JsonFieldType.NUMBER;
+import static org.springframework.restdocs.payload.JsonFieldType.STRING;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+import static org.springframework.restdocs.snippet.Attributes.key;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static project.airbnb.clone.config.RestDocsConfig.field;
 
 @WebMvcTest(AccommodationController.class)
 class AccommodationControllerTest extends RestDocsTestSupport {
 
-    @MockitoBean
-    AccommodationService accommodationService;
-    @MockitoBean
-    TokenService tokenService;
+    private static final String ACCOMMODATION_API_TAG = "Accommodation API";
+
+    @MockitoBean AccommodationService accommodationService;
+    @MockitoBean TokenService tokenService;
 
     @Test
     @DisplayName("메인 페이지 숙소 목록 조회")
@@ -66,49 +71,57 @@ class AccommodationControllerTest extends RestDocsTestSupport {
         //when
         //then
         mockMvc.perform(get("/api/accommodations"))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$", hasSize(result.size())))
-               .andExpect(jsonPath("$[0].areaName").value(result.get(0).areaName()))
-               .andExpect(jsonPath("$[1].areaName").value(result.get(1).areaName()))
-               .andExpect(jsonPath("$[0].accommodations", hasSize(result.get(0).accommodations().size())))
-               .andExpect(jsonPath("$[1].accommodations", hasSize(result.get(1).accommodations().size())))
-               .andExpect(jsonPath("$[0].accommodations[0].reservationCount").doesNotExist())
-               .andExpect(jsonPath("$[0].accommodations[0].areaCode").doesNotExist())
-               .andDo(restDocs.document(
-                       requestHeaders(
-                               headerWithName(AUTHORIZATION).optional().description("Bearer {액세스 토큰}")
-                       ),
-                       responseFields(
-                               fieldWithPath("[].areaName")
-                                       .attributes(field("path", "areaName"))
-                                       .description("지역명"),
-                               fieldWithPath("[].areaCode")
-                                       .attributes(field("path", "areaCode"))
-                                       .description("지역 코드"),
-                               fieldWithPath("[].accommodations[].accommodationId")
-                                       .attributes(field("path", "accommodationId"))
-                                       .description("숙소 ID"),
-                               fieldWithPath("[].accommodations[].title")
-                                       .attributes(field("path", "title"))
-                                       .description("숙소 이름"),
-                               fieldWithPath("[].accommodations[].price")
-                                       .attributes(field("path", "price"))
-                                       .description("숙소 가격"),
-                               fieldWithPath("[].accommodations[].avgRate")
-                                       .attributes(field("path", "avgRate"))
-                                       .description("평균 평점"),
-                               fieldWithPath("[].accommodations[].thumbnailUrl")
-                                       .attributes(field("path", "thumbnailUrl"))
-                                       .description("썸네일 URL"),
-                               fieldWithPath("[].accommodations[].isInWishlist")
-                                       .attributes(field("path", "isInWishlist"))
-                                       .description("위시리스트에 저장된 숙소인지 여부"),
-                               fieldWithPath("[].accommodations[].wishlistId")
-                                       .attributes(field("path", "wishlistId"))
-                                       .optional()
-                                       .description("저장된 위시리스트 ID (isInWishlist = true일 때만, false면 null)")
-                       )
-               ));
+               .andExpectAll(
+                       handler().handlerType(AccommodationController.class),
+                       handler().methodName("getAccommodations"),
+                       status().isOk(),
+                       jsonPath("$", hasSize(result.size())),
+                       jsonPath("$[0].areaName").value(result.get(0).areaName()),
+                       jsonPath("$[1].areaName").value(result.get(1).areaName()),
+                       jsonPath("$[0].accommodations", hasSize(result.get(0).accommodations().size())),
+                       jsonPath("$[1].accommodations", hasSize(result.get(1).accommodations().size())),
+                       jsonPath("$[0].accommodations[0].reservationCount").doesNotExist(),
+                       jsonPath("$[0].accommodations[0].areaCode").doesNotExist()
+               )
+               .andDo(document("get-accommodations",
+                       resource(
+                               builder()
+                                       .tag(ACCOMMODATION_API_TAG)
+                                       .summary("지역별 숙소 목록 조회 (메인 페이지용)")
+                                       .requestHeaders(headerWithName(AUTHORIZATION).optional().description("Bearer {액세스 토큰}"))
+                                       .responseFields(
+                                               fieldWithPath("[].areaName")
+                                                       .type(STRING)
+                                                       .description("지역명"),
+                                               fieldWithPath("[].areaCode")
+                                                       .type(STRING)
+                                                       .description("지역 코드"),
+                                               fieldWithPath("[].accommodations[].accommodationId")
+                                                       .type(NUMBER)
+                                                       .description("숙소 ID"),
+                                               fieldWithPath("[].accommodations[].title")
+                                                       .type(STRING)
+                                                       .description("숙소 이름"),
+                                               fieldWithPath("[].accommodations[].price")
+                                                       .type(NUMBER)
+                                                       .description("숙소 가격"),
+                                               fieldWithPath("[].accommodations[].avgRate")
+                                                       .type(NUMBER)
+                                                       .description("평균 평점"),
+                                               fieldWithPath("[].accommodations[].thumbnailUrl")
+                                                       .type(STRING)
+                                                       .description("썸네일 URL"),
+                                               fieldWithPath("[].accommodations[].isInWishlist")
+                                                       .type(BOOLEAN)
+                                                       .description("위시리스트에 저장된 숙소인지 여부"),
+                                               fieldWithPath("[].accommodations[].wishlistId")
+                                                       .type(NUMBER)
+                                                       .optional()
+                                                       .description("저장된 위시리스트 ID (isInWishlist = true일 때만, false면 null)")
+                                       )
+                                       .responseSchema(schema("MainPageAccommodationsResponse"))
+                                       .build()
+                       )));
     }
 
     @Test
@@ -143,74 +156,84 @@ class AccommodationControllerTest extends RestDocsTestSupport {
                        .param("page", "0")
                        .param("size", "15"))
                .andExpectAll(
+                       handler().handlerType(AccommodationController.class),
+                       handler().methodName("getFilteredPagingAccommodations"),
                        status().isOk(),
                        jsonPath("$.contents.length()").value(dtos.size())
                )
-               .andDo(restDocs.document(
-                       queryParameters(
-                               parameterWithName("areaCode").optional().description("지역코드"),
-                               parameterWithName("amenities").optional().description("편의시설(다중 선택)"),
-                               parameterWithName("priceGoe").optional().description("숙소 최소 가격"),
-                               parameterWithName("priceLoe").optional().description("숙소 최대 가격"),
-                               parameterWithName("page").optional().description("페이지 크기"),
-                               parameterWithName("size").optional().description("페이지 번호 (0-index)")
-                       ),
-                       requestHeaders(headerWithName(AUTHORIZATION).optional().description("Bearer {액세스 토큰}")),
-                       responseFields(
-                               fieldWithPath("contents")
-                                       .attributes(field("path", "contents"))
-                                       .description("검색 페이지 데이터"),
-                               fieldWithPath("hasPrev")
-                                       .attributes(field("path", "hasPrev"))
-                                       .description("이전 페이지 존재 여부"),
-                               fieldWithPath("hasNext")
-                                       .attributes(field("path", "hasNext"))
-                                       .description("다음 페이지 존재 여부"),
-                               fieldWithPath("totalCount")
-                                       .attributes(field("path", "totalCount"))
-                                       .description("검색된 전체 데이터 개수"),
-                               fieldWithPath("prevPage")
-                                       .attributes(field("path", "prevPage"))
-                                       .description("이전 페이지 번호 (0-index, 없으면 -1)"),
-                               fieldWithPath("nextPage")
-                                       .attributes(field("path", "nextPage"))
-                                       .description("다음 페이지 번호 (0-index, 없으면 -1)"),
-                               fieldWithPath("totalPage")
-                                       .attributes(field("path", "totalPage"))
-                                       .description("총 페이지 개수"),
-                               fieldWithPath("current")
-                                       .attributes(field("path", "current"))
-                                       .description("현재 페이지 번호 (0-index)"),
-                               fieldWithPath("size")
-                                       .attributes(field("path", "size"))
-                                       .description("페이지 크기"),
-                               fieldWithPath("contents[].accommodationId")
-                                       .attributes(field("path", "accommodationId"))
-                                       .description("숙소 ID"),
-                               fieldWithPath("contents[].title")
-                                       .attributes(field("path", "title"))
-                                       .description("숙소 제목"),
-                               fieldWithPath("contents[].price")
-                                       .attributes(field("path", "price"))
-                                       .description("숙소 가격"),
-                               fieldWithPath("contents[].avgRate")
-                                       .attributes(field("path", "avgRate"))
-                                       .description("평균 평점"),
-                               fieldWithPath("contents[].reviewCount")
-                                       .attributes(field("path", "reviewCount"))
-                                       .description("리뷰 개수"),
-                               fieldWithPath("contents[].imageUrls")
-                                       .attributes(field("path", "imageUrls"))
-                                       .description("숙소의 이미지 목록(최대 10장)"),
-                               fieldWithPath("contents[].isInWishlist")
-                                       .attributes(field("path", "isInWishlist"))
-                                       .description("위시리스트에 저장된 숙소인지 여부"),
-                               fieldWithPath("contents[].wishlistId")
-                                       .attributes(field("path", "wishlistId"))
-                                       .optional()
-                                       .description("저장된 위시리스트 ID (isInWishlist = true일 때만, false면 null)")
-                       )
-               ));
+               .andDo(document("search-accommodations",
+                       resource(
+                               builder()
+                                       .tag(ACCOMMODATION_API_TAG)
+                                       .summary("숙소 검색 조회")
+                                       .queryParameters(
+                                               parameterWithName("areaCode").optional().description("지역코드"),
+                                               parameterWithName("amenities").optional().description("편의시설(다중 선택)"),
+                                               parameterWithName("priceGoe").optional().description("숙소 최소 가격"),
+                                               parameterWithName("priceLoe").optional().description("숙소 최대 가격"),
+                                               parameterWithName("size").optional().description("페이지 크기"),
+                                               parameterWithName("page").optional().description("페이지 번호 (0-index)")
+                                       )
+                                       .requestHeaders(headerWithName(AUTHORIZATION).optional().description("Bearer {액세스 토큰}"))
+                                       .responseFields(
+                                               fieldWithPath("contents")
+                                                       .type(ARRAY)
+                                                       .description("검색 페이지 데이터"),
+                                               fieldWithPath("hasPrev")
+                                                       .type(BOOLEAN)
+                                                       .description("이전 페이지 존재 여부"),
+                                               fieldWithPath("hasNext")
+                                                       .type(BOOLEAN)
+                                                       .description("다음 페이지 존재 여부"),
+                                               fieldWithPath("totalCount")
+                                                       .type(NUMBER)
+                                                       .description("검색된 전체 데이터 개수"),
+                                               fieldWithPath("prevPage")
+                                                       .type(NUMBER)
+                                                       .description("이전 페이지 번호 (0-index, 없으면 -1)"),
+                                               fieldWithPath("nextPage")
+                                                       .type(NUMBER)
+                                                       .description("다음 페이지 번호 (0-index, 없으면 -1)"),
+                                               fieldWithPath("totalPage")
+                                                       .type(NUMBER)
+                                                       .description("총 페이지 개수"),
+                                               fieldWithPath("current")
+                                                       .type(NUMBER)
+                                                       .description("현재 페이지 번호 (0-index)"),
+                                               fieldWithPath("size")
+                                                       .type(NUMBER)
+                                                       .description("페이지 크기"),
+                                               fieldWithPath("contents[].accommodationId")
+                                                       .type(NUMBER)
+                                                       .description("숙소 ID"),
+                                               fieldWithPath("contents[].title")
+                                                       .type(STRING)
+                                                       .description("숙소 제목"),
+                                               fieldWithPath("contents[].price")
+                                                       .type(NUMBER)
+                                                       .description("숙소 가격"),
+                                               fieldWithPath("contents[].avgRate")
+                                                       .type(NUMBER)
+                                                       .description("평균 평점"),
+                                               fieldWithPath("contents[].reviewCount")
+                                                       .type(NUMBER)
+                                                       .description("리뷰 개수"),
+                                               fieldWithPath("contents[].imageUrls")
+                                                       .type(ARRAY)
+                                                       .attributes(key("itemsType").value("string"))
+                                                       .description("숙소의 이미지 목록(최대 10장)"),
+                                               fieldWithPath("contents[].isInWishlist")
+                                                       .type(BOOLEAN)
+                                                       .description("위시리스트에 저장된 숙소인지 여부"),
+                                               fieldWithPath("contents[].wishlistId")
+                                                       .type(NUMBER)
+                                                       .optional()
+                                                       .description("저장된 위시리스트 ID (isInWishlist = true일 때만, false면 null)")
+                                       )
+                                       .requestSchema(schema("QueryParameter-SearchAccommodationRequest"))
+                                       .responseSchema(schema("PagingAccommodationsResponse"))
+                                       .build()
+                       )));
     }
 
     @Test
@@ -240,6 +263,8 @@ class AccommodationControllerTest extends RestDocsTestSupport {
         //then
         mockMvc.perform(get("/api/accommodations/{id}", accommodationId))
                .andExpectAll(
+                       handler().handlerType(AccommodationController.class),
+                       handler().methodName("getAccommodation"),
                        status().isOk(),
                        jsonPath("$.accommodationId").value(response.accommodationId()),
                        jsonPath("$.title").value(response.title()),
@@ -261,96 +286,101 @@ class AccommodationControllerTest extends RestDocsTestSupport {
                        jsonPath("$.amenities.length()").value(amenities.size()),
                        jsonPath("$.reviews.length()").value(reviewDtos.size())
                )
-               .andDo(restDocs.document(
-                       pathParameters(
-                               parameterWithName("id").description("검색 숙소 ID")
-                       ),
-                       requestHeaders(
-                               headerWithName(AUTHORIZATION).optional().description("Bearer {액세스 토큰}")
-                       ),
-                       responseFields(
-                               fieldWithPath("accommodationId")
-                                       .attributes(field("path", "accommodationId"))
-                                       .description("숙소 ID"),
-                               fieldWithPath("title")
-                                       .attributes(field("path", "title"))
-                                       .description("숙소 제목"),
-                               fieldWithPath("maxPeople")
-                                       .optional()
-                                       .attributes(field("path", "maxPeople"))
-                                       .description("숙소 최대 수용 인원"),
-                               fieldWithPath("address")
-                                       .attributes(field("path", "address"))
-                                       .description("숙소 주소"),
-                               fieldWithPath("mapX")
-                                       .attributes(field("path", "mapX"))
-                                       .description("숙소 X 좌표 값"),
-                               fieldWithPath("mapY")
-                                       .attributes(field("path", "mapY"))
-                                       .description("숙소 Y 좌표 값"),
-                               fieldWithPath("checkIn")
-                                       .optional()
-                                       .attributes(field("path", "checkIn"))
-                                       .description("숙소 체크인 시간"),
-                               fieldWithPath("checkOut")
-                                       .optional()
-                                       .attributes(field("path", "checkOut"))
-                                       .description("숙소 체크아웃 시간"),
-                               fieldWithPath("description")
-                                       .optional()
-                                       .attributes(field("path", "description"))
-                                       .description("숙소 상세 설명"),
-                               fieldWithPath("number")
-                                       .optional()
-                                       .attributes(field("path", "number"))
-                                       .description("숙소 번호"),
-                               fieldWithPath("refundRegulation")
-                                       .optional()
-                                       .attributes(field("path", "refundRegulation"))
-                                       .description("숙소 환불 규정"),
-                               fieldWithPath("price")
-                                       .attributes(field("path", "price"))
-                                       .description("숙소 가격"),
-                               fieldWithPath("isInWishlist")
-                                       .attributes(field("path", "isInWishlist"))
-                                       .description("위시리스트에 저장된 숙소인지 여부"),
-                               fieldWithPath("wishlistId")
-                                       .attributes(field("path", "wishlistId"))
-                                       .optional()
-                                       .description("저장된 위시리스트 ID (isInWishlist = true일 때만, false면 null)"),
-                               fieldWithPath("avgRate")
-                                       .attributes(field("path", "avgRate"))
-                                       .description("평균 평점"),
-                               fieldWithPath("images.thumbnail")
-                                       .attributes(field("path", "thumbnail"))
-                                       .description("숙소 썸네일 이미지"),
-                               fieldWithPath("images.others")
-                                       .attributes(field("path", "others"))
-                                       .description("숙소 썸네일 외 모든 이미지 목록"),
-                               fieldWithPath("amenities")
-                                       .description("숙소 보유 편의시설 목록"),
-                               fieldWithPath("reviews[].guestId")
-                                       .attributes(field("path", "guestId"))
-                                       .description("리뷰 작성자 ID"),
-                               fieldWithPath("reviews[].guestName")
-                                       .attributes(field("path", "guestName"))
-                                       .description("리뷰 작성자명"),
-                               fieldWithPath("reviews[].profileUrl")
-                                       .attributes(field("path", "profileUrl"))
-                                       .description("리뷰 작성자 프로필 이미지"),
-                               fieldWithPath("reviews[].guestCreatedDate")
-                                       .attributes(field("path", "guestCreatedDate"))
-                                       .description("리뷰 작성자 가입일"),
-                               fieldWithPath("reviews[].reviewCreatedDate")
-                                       .attributes(field("path", "reviewCreatedDate"))
-                                       .description("리뷰 작성일"),
-                               fieldWithPath("reviews[].rating")
-                                       .attributes(field("path", "rating"))
-                                       .description("리뷰 평점"),
-                               fieldWithPath("reviews[].content")
-                                       .attributes(field("path", "content"))
-                                       .description("리뷰 내용")
-                       )
-               ));
+               .andDo(document("get-detail-accommodation",
+                       resource(
+                               builder()
+                                       .tag(ACCOMMODATION_API_TAG)
+                                       .summary("특정 숙소 상세 조회")
+                                       .pathParameters(parameterWithName("id").description("숙소 ID"))
+                                       .requestHeaders(headerWithName(AUTHORIZATION).optional().description("Bearer {액세스 토큰}"))
+                                       .responseFields(
+                                               fieldWithPath("accommodationId")
+                                                       .type(NUMBER)
+                                                       .description("숙소 ID"),
+                                               fieldWithPath("title")
+                                                       .type(STRING)
+                                                       .description("숙소 제목"),
+                                               fieldWithPath("maxPeople")
+                                                       .type(NUMBER)
+                                                       .optional()
+                                                       .description("숙소 최대 수용 인원"),
+                                               fieldWithPath("address")
+                                                       .type(STRING)
+                                                       .description("숙소 주소"),
+                                               fieldWithPath("mapX")
+                                                       .type(NUMBER)
+                                                       .description("숙소 X 좌표 값"),
+                                               fieldWithPath("mapY")
+                                                       .type(NUMBER)
+                                                       .description("숙소 Y 좌표 값"),
+                                               fieldWithPath("checkIn")
+                                                       .type(STRING)
+                                                       .optional()
+                                                       .description("숙소 체크인 시간"),
+                                               fieldWithPath("checkOut")
+                                                       .type(STRING)
+                                                       .optional()
+                                                       .description("숙소 체크아웃 시간"),
+                                               fieldWithPath("description")
+                                                       .type(STRING)
+                                                       .optional()
+                                                       .description("숙소 상세 설명"),
+                                               fieldWithPath("number")
+                                                       .type(STRING)
+                                                       .optional()
+                                                       .description("숙소 번호"),
+                                               fieldWithPath("refundRegulation")
+                                                       .type(STRING)
+                                                       .optional()
+                                                       .description("숙소 환불 규정"),
+                                               fieldWithPath("price")
+                                                       .type(NUMBER)
+                                                       .description("숙소 가격"),
+                                               fieldWithPath("isInWishlist")
+                                                       .type(BOOLEAN)
+                                                       .description("위시리스트에 저장된 숙소인지 여부"),
+                                               fieldWithPath("wishlistId")
+                                                       .type(NUMBER)
+                                                       .optional()
+                                                       .description("저장된 위시리스트 ID (isInWishlist = true일 때만, false면 null)"),
+                                               fieldWithPath("avgRate")
+                                                       .type(NUMBER)
+                                                       .description("평균 평점"),
+                                               fieldWithPath("images.thumbnail")
+                                                       .type(STRING)
+                                                       .description("숙소 썸네일 이미지"),
+                                               fieldWithPath("images.others")
+                                                       .type(ARRAY)
+                                                       .attributes(key("itemsType").value("string"))
+                                                       .description("숙소 썸네일 외 모든 이미지 목록"),
+                                               fieldWithPath("amenities")
+                                                       .type(ARRAY)
+                                                       .attributes(key("itemsType").value("string"))
+                                                       .description("숙소 보유 편의시설 목록"),
+                                               fieldWithPath("reviews[].guestId")
+                                                       .type(NUMBER)
+                                                       .description("리뷰 작성자 ID"),
+                                               fieldWithPath("reviews[].guestName")
+                                                       .type(STRING)
+                                                       .description("리뷰 작성자명"),
+                                               fieldWithPath("reviews[].profileUrl")
+                                                       .type(STRING)
+                                                       .description("리뷰 작성자 프로필 이미지"),
+                                               fieldWithPath("reviews[].guestCreatedDate")
+                                                       .type(STRING)
+                                                       .description("리뷰 작성자 가입일"),
+                                               fieldWithPath("reviews[].reviewCreatedDate")
+                                                       .type(STRING)
+                                                       .description("리뷰 작성일"),
+                                               fieldWithPath("reviews[].rating")
+                                                       .type(NUMBER)
+                                                       .description("리뷰 평점"),
+                                               fieldWithPath("reviews[].content")
+                                                       .type(STRING)
+                                                       .description("리뷰 내용")
+                                       )
+                                       .responseSchema(schema("DetailAccommodationResponse"))
+                                       .build()
+                       )));
     }
 }

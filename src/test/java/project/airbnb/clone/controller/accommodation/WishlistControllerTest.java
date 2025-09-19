@@ -4,7 +4,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import project.airbnb.clone.WithMockGuest;
 import project.airbnb.clone.controller.RestDocsTestSupport;
@@ -20,32 +19,36 @@ import project.airbnb.clone.service.jwt.TokenService;
 
 import java.util.List;
 
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
+import static com.epages.restdocs.apispec.ResourceSnippetParameters.builder;
+import static com.epages.restdocs.apispec.Schema.schema;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
-import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.payload.JsonFieldType.ARRAY;
+import static org.springframework.restdocs.payload.JsonFieldType.NUMBER;
+import static org.springframework.restdocs.payload.JsonFieldType.STRING;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.snippet.Attributes.key;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static project.airbnb.clone.config.RestDocsConfig.field;
 
 @WebMvcTest(WishlistController.class)
 class WishlistControllerTest extends RestDocsTestSupport {
 
-    @MockitoBean
-    WishlistService wishlistService;
-    @MockitoBean
-    TokenService tokenService;
+    private static final String WISHLIST_API_TAG = "Wishlist API";
+
+    @MockitoBean WishlistService wishlistService;
+    @MockitoBean TokenService tokenService;
 
     @Test
     @DisplayName("숙소 위시리스트 등록")
@@ -60,28 +63,32 @@ class WishlistControllerTest extends RestDocsTestSupport {
         //when
         //then
         mockMvc.perform(post("/api/wishlists")
-                       .header(AUTHORIZATION,"Bearer {access-token}")
+                       .header(AUTHORIZATION, "Bearer {access-token}")
                        .contentType(MediaType.APPLICATION_JSON_VALUE)
                        .content(creatJson(requestDto))
                )
                .andExpectAll(
+                       handler().handlerType(WishlistController.class),
+                       handler().methodName("createWishlist"),
                        status().isCreated(),
                        jsonPath("$.wishlistId").value(responseDto.wishlistId()),
                        jsonPath("$.wishlistName").value(responseDto.wishlistName())
                )
-               .andDo(restDocs.document(
-                       requestHeaders(
-                               headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}")
-                       ),
-                       requestFields(
-                               fieldWithPath("wishlistName")
-                                       .description("생성할 위시리스트 이름")
-                                       .attributes(field("constraints", "1 ~ 50자 제한"))
-                                       .type(JsonFieldType.STRING)
-                               )
-                       ,responseFields(
-                               fieldWithPath("wishlistId").description("생성된 위시리스트 아이디"),
-                               fieldWithPath("wishlistName").description("생성된 위시리스트 이름")
+               .andDo(document("create-wishlist",
+                       resource(
+                               builder()
+                                       .tag(WISHLIST_API_TAG)
+                                       .summary("새로운 위시리스트 생성")
+                                       .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
+                                       .requestFields(fieldWithPath("wishlistName")
+                                               .description("생성할 위시리스트 이름 (제약사항 : 1~50자)")
+                                               .type(STRING))
+                                       .responseFields(
+                                               fieldWithPath("wishlistId").type(NUMBER).description("생성된 위시리스트 아이디"),
+                                               fieldWithPath("wishlistName").type(STRING).description("생성된 위시리스트 이름"))
+                                       .requestSchema(schema("WishlistCreateRequest"))
+                                       .responseSchema(schema("WishlistCreateResponse"))
+                                       .build()
                        )
                ));
     }
@@ -96,15 +103,27 @@ class WishlistControllerTest extends RestDocsTestSupport {
         //when
         //then
         mockMvc.perform(post("/api/wishlists/{wishlistId}/accommodations", 1L)
-                       .header(AUTHORIZATION,"Bearer {access-token}")
+                       .header(AUTHORIZATION, "Bearer {access-token}")
                        .contentType(MediaType.APPLICATION_JSON_VALUE)
                        .content(creatJson(requestDto))
                )
-               .andExpect(status().isCreated())
-               .andDo(restDocs.document(
-                       requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}")),
-                       pathParameters(parameterWithName("wishlistId").description("숙소를 저장할 위시리스트 ID")),
-                       requestFields(fieldWithPath("accommodationId").description("저장할 숙소 ID"))
+               .andExpectAll(
+                       handler().handlerType(WishlistController.class),
+                       handler().methodName("addAccommodation"),
+                       status().isCreated()
+               )
+               .andDo(document("add-accommodation-to-wishlist",
+                       resource(
+                               builder()
+                                       .tag(WISHLIST_API_TAG)
+                                       .summary("위시리스트에 숙소 저장")
+                                       .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
+                                       .pathParameters(parameterWithName("wishlistId").description("숙소를 저장할 위시리스트 ID"))
+                                       .requestFields(fieldWithPath("accommodationId").type(NUMBER)
+                                                                                      .description("저장할 숙소 ID"))
+                                       .requestSchema(schema("AddAccommodationToWishlistRequest"))
+                                       .build()
+                       )
                ));
     }
 
@@ -117,14 +136,24 @@ class WishlistControllerTest extends RestDocsTestSupport {
         //when
         //then
         mockMvc.perform(delete("/api/wishlists/{wishlistId}/accommodations/{accommodationId}", 1L, 1L)
-                       .header(AUTHORIZATION,"Bearer {access-token}")
+                       .header(AUTHORIZATION, "Bearer {access-token}")
                )
-               .andExpect(status().isNoContent())
-               .andDo(restDocs.document(
-                       requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}")),
-                       pathParameters(
-                               parameterWithName("wishlistId").description("숙소를 제거할 위시리스트 ID"),
-                               parameterWithName("accommodationId").description("제거할 숙소 ID")
+               .andExpectAll(
+                       handler().handlerType(WishlistController.class),
+                       handler().methodName("removeAccommodation"),
+                       status().isNoContent()
+               )
+               .andDo(document("remove-accommodation-from-wishlist",
+                       resource(
+                               builder()
+                                       .tag(WISHLIST_API_TAG)
+                                       .summary("위시리스트에서 숙소 제거")
+                                       .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
+                                       .pathParameters(
+                                               parameterWithName("wishlistId").description("숙소를 제거할 위시리스트 ID"),
+                                               parameterWithName("accommodationId").description("제거할 숙소 ID")
+                                       )
+                                       .build()
                        )
                ));
     }
@@ -134,7 +163,7 @@ class WishlistControllerTest extends RestDocsTestSupport {
     @WithMockGuest
     void updateWishlistName() throws Exception {
         //given
-        WishlistUpdateReqDto requestDto = new WishlistUpdateReqDto("test-new-wishlist-name");
+        WishlistUpdateReqDto requestDto = new WishlistUpdateReqDto("new-wishlist-name");
 
         //when
         //then
@@ -143,13 +172,25 @@ class WishlistControllerTest extends RestDocsTestSupport {
                        .contentType(MediaType.APPLICATION_JSON_VALUE)
                        .content(creatJson(requestDto))
                )
-               .andExpect(status().isNoContent())
-               .andDo(restDocs.document(
-                       requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}")),
-                       pathParameters(parameterWithName("wishlistId").description("이름을 변경할 위시리스트 ID")),
-                       requestFields(fieldWithPath("wishlistName")
-                               .attributes(field("constraints", "1 ~ 50자 제한"))
-                               .description("새로 변경할 위시리스트의 이름"))
+               .andExpectAll(
+                       handler().handlerType(WishlistController.class),
+                       handler().methodName("updateWishlistName"),
+                       status().isNoContent()
+               )
+               .andDo(document("update-wishlist-name",
+                       resource(
+                               builder()
+                                       .tag(WISHLIST_API_TAG)
+                                       .summary("위시리스트 이름 변경")
+                                       .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
+                                       .pathParameters(parameterWithName("wishlistId").description("이름을 변경할 위시리스트 ID"))
+                                       .requestFields(fieldWithPath("wishlistName")
+                                               .type(STRING)
+                                               .description("새로 변경할 위시리스트의 이름 (제약사항 : 1~50자)")
+                                       )
+                                       .requestSchema(schema("WishlistNameUpdateRequest"))
+                                       .build()
+                       )
                ));
     }
 
@@ -162,12 +203,22 @@ class WishlistControllerTest extends RestDocsTestSupport {
         //when
         //then
         mockMvc.perform(delete("/api/wishlists/{wishlistId}", 1L)
-                       .header(AUTHORIZATION,"Bearer {access-token}")
+                       .header(AUTHORIZATION, "Bearer {access-token}")
                )
-               .andExpect(status().isNoContent())
-               .andDo(restDocs.document(
-                       requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}")),
-                       pathParameters(parameterWithName("wishlistId").description("제거할 위시리스트 ID"))
+               .andExpectAll(
+                       handler().handlerType(WishlistController.class),
+                       handler().methodName("removeWishlist"),
+                       status().isNoContent()
+               )
+               .andDo(document("remove-wishlist",
+                       resource(
+                               builder()
+                                       .tag(WISHLIST_API_TAG)
+                                       .summary("위시리스트 제거")
+                                       .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
+                                       .pathParameters(parameterWithName("wishlistId").description("제거할 위시리스트 ID"))
+                                       .build()
+                       )
                ));
     }
 
@@ -191,24 +242,53 @@ class WishlistControllerTest extends RestDocsTestSupport {
                        .header(AUTHORIZATION, "Bearer {access-token}")
                )
                .andExpectAll(
+                       handler().handlerType(WishlistController.class),
+                       handler().methodName("getAccommodationsFromWishlist"),
                        status().isOk(),
                        jsonPath("$.length()").value(response.size()),
                        jsonPath("$[0].accommodationId").value(response.get(0).accommodationId()),
                        jsonPath("$[1].accommodationId").value(response.get(1).accommodationId())
                )
-               .andDo(restDocs.document(
-                       requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}")),
-                       pathParameters(parameterWithName("wishlistId").description("조회할 위시리스트 ID")),
-                       responseFields(
-                               fieldWithPath("[].accommodationId").attributes(field("path", "accommodationId")).description("숙소 ID"),
-                               fieldWithPath("[].wishlistName").attributes(field("path", "wishlistName")).description("위시리스트 이름"),
-                               fieldWithPath("[].title").attributes(field("path", "title")).description("숙소 제목"),
-                               fieldWithPath("[].description").attributes(field("path", "description")).description("숙소 설명"),
-                               fieldWithPath("[].mapX").attributes(field("path", "mapX")).description("숙소 위치 X 좌표"),
-                               fieldWithPath("[].mapY").attributes(field("path", "mapY")).description("숙소 위치 Y 좌표"),
-                               fieldWithPath("[].avgRate").attributes(field("path", "avgRate")).description("숙소 평균 평점"),
-                               fieldWithPath("[].imageUrls").attributes(field("path", "imageUrls")).description("숙소 전체 이미지 목록"),
-                               fieldWithPath("[].memo").attributes(field("path", "memo")).optional().description("작성한 메모 내용")
+               .andDo(document("get-wishlist",
+                       resource(
+                               builder()
+                                       .tag(WISHLIST_API_TAG)
+                                       .summary("위시리스트 조회")
+                                       .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
+                                       .pathParameters(parameterWithName("wishlistId").description("조회할 위시리스트 ID"))
+                                       .responseFields(
+                                               fieldWithPath("[].accommodationId")
+                                                       .type(NUMBER)
+                                                       .description("숙소 ID"),
+                                               fieldWithPath("[].wishlistName")
+                                                       .type(STRING)
+                                                       .description("위시리스트 이름"),
+                                               fieldWithPath("[].title")
+                                                       .type(STRING)
+                                                       .description("숙소 제목"),
+                                               fieldWithPath("[].description")
+                                                       .type(STRING)
+                                                       .description("숙소 설명"),
+                                               fieldWithPath("[].mapX")
+                                                       .type(NUMBER)
+                                                       .description("숙소 위치 X 좌표"),
+                                               fieldWithPath("[].mapY")
+                                                       .type(NUMBER)
+                                                       .description("숙소 위치 Y 좌표"),
+                                               fieldWithPath("[].avgRate")
+                                                       .type(NUMBER)
+                                                       .description("숙소 평균 평점"),
+                                               fieldWithPath("[].imageUrls")
+                                                       .attributes(key("itemsType").value("string"))
+                                                       .type(ARRAY)
+                                                       .description("숙소 전체 이미지 목록"),
+                                               fieldWithPath("[].memo")
+                                                       .optional()
+                                                       .type(STRING)
+                                                       .description("작성한 메모 내용")
+                                       )
+                                       .responseSchema(schema("WishlistDetailResponse"))
+                                       .build()
                        )
                ));
     }
@@ -227,16 +307,28 @@ class WishlistControllerTest extends RestDocsTestSupport {
                        .contentType(MediaType.APPLICATION_JSON_VALUE)
                        .content(creatJson(requestDto))
                )
-               .andExpect(status().isNoContent())
-               .andDo(restDocs.document(
-                       requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}")),
-                       pathParameters(
-                               parameterWithName("wishlistId").description("메모를 수정(저장)할 숙소가 있는 위시리스트 ID"),
-                               parameterWithName("accommodationId").description("메모 수정(저장) 대상 숙소 ID")
-                       ),
-                       requestFields(fieldWithPath("memo")
-                               .attributes(field("constraints", "1 ~ 250자 제한"))
-                               .description("수정(저장)할 메모 내용"))
+               .andExpectAll(
+                       handler().handlerType(WishlistController.class),
+                       handler().methodName("updateMemo"),
+                       status().isNoContent()
+               )
+               .andDo(document("update-wishlist-memo",
+                       resource(
+                               builder()
+                                       .tag(WISHLIST_API_TAG)
+                                       .summary("위시리스트 숙소 메모 수정")
+                                       .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
+                                       .pathParameters(
+                                               parameterWithName("wishlistId").description("메모를 수정(저장)할 숙소가 있는 위시리스트 ID"),
+                                               parameterWithName("accommodationId").description("메모 수정(저장) 대상 숙소 ID")
+                                       )
+                                       .requestFields(fieldWithPath("memo")
+                                               .description("수정(저장)할 메모 내용 (제약사항 : 1~250자)")
+                                               .type(STRING)
+                                       )
+                                       .requestSchema(schema("UpdateMemoRequest"))
+                                       .build()
+                       )
                ));
     }
 
@@ -258,6 +350,8 @@ class WishlistControllerTest extends RestDocsTestSupport {
                        .header(AUTHORIZATION, "Bearer {access-token}")
                )
                .andExpectAll(
+                       handler().handlerType(WishlistController.class),
+                       handler().methodName("getAllWishlists"),
                        status().isOk(),
                        jsonPath("$.length()").value(response.size()),
 
@@ -271,13 +365,28 @@ class WishlistControllerTest extends RestDocsTestSupport {
                        jsonPath("$[1].thumbnailUrl").value(response.get(1).thumbnailUrl()),
                        jsonPath("$[1].savedAccommodations").value(response.get(1).savedAccommodations())
                )
-               .andDo(restDocs.document(
-                       requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}")),
-                       responseFields(
-                               fieldWithPath("[].wishlistId").attributes(field("path", "wishlistId")).description("위시리스트 ID"),
-                               fieldWithPath("[].name").attributes(field("path", "name")).description("위시리스트 이름"),
-                               fieldWithPath("[].thumbnailUrl").attributes(field("path", "thumbnailUrl")).description("해당 위시리스트에 가장 최근 저장된 숙소의 썸네일"),
-                               fieldWithPath("[].savedAccommodations").attributes(field("path", "savedAccommodations")).description("위시리스트에 저장된 숙소의 개수")
+               .andDo(document("get-all-wishlists",
+                       resource(
+                               builder()
+                                       .tag(WISHLIST_API_TAG)
+                                       .summary("위시리스트 목록 조회")
+                                       .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
+                                       .responseFields(
+                                               fieldWithPath("[].wishlistId")
+                                                       .type(NUMBER)
+                                                       .description("위시리스트 ID"),
+                                               fieldWithPath("[].name")
+                                                       .type(STRING)
+                                                       .description("위시리스트 이름"),
+                                               fieldWithPath("[].thumbnailUrl")
+                                                       .type(STRING)
+                                                       .description("해당 위시리스트에 가장 최근 저장된 숙소의 썸네일"),
+                                               fieldWithPath("[].savedAccommodations")
+                                                       .type(NUMBER)
+                                                       .description("위시리스트에 저장된 숙소의 개수")
+                                       )
+                                       .responseSchema(schema("WishlistsResponse"))
+                                       .build()
                        )
                ));
     }
