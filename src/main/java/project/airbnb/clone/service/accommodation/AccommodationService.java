@@ -2,23 +2,25 @@ package project.airbnb.clone.service.accommodation;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import project.airbnb.clone.common.events.view.ViewHistoryEvent;
 import project.airbnb.clone.consts.DayType;
 import project.airbnb.clone.consts.Season;
 import project.airbnb.clone.dto.PageResponseDto;
 import project.airbnb.clone.dto.accommodation.AccSearchCondDto;
-import project.airbnb.clone.repository.dto.DetailAccommodationQueryDto;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailImageDto;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailReviewDto;
 import project.airbnb.clone.dto.accommodation.FilteredAccListResDto;
-import project.airbnb.clone.repository.dto.ImageDataQueryDto;
-import project.airbnb.clone.repository.dto.MainAccListQueryDto;
 import project.airbnb.clone.dto.accommodation.MainAccListResDto;
 import project.airbnb.clone.dto.accommodation.MainAccResDto;
+import project.airbnb.clone.repository.dto.DetailAccommodationQueryDto;
+import project.airbnb.clone.repository.dto.ImageDataQueryDto;
+import project.airbnb.clone.repository.dto.MainAccListQueryDto;
 import project.airbnb.clone.repository.query.AccommodationQueryRepository;
 import project.airbnb.clone.service.DateManager;
 
@@ -35,6 +37,7 @@ import static java.util.stream.Collectors.toList;
 public class AccommodationService {
 
     private final DateManager dateManager;
+    private final ApplicationEventPublisher eventPublisher;
     private final AccommodationQueryRepository accommodationQueryRepository;
 
     public List<MainAccResDto> getAccommodations(Long guestId) {
@@ -87,10 +90,14 @@ public class AccommodationService {
         DayType dayType = dateManager.getDayType(now);
 
         DetailAccommodationQueryDto detailAccQueryDto = accommodationQueryRepository.findAccommodation(accId, guestId, season, dayType)
-                                                                                    .orElseThrow(() -> new EntityNotFoundException("Cannot found accommodation from : " + accId));
+                                                                                    .orElseThrow(() -> new EntityNotFoundException("Accommodation with id " + accId + "cannot be found"));
         List<ImageDataQueryDto> images = accommodationQueryRepository.findImages(accId);
         List<String> amenities = accommodationQueryRepository.findAmenities(accId);
         List<DetailReviewDto> reviews = accommodationQueryRepository.findReviews(accId);
+
+        if (guestId != null) {
+            eventPublisher.publishEvent(new ViewHistoryEvent(accId, guestId));
+        }
 
         String thumbnail = images.stream()
                                  .filter(ImageDataQueryDto::isThumbnail)
