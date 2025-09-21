@@ -16,6 +16,7 @@ import project.airbnb.clone.consts.Season;
 import project.airbnb.clone.dto.accommodation.AccSearchCondDto;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailReviewDto;
 import project.airbnb.clone.dto.accommodation.FilteredAccListResDto;
+import project.airbnb.clone.dto.accommodation.ViewHistoryDto;
 import project.airbnb.clone.entity.QAccommodation;
 import project.airbnb.clone.entity.QAccommodationAmenity;
 import project.airbnb.clone.entity.QAccommodationImage;
@@ -25,6 +26,7 @@ import project.airbnb.clone.entity.QAreaCode;
 import project.airbnb.clone.entity.QGuest;
 import project.airbnb.clone.entity.QReservation;
 import project.airbnb.clone.entity.QReview;
+import project.airbnb.clone.entity.QViewHistory;
 import project.airbnb.clone.entity.QWishlist;
 import project.airbnb.clone.entity.QWishlistAccommodation;
 import project.airbnb.clone.repository.dto.AccAllImagesQueryDto;
@@ -33,6 +35,7 @@ import project.airbnb.clone.repository.dto.FilteredAccListQueryDto;
 import project.airbnb.clone.repository.dto.ImageDataQueryDto;
 import project.airbnb.clone.repository.dto.MainAccListQueryDto;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -53,6 +56,7 @@ import static project.airbnb.clone.entity.QGuest.guest;
 import static project.airbnb.clone.entity.QReservation.reservation;
 import static project.airbnb.clone.entity.QReview.review;
 import static project.airbnb.clone.entity.QSigunguCode.sigunguCode;
+import static project.airbnb.clone.entity.QViewHistory.viewHistory;
 import static project.airbnb.clone.entity.QWishlist.wishlist;
 import static project.airbnb.clone.entity.QWishlistAccommodation.wishlistAccommodation;
 
@@ -70,7 +74,6 @@ public class AccommodationQueryRepository {
         QReview rv = review;
         QAreaCode ac = areaCode;
         QWishlistAccommodation wa = wishlistAccommodation;
-        QWishlist w = wishlist;
 
         return queryFactory
                 .select(constructor(MainAccListQueryDto.class,
@@ -268,6 +271,42 @@ public class AccommodationQueryRepository {
                 .join(rv.guest, g)
                 .where(rs.accommodation.id.eq(accId))
                 .orderBy(rv.createdAt.desc())
+                .fetch();
+    }
+
+    public List<ViewHistoryDto> findViewHistories(Long guestId, Season season, DayType dayType) {
+        QAccommodation acc = accommodation;
+        QAccommodationImage ai = accommodationImage;
+        QAccommodationPrice ap = accommodationPrice;
+        QReservation rs = reservation;
+        QReview rv = review;
+        QWishlistAccommodation wa = wishlistAccommodation;
+        QViewHistory vh = viewHistory;
+
+        return queryFactory
+                .select(constructor(ViewHistoryDto.class,
+                        vh.viewedAt,
+                        acc.id,
+                        acc.title,
+                        rv.rating.avg().coalesce(0.0),
+                        ai.imageUrl,
+                        wa.isNotNull(),
+                        wa.wishlist.id
+                ))
+                .from(vh)
+                .join(vh.accommodation, acc)
+                .join(ai).on(ai.accommodation.eq(acc)
+                                             .and(ai.thumbnail.isTrue()))
+                .join(ap).on(ap.accommodation.eq(acc)
+                                             .and(ap.season.eq(season).and(ap.dayType.eq(dayType))))
+                .leftJoin(wa).on(wa.accommodation.eq(acc)
+                                                 .and(wa.wishlist.guest.id.eq(guestId)))
+                .leftJoin(rs).on(rs.accommodation.eq(acc))
+                .leftJoin(rv).on(rv.reservation.eq(rs))
+                .where(vh.guest.id.eq(guestId)
+                                  .and(vh.viewedAt.after(LocalDateTime.now().minusDays(30))))
+                .groupBy(vh.viewedAt, acc.id, acc.title, ai.imageUrl, wa)
+                .orderBy(vh.viewedAt.desc())
                 .fetch();
     }
 

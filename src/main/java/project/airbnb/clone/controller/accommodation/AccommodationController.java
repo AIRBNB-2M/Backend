@@ -14,6 +14,7 @@ import project.airbnb.clone.dto.accommodation.AccSearchCondDto;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto;
 import project.airbnb.clone.dto.accommodation.FilteredAccListResDto;
 import project.airbnb.clone.dto.accommodation.MainAccResDto;
+import project.airbnb.clone.dto.accommodation.ViewHistoryResDto;
 import project.airbnb.clone.service.accommodation.AccommodationService;
 
 import java.util.List;
@@ -28,7 +29,6 @@ public class AccommodationController {
     @GetMapping
     public ResponseEntity<List<MainAccResDto>> getAccommodations(@CurrentGuestId(required = false) Long id) {
         List<MainAccResDto> result = accommodationService.getAccommodations(id);
-
         return ResponseEntity.ok(result);
     }
 
@@ -44,6 +44,12 @@ public class AccommodationController {
     public ResponseEntity<DetailAccommodationResDto> getAccommodation(@PathVariable("id") Long accId,
                                                                       @CurrentGuestId(required = false) Long guestId) {
         DetailAccommodationResDto result = accommodationService.getDetailAccommodation(accId, guestId);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/recent")
+    public ResponseEntity<List<ViewHistoryResDto>> getRecentViewAccommodations(@CurrentGuestId Long guestId) {
+        List<ViewHistoryResDto> result = accommodationService.getRecentViewAccommodations(guestId);
         return ResponseEntity.ok(result);
     }
 }

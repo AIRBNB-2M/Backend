@@ -18,6 +18,7 @@ import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailRe
 import project.airbnb.clone.dto.accommodation.FilteredAccListResDto;
 import project.airbnb.clone.dto.accommodation.MainAccListResDto;
 import project.airbnb.clone.dto.accommodation.MainAccResDto;
+import project.airbnb.clone.dto.accommodation.ViewHistoryResDto;
 import project.airbnb.clone.repository.dto.DetailAccommodationQueryDto;
 import project.airbnb.clone.repository.dto.ImageDataQueryDto;
 import project.airbnb.clone.repository.dto.MainAccListQueryDto;
@@ -25,7 +26,9 @@ import project.airbnb.clone.repository.query.AccommodationQueryRepository;
 import project.airbnb.clone.service.DateManager;
 
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.groupingBy;
@@ -111,5 +114,23 @@ public class AccommodationService {
         DetailImageDto detailImageDto = new DetailImageDto(thumbnail, others);
 
         return DetailAccommodationResDto.from(detailAccQueryDto, detailImageDto, amenities, reviews);
+    }
+
+    public List<ViewHistoryResDto> getRecentViewAccommodations(Long guestId) {
+        LocalDate now = LocalDate.now();
+        Season season = dateManager.getSeason(now);
+        DayType dayType = dateManager.getDayType(now);
+
+        return accommodationQueryRepository.findViewHistories(guestId, season, dayType)
+                                           .stream()
+                                           .collect(Collectors.groupingBy(
+                                                   dto -> dto.viewDate().toLocalDate(),
+                                                   LinkedHashMap::new,
+                                                   Collectors.toList()
+                                           ))
+                                           .entrySet()
+                                           .stream()
+                                           .map(e -> new ViewHistoryResDto(e.getKey(), e.getValue()))
+                                           .toList();
     }
 }
