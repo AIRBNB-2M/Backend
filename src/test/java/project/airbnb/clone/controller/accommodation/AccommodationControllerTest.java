@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import project.airbnb.clone.WithMockGuest;
 import project.airbnb.clone.controller.RestDocsTestSupport;
 import project.airbnb.clone.dto.PageResponseDto;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto;
@@ -12,6 +13,8 @@ import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailRe
 import project.airbnb.clone.dto.accommodation.FilteredAccListResDto;
 import project.airbnb.clone.dto.accommodation.MainAccListResDto;
 import project.airbnb.clone.dto.accommodation.MainAccResDto;
+import project.airbnb.clone.dto.accommodation.ViewHistoryDto;
+import project.airbnb.clone.dto.accommodation.ViewHistoryResDto;
 import project.airbnb.clone.service.accommodation.AccommodationService;
 import project.airbnb.clone.service.jwt.TokenService;
 
@@ -380,6 +383,80 @@ class AccommodationControllerTest extends RestDocsTestSupport {
                                                        .description("리뷰 내용")
                                        )
                                        .responseSchema(schema("DetailAccommodationResponse"))
+                                       .build()
+                       )));
+    }
+
+    @Test
+    @DisplayName("최근 조회 숙소 이력")
+    @WithMockGuest
+    void getRecentViewAccommodations() throws Exception {
+        //given
+        LocalDateTime today = LocalDateTime.now();
+        List<ViewHistoryDto> todays = List.of(
+                new ViewHistoryDto(today.minusHours(1), 1L, "호텔A", 4.5, "https://example.com/a.jpg", true, 1L),
+                new ViewHistoryDto(today.minusHours(2), 2L, "호텔B", 4.8, "https://example.com/b.jpg", false, null),
+                new ViewHistoryDto(today.minusHours(3), 3L, "호텔C", 4.3, "https://example.com/c.jpg", true, 3L)
+        );
+
+        LocalDateTime yesterday = LocalDateTime.now().minusDays(1);
+        List<ViewHistoryDto> yesterdays = List.of(
+                new ViewHistoryDto(yesterday.minusHours(1), 4L, "호텔D", 4.0, "https://example.com/d.jpg", false, null),
+                new ViewHistoryDto(yesterday.minusHours(2), 5L, "호텔E", 3.9, "https://example.com/e.jpg", true, 5L)
+        );
+
+        List<ViewHistoryResDto> result = List.of(new ViewHistoryResDto(today.toLocalDate(), todays), new ViewHistoryResDto(yesterday.toLocalDate(), yesterdays));
+        given(accommodationService.getRecentViewAccommodations(any())).willReturn(result);
+
+        //when
+        //then
+        mockMvc.perform(get("/api/accommodations/recent").header(AUTHORIZATION, "Bearer access-token"))
+               .andExpectAll(
+                       handler().handlerType(AccommodationController.class),
+                       handler().methodName("getRecentViewAccommodations"),
+                       status().isOk(),
+                       jsonPath("$.length()").value(result.size()),
+                       jsonPath("$[0].accommodations", hasSize(result.get(0).accommodations().size())),
+                       jsonPath("$[1].accommodations", hasSize(result.get(1).accommodations().size()))
+               )
+               .andDo(document("recent-view-accommodations",
+                       resource(
+                               builder()
+                                       .tag(ACCOMMODATION_API_TAG)
+                                       .summary("최근 조회한 숙소 목록")
+                                       .description("최근 30일 숙소 조회 이력을 응답합니다.")
+                                       .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
+                                       .responseFields(
+                                               fieldWithPath("[].date")
+                                                       .type(STRING)
+                                                       .description("조회일 (내림차순)"),
+                                               fieldWithPath("[].accommodations")
+                                                       .type(ARRAY)
+                                                       .description("숙소 목록 (시간 내림차순)"),
+                                               fieldWithPath("[].accommodations[].viewDate")
+                                                       .type(STRING)
+                                                       .description("조회일(시간 포함)"),
+                                               fieldWithPath("[].accommodations[].accommodationId")
+                                                       .type(NUMBER)
+                                                       .description("숙소 ID"),
+                                               fieldWithPath("[].accommodations[].title")
+                                                       .type(STRING)
+                                                       .description("숙소 이름"),
+                                               fieldWithPath("[].accommodations[].avgRate")
+                                                       .type(NUMBER)
+                                                       .description("평균 평점"),
+                                               fieldWithPath("[].accommodations[].thumbnailUrl")
+                                                       .type(STRING)
+                                                       .description("썸네일 URL"),
+                                               fieldWithPath("[].accommodations[].isInWishlist")
+                                                       .type(BOOLEAN)
+                                                       .description("위시리스트에 저장된 숙소인지 여부"),
+                                               fieldWithPath("[].accommodations[].wishlistId")
+                                                       .type(NUMBER)
+                                                       .optional()
+                                                       .description("저장된 위시리스트 ID (isInWishlist = true일 때만, false면 null)")
+                                       )
+                                       .responseSchema(schema("RecentViewAccommodationsResponse"))
                                        .build()
                        )));
     }
