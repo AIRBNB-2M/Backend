@@ -12,6 +12,7 @@ import project.airbnb.clone.consts.DayType;
 import project.airbnb.clone.consts.Season;
 import project.airbnb.clone.dto.PageResponseDto;
 import project.airbnb.clone.dto.accommodation.AccSearchCondDto;
+import project.airbnb.clone.dto.accommodation.AccommodationPriceResDto;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailImageDto;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailReviewDto;
@@ -132,5 +133,13 @@ public class AccommodationService {
                                            .stream()
                                            .map(e -> new ViewHistoryResDto(e.getKey(), e.getValue()))
                                            .toList();
+    }
+
+    public AccommodationPriceResDto getAccommodationPrice(Long accId, LocalDate date) {
+        Season season = dateManager.getSeason(date);
+        DayType dayType = dateManager.getDayType(date);
+        int price = accommodationQueryRepository.getAccommodationPrice(accId, season, dayType);
+
+        return new AccommodationPriceResDto(accId, date, price);
     }
 }

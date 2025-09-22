@@ -304,6 +304,15 @@ public class AccommodationQueryRepository {
                 .fetch();
     }
 
+    public Integer getAccommodationPrice(Long accId, Season season, DayType dayType) {
+        QAccommodationPrice ap = accommodationPrice;
+
+        return queryFactory.select(ap.price)
+                           .from(ap)
+                           .where(ap.accommodation.id.eq(accId).and(ap.season.eq(season).and(ap.dayType.eq(dayType))))
+                           .fetchOne();
+    }
+
     private JPQLQuery<Double> avgRateSubquery(Long accId) {
         QReservation rs = reservation;
         QReview rv = review;
