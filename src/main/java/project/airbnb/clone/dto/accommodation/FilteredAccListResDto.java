@@ -12,7 +12,8 @@ public record FilteredAccListResDto(
         int reviewCount,
         List<String> imageUrls,
         boolean isInWishlist,
-        Long wishlistId) {
+        Long wishlistId,
+        String wishlistName) {
 
     public static FilteredAccListResDto from(FilteredAccListQueryDto queryDto, List<String> imageUrls) {
         return new FilteredAccListResDto(
@@ -23,7 +24,8 @@ public record FilteredAccListResDto(
                 queryDto.reviewCount(),
                 imageUrls,
                 queryDto.isInWishlist(),
-                queryDto.wishlistId()
+                queryDto.wishlistId(),
+                queryDto.wishlistName()
         );
     }
 }

@@ -9,5 +9,6 @@ public record ViewHistoryDto(
         double avgRate,
         String thumbnailUrl,
         boolean isInWishlist,
-        Long wishlistId) {
+        Long wishlistId,
+        String wishlistName) {
 }

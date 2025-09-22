@@ -7,5 +7,6 @@ public record FilteredAccListQueryDto(
         double avgRate,
         int reviewCount,
         boolean isInWishlist,
-        Long wishlistId) {
+        Long wishlistId,
+        String wishlistName) {
 }

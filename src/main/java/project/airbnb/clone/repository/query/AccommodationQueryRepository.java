@@ -67,12 +67,13 @@ public class AccommodationQueryRepository {
     private final JPAQueryFactory queryFactory;
 
     public List<MainAccListQueryDto> getAreaAccommodations(Season season, DayType dayType, Long guestId) {
+        QReview rv = review;
+        QWishlist w = wishlist;
+        QAreaCode ac = areaCode;
+        QReservation rs = reservation;
         QAccommodation acc = accommodation;
         QAccommodationImage ai = accommodationImage;
         QAccommodationPrice ap = accommodationPrice;
-        QReservation rs = reservation;
-        QReview rv = review;
-        QAreaCode ac = areaCode;
         QWishlistAccommodation wa = wishlistAccommodation;
 
         return queryFactory
@@ -82,27 +83,24 @@ public class AccommodationQueryRepository {
                         ap.price,
                         rv.rating.avg().coalesce(0.0),
                         ai.imageUrl,
-                        wa.isNotNull(),
-                        wa.wishlist.id,
+                        w.isNotNull(),
+                        w.id,
+                        w.name,
                         rs.count().coalesce(0L),
                         ac.codeName,
                         ac.code
                 ))
                 .from(acc)
-                .join(ai).on(ai.accommodation.eq(acc)
-                                             .and(ai.thumbnail.isTrue()))
-                .join(ap).on(ap.accommodation.eq(acc)
-                                             .and(ap.season.eq(season).and(ap.dayType.eq(dayType))))
+                .join(ai).on(ai.accommodation.eq(acc).and(ai.thumbnail.isTrue()))
+                .join(ap).on(ap.accommodation.eq(acc).and(ap.season.eq(season).and(ap.dayType.eq(dayType))))
                 .join(acc.sigunguCode, sigunguCode)
                 .join(sigunguCode.areaCode, ac)
-                .leftJoin(wa).on(
-                        guestId != null
-                                ? wa.accommodation.eq(acc).and(wa.wishlist.guest.id.eq(guestId))
-                                : Expressions.FALSE
-                )
+                .leftJoin(wa).on(wa.accommodation.eq(acc)
+                                                 .and(guestId != null ? wa.wishlist.guest.id.eq(guestId) : Expressions.FALSE))
+                .leftJoin(wa.wishlist, w)
                 .leftJoin(rs).on(rs.accommodation.eq(acc))
                 .leftJoin(rv).on(rv.reservation.eq(rs))
-                .groupBy(acc.id, acc.title, ap.price, ai.imageUrl, wa, ac.codeName, ac.code)
+                .groupBy(acc.id, acc.title, ap.price, ai.imageUrl, w.id, w.name, ac.codeName, ac.code)
                 .orderBy(rs.count().desc())
                 .fetch();
     }
@@ -110,14 +108,14 @@ public class AccommodationQueryRepository {
     public Page<FilteredAccListResDto> getFilteredPagingAccommodations(AccSearchCondDto searchDto,
                                                                        Long guestId, Pageable pageable,
                                                                        Season season, DayType dayType) {
+        QReview rv = review;
+        QWishlist w = wishlist;
+        QAreaCode ac = areaCode;
+        QReservation rs = reservation;
         QAccommodation acc = accommodation;
         QAccommodationImage ai = accommodationImage;
         QAccommodationPrice ap = accommodationPrice;
-        QReservation rs = reservation;
-        QReview rv = review;
-        QAreaCode ac = areaCode;
         QWishlistAccommodation wa = wishlistAccommodation;
-        QWishlist w = wishlist;
 
         //이미지 목록 제외 필드 조회
         List<FilteredAccListQueryDto> queryDtos = queryFactory
@@ -127,20 +125,18 @@ public class AccommodationQueryRepository {
                         ap.price,
                         rv.rating.avg().coalesce(0.0),
                         rv.count().intValue().coalesce(0),
-                        wa.isNotNull(),
-                        w.id
+                        w.isNotNull(),
+                        w.id,
+                        w.name
                 ))
                 .from(acc)
                 .leftJoin(ai).on(ai.accommodation.eq(acc))
                 .leftJoin(rs).on(rs.accommodation.eq(acc))
                 .leftJoin(rv).on(rv.reservation.eq(rs))
-                .leftJoin(wa).on(
-                        guestId != null
-                                ? wa.accommodation.eq(acc).and(wa.wishlist.guest.id.eq(guestId))
-                                : Expressions.FALSE
-                )
-                .join(ap).on(ap.accommodation.eq(acc)
-                                             .and(ap.season.eq(season).and(ap.dayType.eq(dayType))))
+                .leftJoin(wa).on(wa.accommodation.eq(acc)
+                                                 .and(guestId != null ? wa.wishlist.guest.id.eq(guestId) : Expressions.FALSE))
+                .leftJoin(wa.wishlist, w)
+                .join(ap).on(ap.accommodation.eq(acc).and(ap.season.eq(season).and(ap.dayType.eq(dayType))))
                 .join(acc.sigunguCode, sigunguCode)
                 .join(sigunguCode.areaCode, ac)
                 .where(
@@ -149,7 +145,7 @@ public class AccommodationQueryRepository {
                         loePrice(searchDto.priceLoe()),
                         hasAllAmenities(searchDto.amenities())
                 )
-                .groupBy(acc.id, acc.title, ap.price, wa, w)
+                .groupBy(acc.id, acc.title, ap.price, w.id, w.name)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -201,28 +197,26 @@ public class AccommodationQueryRepository {
     }
 
     public Optional<DetailAccommodationQueryDto> findAccommodation(Long accId, Long guestId, Season season, DayType dayType) {
+        QWishlist w = wishlist;
         QAccommodation acc = accommodation;
         QAccommodationPrice ap = accommodationPrice;
         QWishlistAccommodation wa = wishlistAccommodation;
-        QWishlist w = wishlist;
 
         return Optional.ofNullable(
                 queryFactory.select(constructor(DetailAccommodationQueryDto.class,
                                     acc.id, acc.title, acc.maxPeople, acc.address,
                                     acc.mapX, acc.mapY, acc.checkIn, acc.checkOut, acc.description,
                                     acc.number, acc.refundRegulation, ap.price,
-                                    wa.isNotNull(),
+                                    w.isNotNull(),
                                     w.id,
+                                    w.name,
                                     avgRateSubquery(accId)
                             ))
                             .from(acc)
-                            .join(ap).on(ap.accommodation.eq(acc)
-                                                         .and(ap.season.eq(season).and(ap.dayType.eq(dayType))))
-                            .leftJoin(wa).on(
-                                    guestId != null
-                                            ? wa.accommodation.eq(acc).and(wa.wishlist.guest.id.eq(guestId))
-                                            : Expressions.FALSE
-                            )
+                            .join(ap).on(ap.accommodation.eq(acc).and(ap.season.eq(season).and(ap.dayType.eq(dayType))))
+                            .leftJoin(wa).on(wa.accommodation.eq(acc)
+                                                             .and(guestId != null ? wa.wishlist.guest.id.eq(guestId) : Expressions.FALSE))
+                            .leftJoin(wa.wishlist, w)
                             .where(acc.id.eq(accId))
                             .fetchOne()
         );
@@ -275,13 +269,14 @@ public class AccommodationQueryRepository {
     }
 
     public List<ViewHistoryDto> findViewHistories(Long guestId, Season season, DayType dayType) {
+        QReview rv = review;
+        QWishlist w = wishlist;
+        QReservation rs = reservation;
+        QViewHistory vh = viewHistory;
         QAccommodation acc = accommodation;
         QAccommodationImage ai = accommodationImage;
         QAccommodationPrice ap = accommodationPrice;
-        QReservation rs = reservation;
-        QReview rv = review;
         QWishlistAccommodation wa = wishlistAccommodation;
-        QViewHistory vh = viewHistory;
 
         return queryFactory
                 .select(constructor(ViewHistoryDto.class,
@@ -290,22 +285,21 @@ public class AccommodationQueryRepository {
                         acc.title,
                         rv.rating.avg().coalesce(0.0),
                         ai.imageUrl,
-                        wa.isNotNull(),
-                        wa.wishlist.id
+                        w.isNotNull(),
+                        w.id,
+                        w.name
                 ))
                 .from(vh)
                 .join(vh.accommodation, acc)
-                .join(ai).on(ai.accommodation.eq(acc)
-                                             .and(ai.thumbnail.isTrue()))
-                .join(ap).on(ap.accommodation.eq(acc)
-                                             .and(ap.season.eq(season).and(ap.dayType.eq(dayType))))
+                .join(ai).on(ai.accommodation.eq(acc).and(ai.thumbnail.isTrue()))
+                .join(ap).on(ap.accommodation.eq(acc).and(ap.season.eq(season).and(ap.dayType.eq(dayType))))
                 .leftJoin(wa).on(wa.accommodation.eq(acc)
-                                                 .and(wa.wishlist.guest.id.eq(guestId)))
+                                                 .and(guestId != null ? wa.wishlist.guest.id.eq(guestId) : Expressions.FALSE))
+                .leftJoin(wa.wishlist, w)
                 .leftJoin(rs).on(rs.accommodation.eq(acc))
                 .leftJoin(rv).on(rv.reservation.eq(rs))
-                .where(vh.guest.id.eq(guestId)
-                                  .and(vh.viewedAt.after(LocalDateTime.now().minusDays(30))))
-                .groupBy(vh.viewedAt, acc.id, acc.title, ai.imageUrl, wa)
+                .where(vh.guest.id.eq(guestId).and(vh.viewedAt.after(LocalDateTime.now().minusDays(30))))
+                .groupBy(vh.viewedAt, acc.id, acc.title, ai.imageUrl, w.id, w.name)
                 .orderBy(vh.viewedAt.desc())
                 .fetch();
     }
