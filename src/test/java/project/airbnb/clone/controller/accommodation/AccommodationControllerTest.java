@@ -7,6 +7,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import project.airbnb.clone.WithMockGuest;
 import project.airbnb.clone.controller.RestDocsTestSupport;
 import project.airbnb.clone.dto.PageResponseDto;
+import project.airbnb.clone.dto.accommodation.AccommodationPriceResDto;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailImageDto;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailReviewDto;
@@ -18,6 +19,7 @@ import project.airbnb.clone.dto.accommodation.ViewHistoryResDto;
 import project.airbnb.clone.service.accommodation.AccommodationService;
 import project.airbnb.clone.service.jwt.TokenService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -473,6 +475,52 @@ class AccommodationControllerTest extends RestDocsTestSupport {
                                                        .description("저장된 위시리스트 이름 (isInWishlist = true일 때만, false면 null)")
                                        )
                                        .responseSchema(schema("RecentViewAccommodationsResponse"))
+                                       .build()
+                       )));
+    }
+
+    @Test
+    @DisplayName("숙소 특정 날짜 가격 조회")
+    void getAccommodationPrice() throws Exception {
+        //given
+        Long accommodationId = 1L;
+        LocalDate date = LocalDate.now();
+
+        AccommodationPriceResDto result = new AccommodationPriceResDto(accommodationId, date, 130000);
+        given(accommodationService.getAccommodationPrice(any(), any())).willReturn(result);
+
+        //when
+        //then
+        mockMvc.perform(get("/api/accommodations/{id}/price", accommodationId)
+                       .param("date", date.toString())
+               )
+               .andExpectAll(
+                       handler().handlerType(AccommodationController.class),
+                       handler().methodName("getAccommodationPrice"),
+                       status().isOk(),
+                       jsonPath("$.accommodationId").value(result.accommodationId()),
+                       jsonPath("$.date").value(result.date().toString()),
+                       jsonPath("$.price").value(result.price())
+               )
+               .andDo(document("get-accommodation-price",
+                       resource(
+                               builder()
+                                       .tag(ACCOMMODATION_API_TAG)
+                                       .summary("숙소 특정 날짜 가격 조회")
+                                       .pathParameters(parameterWithName("id").description("숙소 ID"))
+                                       .queryParameters(parameterWithName("date").description("조회 날짜(yyyy-MM-dd)"))
+                                       .responseFields(
+                                               fieldWithPath("accommodationId")
+                                                       .type(NUMBER)
+                                                       .description("숙소 ID"),
+                                               fieldWithPath("date")
+                                                       .type(STRING)
+                                                       .description("조회 날짜"),
+                                               fieldWithPath("price")
+                                                       .type(NUMBER)
+                                                       .description("가격")
+                                       )
+                                       .responseSchema(schema("AccommodationPriceResponse"))
                                        .build()
                        )));
     }
