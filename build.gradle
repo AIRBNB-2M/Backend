@@ -121,7 +121,7 @@ tasks.register('copyOasToSwagger', Copy) {
                 paths: [
                         "/api/auth/login": [
                                 post: [
-                                        tags: ["Guest-API"],
+                                        tags: ["Auth API"],
                                         summary: "사용자 로그인",
                                         description: "이메일과 비밀번호로 사용자 인증",
                                         requestBody: [
