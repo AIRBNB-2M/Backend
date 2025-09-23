@@ -22,7 +22,7 @@ public class PageResponseDto<E> {
         this.totalPage = (int) (Math.ceil(totalCount / (double) size));
 
         this.hasPrev = pageNumber > 0;
-        this.hasNext = pageNumber < totalPage;
+        this.hasNext = pageNumber < (totalPage - 1);
 
         this.prevPage = hasPrev ? current - 1 : -1;
         this.nextPage = hasNext ? current + 1 : -1;

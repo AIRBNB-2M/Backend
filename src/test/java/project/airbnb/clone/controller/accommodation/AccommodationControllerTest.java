@@ -4,17 +4,22 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import project.airbnb.clone.WithMockGuest;
 import project.airbnb.clone.controller.RestDocsTestSupport;
 import project.airbnb.clone.dto.PageResponseDto;
+import project.airbnb.clone.dto.accommodation.AccommodationPriceResDto;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailImageDto;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailReviewDto;
 import project.airbnb.clone.dto.accommodation.FilteredAccListResDto;
 import project.airbnb.clone.dto.accommodation.MainAccListResDto;
 import project.airbnb.clone.dto.accommodation.MainAccResDto;
+import project.airbnb.clone.dto.accommodation.ViewHistoryDto;
+import project.airbnb.clone.dto.accommodation.ViewHistoryResDto;
 import project.airbnb.clone.service.accommodation.AccommodationService;
 import project.airbnb.clone.service.jwt.TokenService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -52,13 +57,13 @@ class AccommodationControllerTest extends RestDocsTestSupport {
     void getAccommodations() throws Exception {
         // given
         List<MainAccListResDto> seoulAcc = List.of(
-                new MainAccListResDto(1L, "호텔A", 100000, 4.5, "https://example.com/a.jpg", true, 1L),
-                new MainAccListResDto(2L, "호텔B", 200000, 3.8, "https://example.com/b.jpg", false, null)
+                new MainAccListResDto(1L, "호텔A", 100000, 4.5, "https://example.com/a.jpg", true, "my-wishlist-1", 1L),
+                new MainAccListResDto(2L, "호텔B", 200000, 3.8, "https://example.com/b.jpg", false, null, null)
         );
         List<MainAccListResDto> gyeonggiAcc = List.of(
-                new MainAccListResDto(3L, "호텔C", 150000, 4.3, "https://example.com/c.jpg", false, null),
-                new MainAccListResDto(4L, "호텔D", 250000, 4.7, "https://example.com/d.jpg", true, 2L),
-                new MainAccListResDto(5L, "호텔E", 300000, 3.3, "https://example.com/e.jpg", true, 2L)
+                new MainAccListResDto(3L, "호텔C", 150000, 4.3, "https://example.com/c.jpg", false, null, null),
+                new MainAccListResDto(4L, "호텔D", 250000, 4.7, "https://example.com/d.jpg", true,"my-wishlist-2", 2L),
+                new MainAccListResDto(5L, "호텔E", 300000, 3.3, "https://example.com/e.jpg", true,"my-wishlist-2", 2L)
         );
 
         List<MainAccResDto> result = List.of(
@@ -117,7 +122,11 @@ class AccommodationControllerTest extends RestDocsTestSupport {
                                                fieldWithPath("[].accommodations[].wishlistId")
                                                        .type(NUMBER)
                                                        .optional()
-                                                       .description("저장된 위시리스트 ID (isInWishlist = true일 때만, false면 null)")
+                                                       .description("저장된 위시리스트 ID (isInWishlist = true일 때만, false면 null)"),
+                                               fieldWithPath("[].accommodations[].wishlistName")
+                                                       .type(STRING)
+                                                       .optional()
+                                                       .description("저장된 위시리스트 이름 (isInWishlist = true일 때만, false면 null)")
                                        )
                                        .responseSchema(schema("MainPageAccommodationsResponse"))
                                        .build()
@@ -130,9 +139,9 @@ class AccommodationControllerTest extends RestDocsTestSupport {
         //given
         List<FilteredAccListResDto> dtos = List.of(
                 new FilteredAccListResDto(1L, "title-1", 50000, 4.3, 10,
-                        List.of("https://example.com/a.jpg", "https://example.com/b.jpg"), false, null),
+                        List.of("https://example.com/a.jpg", "https://example.com/b.jpg"), false, null, null),
                 new FilteredAccListResDto(2L, "title-2", 80000, 4.5, 23,
-                        List.of("https://example.com/c.jpg", "https://example.com/d.jpg"), true, 1L)
+                        List.of("https://example.com/c.jpg", "https://example.com/d.jpg"), true, 1L, "my-wishlist-1")
         );
 
         PageResponseDto<FilteredAccListResDto> response = PageResponseDto.<FilteredAccListResDto>builder()
@@ -228,7 +237,11 @@ class AccommodationControllerTest extends RestDocsTestSupport {
                                                fieldWithPath("contents[].wishlistId")
                                                        .type(NUMBER)
                                                        .optional()
-                                                       .description("저장된 위시리스트 ID (isInWishlist = true일 때만, false면 null)")
+                                                       .description("저장된 위시리스트 ID (isInWishlist = true일 때만, false면 null)"),
+                                               fieldWithPath("contents[].wishlistName")
+                                                       .type(STRING)
+                                                       .optional()
+                                                       .description("저장된 위시리스트 이름 (isInWishlist = true일 때만, false면 null)")
                                        )
                                        .requestSchema(schema("QueryParameter-SearchAccommodationRequest"))
                                        .responseSchema(schema("PagingAccommodationsResponse"))
@@ -254,7 +267,7 @@ class AccommodationControllerTest extends RestDocsTestSupport {
         );
         DetailAccommodationResDto response = new DetailAccommodationResDto(accommodationId, "acc-title", 5, "경기도 부천시...", 35.3, 40.1,
                 "10:00", "14:00", "acc-overview", "054-855-8552", "7일 이내 100%",
-                55000, true, 1L, 4.8, detailImageDto, amenities, reviewDtos
+                55000, true, 1L, "my-wishlist-1", 4.8, detailImageDto, amenities, reviewDtos
         );
 
         given(accommodationService.getDetailAccommodation(any(), any())).willReturn(response);
@@ -343,6 +356,10 @@ class AccommodationControllerTest extends RestDocsTestSupport {
                                                        .type(NUMBER)
                                                        .optional()
                                                        .description("저장된 위시리스트 ID (isInWishlist = true일 때만, false면 null)"),
+                                               fieldWithPath("wishlistName")
+                                                       .type(STRING)
+                                                       .optional()
+                                                       .description("저장된 위시리스트 이름 (isInWishlist = true일 때만, false면 null)"),
                                                fieldWithPath("avgRate")
                                                        .type(NUMBER)
                                                        .description("평균 평점"),
@@ -380,6 +397,130 @@ class AccommodationControllerTest extends RestDocsTestSupport {
                                                        .description("리뷰 내용")
                                        )
                                        .responseSchema(schema("DetailAccommodationResponse"))
+                                       .build()
+                       )));
+    }
+
+    @Test
+    @DisplayName("최근 조회 숙소 이력")
+    @WithMockGuest
+    void getRecentViewAccommodations() throws Exception {
+        //given
+        LocalDateTime today = LocalDateTime.now();
+        List<ViewHistoryDto> todays = List.of(
+                new ViewHistoryDto(today.minusHours(1), 1L, "호텔A", 4.5, "https://example.com/a.jpg", true, 1L, "my-wishlist-1"),
+                new ViewHistoryDto(today.minusHours(2), 2L, "호텔B", 4.8, "https://example.com/b.jpg", false, null, null),
+                new ViewHistoryDto(today.minusHours(3), 3L, "호텔C", 4.3, "https://example.com/c.jpg", true, 3L, "my-wishlist-3")
+        );
+
+        LocalDateTime yesterday = LocalDateTime.now().minusDays(1);
+        List<ViewHistoryDto> yesterdays = List.of(
+                new ViewHistoryDto(yesterday.minusHours(1), 4L, "호텔D", 4.0, "https://example.com/d.jpg", false, null, null),
+                new ViewHistoryDto(yesterday.minusHours(2), 5L, "호텔E", 3.9, "https://example.com/e.jpg", true, 5L, "my-wishlist-5")
+        );
+
+        List<ViewHistoryResDto> result = List.of(new ViewHistoryResDto(today.toLocalDate(), todays), new ViewHistoryResDto(yesterday.toLocalDate(), yesterdays));
+        given(accommodationService.getRecentViewAccommodations(any())).willReturn(result);
+
+        //when
+        //then
+        mockMvc.perform(get("/api/accommodations/recent").header(AUTHORIZATION, "Bearer access-token"))
+               .andExpectAll(
+                       handler().handlerType(AccommodationController.class),
+                       handler().methodName("getRecentViewAccommodations"),
+                       status().isOk(),
+                       jsonPath("$.length()").value(result.size()),
+                       jsonPath("$[0].accommodations", hasSize(result.get(0).accommodations().size())),
+                       jsonPath("$[1].accommodations", hasSize(result.get(1).accommodations().size()))
+               )
+               .andDo(document("recent-view-accommodations",
+                       resource(
+                               builder()
+                                       .tag(ACCOMMODATION_API_TAG)
+                                       .summary("최근 조회한 숙소 목록")
+                                       .description("최근 30일 숙소 조회 이력을 응답합니다.")
+                                       .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
+                                       .responseFields(
+                                               fieldWithPath("[].date")
+                                                       .type(STRING)
+                                                       .description("조회일 (내림차순)"),
+                                               fieldWithPath("[].accommodations")
+                                                       .type(ARRAY)
+                                                       .description("숙소 목록 (시간 내림차순)"),
+                                               fieldWithPath("[].accommodations[].viewDate")
+                                                       .type(STRING)
+                                                       .description("조회일(시간 포함)"),
+                                               fieldWithPath("[].accommodations[].accommodationId")
+                                                       .type(NUMBER)
+                                                       .description("숙소 ID"),
+                                               fieldWithPath("[].accommodations[].title")
+                                                       .type(STRING)
+                                                       .description("숙소 이름"),
+                                               fieldWithPath("[].accommodations[].avgRate")
+                                                       .type(NUMBER)
+                                                       .description("평균 평점"),
+                                               fieldWithPath("[].accommodations[].thumbnailUrl")
+                                                       .type(STRING)
+                                                       .description("썸네일 URL"),
+                                               fieldWithPath("[].accommodations[].isInWishlist")
+                                                       .type(BOOLEAN)
+                                                       .description("위시리스트에 저장된 숙소인지 여부"),
+                                               fieldWithPath("[].accommodations[].wishlistId")
+                                                       .type(NUMBER)
+                                                       .optional()
+                                                       .description("저장된 위시리스트 ID (isInWishlist = true일 때만, false면 null)"),
+                                               fieldWithPath("[].accommodations[].wishlistName")
+                                                       .type(STRING)
+                                                       .optional()
+                                                       .description("저장된 위시리스트 이름 (isInWishlist = true일 때만, false면 null)")
+                                       )
+                                       .responseSchema(schema("RecentViewAccommodationsResponse"))
+                                       .build()
+                       )));
+    }
+
+    @Test
+    @DisplayName("숙소 특정 날짜 가격 조회")
+    void getAccommodationPrice() throws Exception {
+        //given
+        Long accommodationId = 1L;
+        LocalDate date = LocalDate.now();
+
+        AccommodationPriceResDto result = new AccommodationPriceResDto(accommodationId, date, 130000);
+        given(accommodationService.getAccommodationPrice(any(), any())).willReturn(result);
+
+        //when
+        //then
+        mockMvc.perform(get("/api/accommodations/{id}/price", accommodationId)
+                       .param("date", date.toString())
+               )
+               .andExpectAll(
+                       handler().handlerType(AccommodationController.class),
+                       handler().methodName("getAccommodationPrice"),
+                       status().isOk(),
+                       jsonPath("$.accommodationId").value(result.accommodationId()),
+                       jsonPath("$.date").value(result.date().toString()),
+                       jsonPath("$.price").value(result.price())
+               )
+               .andDo(document("get-accommodation-price",
+                       resource(
+                               builder()
+                                       .tag(ACCOMMODATION_API_TAG)
+                                       .summary("숙소 특정 날짜 가격 조회")
+                                       .pathParameters(parameterWithName("id").description("숙소 ID"))
+                                       .queryParameters(parameterWithName("date").description("조회 날짜(yyyy-MM-dd)"))
+                                       .responseFields(
+                                               fieldWithPath("accommodationId")
+                                                       .type(NUMBER)
+                                                       .description("숙소 ID"),
+                                               fieldWithPath("date")
+                                                       .type(STRING)
+                                                       .description("조회 날짜"),
+                                               fieldWithPath("price")
+                                                       .type(NUMBER)
+                                                       .description("가격")
+                                       )
+                                       .responseSchema(schema("AccommodationPriceResponse"))
                                        .build()
                        )));
     }

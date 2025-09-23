@@ -12,6 +12,7 @@ public record MainAccListResDto(
         double avgRate,
         String thumbnailUrl,
         boolean isInWishlist,
+        String wishlistName,
         Long wishlistId) {
 
     public static MainAccListResDto from(MainAccListQueryDto queryDto) {
@@ -22,6 +23,7 @@ public record MainAccListResDto(
                 queryDto.avgRate(),
                 queryDto.thumbnailUrl(),
                 queryDto.isInWishlist(),
+                queryDto.wishlistName(),
                 queryDto.wishlistId()
         );
     }

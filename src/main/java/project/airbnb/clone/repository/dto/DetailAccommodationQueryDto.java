@@ -15,5 +15,6 @@ public record DetailAccommodationQueryDto(
         int price,
         boolean isInWishlist,
         Long wishlistId,
+        String wishlistName,
         Double avgRate) {
 }

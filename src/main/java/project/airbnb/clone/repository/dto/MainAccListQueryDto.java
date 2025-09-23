@@ -8,6 +8,7 @@ public record MainAccListQueryDto(
         String thumbnailUrl,
         boolean isInWishlist,
         Long wishlistId,
+        String wishlistName,
         long reservationCount,
         String areaName,
         String areaCode) {
