@@ -15,7 +15,6 @@ import project.airbnb.clone.dto.wishlist.WishlistDetailResDto;
 import project.airbnb.clone.dto.wishlist.WishlistUpdateReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistsResDto;
 import project.airbnb.clone.service.accommodation.WishlistService;
-import project.airbnb.clone.service.jwt.TokenService;
 
 import java.util.List;
 
@@ -48,7 +47,6 @@ class WishlistControllerTest extends RestDocsTestSupport {
     private static final String WISHLIST_API_TAG = "Wishlist API";
 
     @MockitoBean WishlistService wishlistService;
-    @MockitoBean TokenService tokenService;
 
     @Test
     @DisplayName("숙소 위시리스트 등록")

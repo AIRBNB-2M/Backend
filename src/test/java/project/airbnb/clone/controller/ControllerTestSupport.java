@@ -8,6 +8,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import project.airbnb.clone.common.jwt.JwtProvider;
 import project.airbnb.clone.repository.redis.RedisRepository;
+import project.airbnb.clone.service.jwt.TokenService;
 
 @Disabled
 public abstract class ControllerTestSupport {
@@ -17,6 +18,8 @@ public abstract class ControllerTestSupport {
 
     @MockitoBean protected RedisRepository redisRepository;
     @MockitoBean protected JwtProvider jwtProvider;
+
+    @MockitoBean protected TokenService tokenService;
 
     protected String creatJson(Object dto) throws JsonProcessingException {
         return objectMapper.writeValueAsString(dto);

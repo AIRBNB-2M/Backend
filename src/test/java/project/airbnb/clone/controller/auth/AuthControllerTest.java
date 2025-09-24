@@ -11,7 +11,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import project.airbnb.clone.controller.RestDocsTestSupport;
 import project.airbnb.clone.dto.guest.SignupRequestDto;
 import project.airbnb.clone.service.guest.GuestService;
-import project.airbnb.clone.service.jwt.TokenService;
 
 import java.time.LocalDate;
 
@@ -36,7 +35,6 @@ class AuthControllerTest extends RestDocsTestSupport {
 
     public static final String AUTH_API_TAG = "Auth API";
 
-    @MockitoBean TokenService tokenService;
     @MockitoBean GuestService guestService;
 
     @Test

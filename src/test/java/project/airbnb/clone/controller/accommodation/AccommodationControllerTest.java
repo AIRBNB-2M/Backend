@@ -17,7 +17,6 @@ import project.airbnb.clone.dto.accommodation.MainAccResDto;
 import project.airbnb.clone.dto.accommodation.ViewHistoryDto;
 import project.airbnb.clone.dto.accommodation.ViewHistoryResDto;
 import project.airbnb.clone.service.accommodation.AccommodationService;
-import project.airbnb.clone.service.jwt.TokenService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -50,7 +49,6 @@ class AccommodationControllerTest extends RestDocsTestSupport {
     private static final String ACCOMMODATION_API_TAG = "Accommodation API";
 
     @MockitoBean AccommodationService accommodationService;
-    @MockitoBean TokenService tokenService;
 
     @Test
     @DisplayName("메인 페이지 숙소 목록 조회")
