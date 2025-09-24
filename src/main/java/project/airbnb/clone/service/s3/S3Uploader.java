@@ -24,7 +24,7 @@ public class S3Uploader {
     @Value("${cloudflare.r2.bucket}")
     private String bucketName;
 
-    @Value("${cloudflare.r2.endpoint}")
+    @Value("${cloudflare.r2.public-url}")
     private String bucketPublicUrl;
 
     /**

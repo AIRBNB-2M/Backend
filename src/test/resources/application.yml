@@ -53,6 +53,7 @@ jwt:
 cloudflare:
   r2:
     endpoint: http://test.com
+    public-url: http://test.com
     bucket: test
     access-key: test
     secret-key: test
