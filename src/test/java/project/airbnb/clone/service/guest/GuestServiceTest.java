@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import project.airbnb.clone.TestContainersConfig;
 import project.airbnb.clone.common.exceptions.EmailAlreadyExistsException;
 import project.airbnb.clone.consts.SocialType;
+import project.airbnb.clone.dto.guest.DefaultProfileResDto;
 import project.airbnb.clone.dto.guest.SignupRequestDto;
 import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.model.ProviderUser;
@@ -23,12 +24,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class GuestServiceTest extends TestContainersConfig {
 
-    @Autowired
-    GuestService guestService;
-    @Autowired
-    GuestRepository guestRepository;
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    @Autowired GuestService guestService;
+    @Autowired GuestRepository guestRepository;
+    @Autowired PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
@@ -117,6 +115,33 @@ class GuestServiceTest extends TestContainersConfig {
         assertThatThrownBy(() -> guestService.register(requestDto))
                 .isInstanceOf(EmailAlreadyExistsException.class)
                 .hasMessageContaining("Email already exists : ");
+    }
+
+    @Test
+    @DisplayName("사용자 기본 정보 조회")
+    void getDefaultProfile() {
+        //given
+        Guest guest = saveAndGetGuest();
+
+        //when
+        DefaultProfileResDto result = guestService.getDefaultProfile(guest.getId());
+
+        //then
+        assertThat(result.name()).isEqualTo(guest.getName());
+        assertThat(result.profileImageUrl()).isEqualTo(guest.getProfileUrl());
+        assertThat(result.createdDate()).isEqualTo(guest.getCreatedAt().toLocalDate());
+        assertThat(result.aboutMe()).isEqualTo(guest.getAboutMe());
+    }
+
+    private Guest saveAndGetGuest() {
+        return guestRepository.save(Guest.builder()
+                                         .name("David Jin")
+                                         .birthDate(LocalDate.of(2000, 9, 14))
+                                         .profileUrl("https://example.com/a.jpg")
+                                         .aboutMe("Lectus euismod maecenas erat.")
+                                         .email("test@email.com")
+                                         .password("86e48502-0ecf-4df1-8748-998bc06b9823")
+                                         .build());
     }
 
     private SignupRequestDto createRequestDto() {
