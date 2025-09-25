@@ -170,12 +170,59 @@ tasks.register('copyOasToSwagger', Copy) {
                                 ]
                         ],
                         required: ["email", "password"]
+                ],
+                EditProfileRequest: [
+                        title: "EditProfileRequest",
+                        type: "object",
+                        properties: [
+                                editProfileRequest: [
+                                    type: "object",
+                                    properties: [
+                                            name: [
+                                                    type: "string",
+                                                    description: "새로 저장할 이름"
+                                            ],
+                                            aboutMe: [
+                                                    type: "string",
+                                                    description: "새로 저장할 소개글 (제약사항 : 최대 500자)"
+                                            ],
+                                            isProfileImageChanged: [
+                                                    type: "boolean",
+                                                    description: "이미지 파일 변경 여부"
+                                            ]
+                                    ],
+                                    required: ["name", "isProfileImageChanged"]
+                                ],
+                                profileImage: [
+                                     type: "string",
+                                     format: "binary",
+                                     description: "프로필 이미지 파일"
+                                ]
+                        ],
+                        required: ["editProfileRequest"]
+                ]
+        ]
+
+        def editProfileRequestBody = [
+                required: true,
+                content: [
+                        "multipart/form-data": [
+                                schema: [
+                                        $ref: "#/components/schemas/EditProfileRequest"
+                                ],
+                                encoding: [
+                                        editProfileRequest: [
+                                                contentType: "application/json"
+                                        ]
+                                ]
+                        ]
                 ]
         ]
 
         // 3. 병합: paths
         swaggerMap.paths = swaggerMap.paths ?: [:]
         swaggerMap.paths.putAll(authSpec.paths)
+        swaggerMap.paths["/api/guests/me"].put.requestBody = editProfileRequestBody
 
         // 4. 병합: components.securitySchemes
         swaggerMap.components = swaggerMap.components ?: [:]
