@@ -69,4 +69,8 @@ public class Guest extends BaseEntity {
         this.name = name;
         this.aboutMe = aboutMe;
     }
+
+    public void verifyEmail() {
+        this.isEmailVerified = true;
+    }
 }

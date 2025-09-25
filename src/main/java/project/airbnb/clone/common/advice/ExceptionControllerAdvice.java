@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
@@ -104,6 +105,16 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
         ErrorResponse<String> errorResponse = createErrorResponse(notFound, "Data not found in the database", request);
 
         return new ResponseEntity<>(errorResponse, notFound);
+    }
+
+    @ExceptionHandler(MailException.class)
+    public ResponseEntity<ErrorResponse<String>> handleMailSendException(MailException e, HttpServletRequest request) {
+        log.debug("ExceptionControllerAdvice.handleMailSendException: {}", e.getMessage());
+
+        HttpStatus serverError = HttpStatus.INTERNAL_SERVER_ERROR;
+        ErrorResponse<String> errorResponse = createErrorResponse(serverError, "Email verification send failed", request);
+
+        return new ResponseEntity<>(errorResponse, serverError);
     }
 
     @ExceptionHandler(Exception.class)

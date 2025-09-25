@@ -10,14 +10,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import project.airbnb.clone.common.annotations.CurrentGuestId;
 import project.airbnb.clone.dto.guest.SignupRequestDto;
+import project.airbnb.clone.service.guest.EmailVerificationService;
 import project.airbnb.clone.service.guest.GuestService;
 import project.airbnb.clone.service.jwt.TokenService;
+
+import java.net.URI;
 
 import static project.airbnb.clone.common.jwt.JwtProperties.AUTHORIZATION_HEADER;
 import static project.airbnb.clone.common.jwt.JwtProperties.REFRESH_TOKEN_KEY;
@@ -30,6 +36,7 @@ public class AuthController {
 
     private final TokenService tokenService;
     private final GuestService guestService;
+    private final EmailVerificationService emailVerificationService;
 
     @PostMapping("/refresh")
     public void refreshAccessToken(@CookieValue(value = REFRESH_TOKEN_KEY, required = false) String refreshToken,
@@ -56,5 +63,25 @@ public class AuthController {
     public ResponseEntity<?> signup(@Valid @RequestBody SignupRequestDto signupRequestDto) {
         guestService.register(signupRequestDto);
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PostMapping("/email/verify")
+    public ResponseEntity<?> sendEmail(@CurrentGuestId Long guestId) {
+        emailVerificationService.sendEmail(guestId);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/email/verify")
+    public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
+        boolean success = emailVerificationService.verifyToken(token);
+
+        //TODO : 프론트엔드 배포 주소 연결
+        String redirectUrl = success
+                ? "http://localhost:3000/users/profile?emailVerify=success"
+                : "http://localhost:3000/users/profile?emailVerify=failed";
+
+        return ResponseEntity.status(HttpStatus.FOUND)
+                             .location(URI.create(redirectUrl))
+                             .build();
     }
 }
