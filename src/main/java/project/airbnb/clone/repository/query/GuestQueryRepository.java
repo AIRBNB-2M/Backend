@@ -23,7 +23,8 @@ public class GuestQueryRepository {
                                 guest.name,
                                 guest.profileUrl,
                                 guest.createdAt,
-                                guest.aboutMe
+                                guest.aboutMe,
+                                guest.isEmailVerified
                         ))
                         .from(guest)
                         .where(guest.id.eq(guestId))

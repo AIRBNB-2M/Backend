@@ -8,14 +8,16 @@ public record DefaultProfileResDto(
         String name,
         String profileImageUrl,
         LocalDate createdDate,
-        String aboutMe) {
+        String aboutMe,
+        boolean isEmailVerified) {
 
     public static DefaultProfileResDto from(DefaultProfileQueryDto queryDto) {
         return new DefaultProfileResDto(
                 queryDto.name(),
                 queryDto.profileImageUrl(),
                 queryDto.createdDateTime().toLocalDate(),
-                queryDto.aboutMe()
+                queryDto.aboutMe(),
+                queryDto.isEmailVerified()
         );
     }
 }

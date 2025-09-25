@@ -49,7 +49,7 @@ class GuestControllerTest extends RestDocsTestSupport {
     @WithMockGuest
     void getDefaultProfile() throws Exception {
         //given
-        DefaultProfileResDto response = new DefaultProfileResDto("Antonio Cui", "https://example.com/a.jpg", LocalDate.of(2024, 8, 15), "Accumsan luctus fringilla cubilia tempor auctor ullamcorper.");
+        DefaultProfileResDto response = new DefaultProfileResDto("Antonio Cui", "https://example.com/a.jpg", LocalDate.of(2024, 8, 15), "Accumsan luctus fringilla cubilia tempor auctor ullamcorper.", true);
         given(guestService.getDefaultProfile(anyLong())).willReturn(response);
 
         //when
@@ -64,7 +64,8 @@ class GuestControllerTest extends RestDocsTestSupport {
                        jsonPath("$.name").value(response.name()),
                        jsonPath("$.profileImageUrl").value(response.profileImageUrl()),
                        jsonPath("$.createdDate").value(response.createdDate().toString()),
-                       jsonPath("$.aboutMe").value(response.aboutMe())
+                       jsonPath("$.aboutMe").value(response.aboutMe()),
+                       jsonPath("$.isEmailVerified").value(response.isEmailVerified())
                )
                .andDo(document("get-my-profile",
                        resource(
@@ -86,7 +87,10 @@ class GuestControllerTest extends RestDocsTestSupport {
                                                fieldWithPath("aboutMe")
                                                        .type(STRING)
                                                        .optional()
-                                                       .description("자기소개글")
+                                                       .description("자기소개글"),
+                                               fieldWithPath("isEmailVerified")
+                                                       .type(BOOLEAN)
+                                                       .description("이메일 인증 완료 여부")
                                        )
                                        .responseSchema(schema("DefaultProfileResponse"))
                                        .build()

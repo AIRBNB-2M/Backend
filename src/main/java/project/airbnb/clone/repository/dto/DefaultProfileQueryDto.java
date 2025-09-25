@@ -6,5 +6,6 @@ public record DefaultProfileQueryDto(
         String name,
         String profileImageUrl,
         LocalDateTime createdDateTime,
-        String aboutMe) {
+        String aboutMe,
+        boolean isEmailVerified) {
 }
