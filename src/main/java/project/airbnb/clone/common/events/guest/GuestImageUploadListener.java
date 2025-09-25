@@ -18,4 +18,10 @@ public class GuestImageUploadListener {
         log.debug("GuestImageUploadListener.handleGuestImageUploadEvent");
         profileImageUploadService.upload(event.guestId(), event.imageUrl());
     }
+
+    @EventListener
+    public void handleGuestImageUploadEvent(GuestProfileImageChangedEvent event) {
+        log.debug("GuestImageUploadListener.GuestProfileImageChangedEvent");
+        profileImageUploadService.uploadAndDeleteOrigin(event.guestId(), event.oldImageUrl(), event.newImageFile());
+    }
 }

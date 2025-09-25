@@ -60,4 +60,9 @@ public class Guest extends BaseEntity {
     @Builder.Default
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
+
+    public void updateProfile(String name, String aboutMe) {
+        this.name = name;
+        this.aboutMe = aboutMe;
+    }
 }

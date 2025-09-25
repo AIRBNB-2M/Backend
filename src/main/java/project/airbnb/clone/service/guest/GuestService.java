@@ -6,10 +6,14 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import project.airbnb.clone.common.events.guest.GuestImageUploadEvent;
+import project.airbnb.clone.common.events.guest.GuestProfileImageChangedEvent;
 import project.airbnb.clone.common.exceptions.EmailAlreadyExistsException;
 import project.airbnb.clone.consts.SocialType;
 import project.airbnb.clone.dto.guest.DefaultProfileResDto;
+import project.airbnb.clone.dto.guest.EditProfileReqDto;
+import project.airbnb.clone.dto.guest.EditProfileResDto;
 import project.airbnb.clone.dto.guest.SignupRequestDto;
 import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.model.ProviderUser;
@@ -62,6 +66,19 @@ public class GuestService {
         Guest guest = signupRequestDto.toEntity(encodePassword);
 
         guestRepository.save(guest);
+    }
+
+    @Transactional
+    public EditProfileResDto editMyProfile(Long guestId, MultipartFile imageFile, EditProfileReqDto profileReqDto) {
+        Guest guest = guestRepository.findById(guestId)
+                                     .orElseThrow(() -> new EntityNotFoundException("Guest with id " + guestId + "cannot be found"));
+
+        if (profileReqDto.isProfileImageChanged()) {
+            eventPublisher.publishEvent(new GuestProfileImageChangedEvent(guestId, guest.getProfileUrl(), imageFile));
+        }
+
+        guest.updateProfile(profileReqDto.name(), profileReqDto.aboutMe());
+        return new EditProfileResDto(guest.getName(), guest.getProfileUrl(), guest.getAboutMe());
     }
 
     public DefaultProfileResDto getDefaultProfile(Long guestId) {
