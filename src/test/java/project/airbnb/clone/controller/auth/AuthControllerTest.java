@@ -8,8 +8,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import project.airbnb.clone.WithMockGuest;
 import project.airbnb.clone.controller.RestDocsTestSupport;
 import project.airbnb.clone.dto.guest.SignupRequestDto;
+import project.airbnb.clone.service.guest.EmailVerificationService;
 import project.airbnb.clone.service.guest.GuestService;
 
 import java.time.LocalDate;
@@ -36,6 +38,7 @@ class AuthControllerTest extends RestDocsTestSupport {
     public static final String AUTH_API_TAG = "Auth API";
 
     @MockitoBean GuestService guestService;
+    @MockitoBean EmailVerificationService emailVerificationService;
 
     @Test
     @DisplayName("쿠키로 받은 리프레시 토큰으로 액세스 토큰을 갱신한다.")
@@ -150,5 +153,33 @@ class AuthControllerTest extends RestDocsTestSupport {
                                        .requestSchema(schema("SignupRequest"))
                                        .build()
                        )));
+    }
+
+    @Test
+    @DisplayName("이메일 인증 요청")
+    @WithMockGuest
+    void sendEmail() throws Exception {
+        //given
+
+        //when
+        //then
+        mockMvc.perform(post("/api/auth/email/verify")
+                       .header(AUTHORIZATION, "Bearer {access-token}")
+               )
+               .andExpectAll(
+                       handler().handlerType(AuthController.class),
+                       handler().methodName("sendEmail"),
+                       status().isOk()
+               )
+               .andDo(document("send-email",
+                       resource(
+                               builder()
+                                       .tag(AUTH_API_TAG)
+                                       .summary("이메일 인증 요청")
+                                       .description("회원가입 과정에서 저장된 이메일로 인증을 진행합니다.")
+                                       .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
+                                       .build()
+                       )
+               ));
     }
 }
