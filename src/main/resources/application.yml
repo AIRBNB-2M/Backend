@@ -1,4 +1,19 @@
 spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: jgy091411@gmail.com
+    password: ${GMAIL_SMTP_PWD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connection-timeout: 5000
+          timeout: 5000
+          write-timeout: 5000
   mvc:
     static-path-pattern: /static/**
   profiles:

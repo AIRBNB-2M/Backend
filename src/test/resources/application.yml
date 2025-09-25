@@ -2,6 +2,21 @@ tourapi:
   key: hello
 
 spring:
+  mail:
+    host: test
+    port: 587
+    username: test
+    password: test
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connection-timeout: 1
+          timeout: 1
+          write-timeout: 1
   batch:
     jdbc:
       initialize-schema: always
