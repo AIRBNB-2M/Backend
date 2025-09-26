@@ -9,7 +9,6 @@ build/
 
 # ===== Gradle 관련 =====
 .gradle/
-build/
 !gradle/wrapper/gradle-wrapper.jar
 !gradle-wrapper.properties
 
@@ -35,3 +34,5 @@ Thumbs.db
 gradle.properties
 /https/
 /src/test/resources/
+/src/main/resources/static/dist/
+/src/main/resources/static/swagger-ui/
