@@ -14,6 +14,8 @@ jobs:
         with:
           token: ${{ secrets.CLOUDTYPE_TOKEN }}
           ghtoken: ${{ secrets.GHP_TOKEN }}
+      - name: Set execute permission for gradlew
+        run: chmod +x ./gradlew
       - name: Generate Swagger Docs
         run: ./gradlew copyOasToSwagger -Pspring.profiles.active=h2
       - name: Deploy
