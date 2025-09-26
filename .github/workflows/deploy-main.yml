@@ -39,6 +39,8 @@ jobs:
               build: ./gradlew build -x test
               env: []
               buildenv: 
+                - name: SPRING_ACTIVE_PROFILE
+                  value: prod
                 - name: PROD_DB_URL
                   value: ${{ secrets.PROD_DB_URL }}
                 - name: PROD_DB_USERNAME
