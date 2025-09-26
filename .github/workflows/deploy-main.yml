@@ -29,37 +29,37 @@ jobs:
               env: 
                 SPRING_PROFILES_ACTIVE: prod
             
-                PROD_DB_URL: ${{ secrets.PROD_DB_URL}}
-                PROD_DB_USERNAME: ${{ secrets.PROD_DB_USERNAME}}
-                PROD_DB_PASSWORD: ${{ secrets.PROD_DB_PASSWORD}}
+                PROD_DB_URL: ${{ secrets.PROD_DB_URL }}
+                PROD_DB_USERNAME: ${{ secrets.PROD_DB_USERNAME }}
+                PROD_DB_PASSWORD: ${{ secrets.PROD_DB_PASSWORD }}
             
-                GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID}}
-                GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET}}
-                GH_CLIENT_ID: ${{ secrets.GH_CLIENT_ID}}
-                GH_CLIENT_SECRET: ${{ secrets.GH_CLIENT_SECRET}}
-                NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID}}
-                NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET}}
-                KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID}}
-                KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET}}
+                GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+                GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+                GH_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
+                GH_CLIENT_SECRET: ${{ secrets.GH_CLIENT_SECRET }}
+                NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+                NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+                KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
+                KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
             
-                TOUR_API_KEY: ${{ secrets.TOUR_API_KEY}}
+                TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
             
-                JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY}}
-                JWT_ACCESS_EXP: ${{ secrets.JWT_ACCESS_EXP}}
-                JWT_REFRESH_EXP: ${{ secrets.JWT_REFRESH_EXP}}
+                JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+                JWT_ACCESS_EXP: ${{ secrets.JWT_ACCESS_EXP }}
+                JWT_REFRESH_EXP: ${{ secrets.JWT_REFRESH_EXP }}
             
-                R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL}}
-                R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL}}
-                R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME}}
-                R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY}}
-                R2_SECRET_KEY: ${{ secrets.R2_SECRET_KEY}}
+                R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
+                R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
+                R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+                R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY }}
+                R2_SECRET_KEY: ${{ secrets.R2_SECRET_KEY }}
             
-                PORTONE_API_ID: ${{ secrets.PORTONE_API_ID}}
-                PORTONE_API_SECRET: ${{ secrets.PORTONE_API_SECRET}}
+                PORTONE_API_ID: ${{ secrets.PORTONE_API_ID }}
+                PORTONE_API_SECRET: ${{ secrets.PORTONE_API_SECRET }}
             
-                REST_DAY_API_KEY: ${{ secrets.REST_DAY_API_KEY}}
+                REST_DAY_API_KEY: ${{ secrets.REST_DAY_API_KEY }}
             
-                GMAIL_SMTP_PWD: ${{ secrets.GMAIL_SMTP_PWD}}
+                GMAIL_SMTP_PWD: ${{ secrets.GMAIL_SMTP_PWD }}
               buildenv: []
             context:
               git:
