@@ -36,12 +36,9 @@ jobs:
             app: java@17
             options:
               ports: "8080"
-              build: ./gradlew build -x test
+              build: ./gradlew build -x test -Dspring.profiles.active=prod
               env: []
               buildenv: 
-                - name: SPRING_PROFILES_ACTIVE
-                  value: prod
-          
                 - name: PROD_DB_URL
                   value: ${{ secrets.PROD_DB_URL }}
                 - name: PROD_DB_USERNAME
