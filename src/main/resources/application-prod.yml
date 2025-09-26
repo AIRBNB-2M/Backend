@@ -8,23 +8,11 @@ spring:
     password: ${PROD_DB_PASSWORD}
     driver-class-name: org.mariadb.jdbc.Driver
 
-  security:
-    oauth2:
-      client:
-        registration:
-          naver:
-            redirect-uri: #TODO: 배포 주소 넣기
-          kakao:
-            redirect-uri: #TODO: 배포 주소 넣기
-
   jpa:
     hibernate:
       ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MariaDBDialect
-
-server:
-  port: 8081
 
 frontend-url: https://frontend-liard-eight-40.vercel.app

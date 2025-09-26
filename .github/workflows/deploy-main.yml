@@ -41,6 +41,8 @@ jobs:
               buildenv: 
                 - name: SPRING_ACTIVE_PROFILE
                   value: prod
+                - name: BASE_URL
+                  value: https://port-0-backend-mdl85cydd9f8761f.sel5.cloudtype.app
                 - name: PROD_DB_URL
                   value: ${{ secrets.PROD_DB_URL }}
                 - name: PROD_DB_USERNAME
