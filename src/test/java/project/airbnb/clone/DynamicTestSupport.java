@@ -55,8 +55,8 @@ public abstract class DynamicTestSupport extends IntegrationTestSupport {
             registry.add("spring.datasource.password", () -> "");
             registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
             registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.H2Dialect");
-            registry.add("spring.data.redis.host", () -> "redis-container");
-            registry.add("spring.data.redis.port", () -> 6377);
+            registry.add("spring.data.redis.host", () -> "localhost");
+            registry.add("spring.data.redis.port", () -> 6379);
         }
     }
 }
