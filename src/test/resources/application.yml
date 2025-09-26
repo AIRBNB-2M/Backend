@@ -2,6 +2,21 @@ tourapi:
   key: hello
 
 spring:
+  mail:
+    host: test
+    port: 587
+    username: test
+    password: test
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connection-timeout: 1
+          timeout: 1
+          write-timeout: 1
   batch:
     jdbc:
       initialize-schema: always
@@ -53,6 +68,7 @@ jwt:
 cloudflare:
   r2:
     endpoint: http://test.com
+    public-url: http://test.com
     bucket: test
     access-key: test
     secret-key: test

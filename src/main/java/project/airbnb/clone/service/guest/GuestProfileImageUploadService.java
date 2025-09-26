@@ -1,9 +1,12 @@
 package project.airbnb.clone.service.guest;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 import project.airbnb.clone.common.exceptions.ImageUploadException;
 import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.repository.jpa.GuestRepository;
@@ -21,15 +24,33 @@ public class GuestProfileImageUploadService {
 
     @Transactional
     public void upload(Long guestId, String imageUrl) {
-        Guest guest = guestRepository.getGuestById(guestId);
+        uploadProfileImage(guestId, key -> s3Uploader.uploadImage(imageUrl, key));
+    }
 
+    @Transactional
+    public void uploadAndDeleteOrigin(Long guestId, String oldImageUrl, MultipartFile newImageFile) {
+        uploadProfileImage(guestId, key -> newImageFile != null ? s3Uploader.uploadImage(newImageFile, key) : null);
+
+        if (StringUtils.hasText(oldImageUrl)) {
+            s3Uploader.deleteFile(oldImageUrl);
+        }
+    }
+
+    private void uploadProfileImage(Long guestId, FileUploadFunction uploadFunction) {
+        Guest guest = guestRepository.findById(guestId)
+                                     .orElseThrow(() -> new EntityNotFoundException("Guest with id " + guestId + "cannot be found"));
         String key = String.format("guests/%s", UUID.randomUUID());
 
         try {
-            guest.setProfileUrl(s3Uploader.uploadImage(imageUrl, key));
-            log.debug("Succeed to upload image to S3: guestId={}", guestId);
+            guest.setProfileUrl(uploadFunction.upload(key));
+            log.debug("Succeed to upload image to S3: guestId={}", guest.getId());
         } catch (ImageUploadException e) {
-            log.warn("failed image upload for guestId={}. Continue without profile image.", guestId, e);
+            log.warn("Failed image upload for guestId={}. Continue without profile image.", guest.getId(), e);
         }
+    }
+
+    @FunctionalInterface
+    private interface FileUploadFunction {
+        String upload(String key) throws ImageUploadException;
     }
 }

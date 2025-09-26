@@ -2,28 +2,37 @@ package project.airbnb.clone.controller.guests;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import project.airbnb.clone.dto.guest.SignupRequestDto;
+import org.springframework.web.multipart.MultipartFile;
+import project.airbnb.clone.common.annotations.CurrentGuestId;
+import project.airbnb.clone.dto.guest.DefaultProfileResDto;
+import project.airbnb.clone.dto.guest.EditProfileReqDto;
+import project.airbnb.clone.dto.guest.EditProfileResDto;
 import project.airbnb.clone.service.guest.GuestService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/api/guests")
 public class GuestController {
 
     private final GuestService guestService;
 
-    /**
-     * REST 회원가입
-     */
-    @PostMapping("/auth/signup")
-    public ResponseEntity<?> signup(@Valid @RequestBody SignupRequestDto signupRequestDto) {
-        guestService.register(signupRequestDto);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    @GetMapping("/me")
+    public ResponseEntity<DefaultProfileResDto> getMyProfile(@CurrentGuestId Long guestId) {
+        DefaultProfileResDto response = guestService.getDefaultProfile(guestId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<EditProfileResDto> editMyProfile(@CurrentGuestId Long guestId,
+                                                           @RequestPart(value = "profileImage", required = false) MultipartFile imageFile,
+                                                           @Valid @RequestPart("editProfileRequest") EditProfileReqDto profileReqDto) {
+        EditProfileResDto response = guestService.editMyProfile(guestId, imageFile, profileReqDto);
+        return ResponseEntity.ok(response);
     }
 }

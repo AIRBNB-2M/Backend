@@ -4,12 +4,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 import project.airbnb.clone.common.exceptions.ImageUploadException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -24,7 +27,7 @@ public class S3Uploader {
     @Value("${cloudflare.r2.bucket}")
     private String bucketName;
 
-    @Value("${cloudflare.r2.endpoint}")
+    @Value("${cloudflare.r2.public-url}")
     private String bucketPublicUrl;
 
     /**
@@ -33,38 +36,75 @@ public class S3Uploader {
      * @return R2에 저장된 이미지 주소
      */
     public String uploadImage(String imageUrl, String key) {
-        HttpURLConnection connection = null;
-
         try {
             URL url = new URL(imageUrl);
-            connection = (HttpURLConnection) url.openConnection();
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setConnectTimeout(10000); //10s
             connection.setReadTimeout(30000); //30s
 
-            long contentLength = connection.getContentLengthLong();
-            String contentType = connection.getContentType();
-
             try (InputStream inputStream = new BufferedInputStream(connection.getInputStream())) {
-                RequestBody requestBody = RequestBody.fromInputStream(inputStream, contentLength);
+                long contentLength = connection.getContentLengthLong();
+                String contentType = connection.getContentType();
 
-                PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                                                                    .bucket(bucketName)
-                                                                    .key(key)
-                                                                    .contentType(contentType)
-                                                                    .build();
-
-                s3Client.putObject(putObjectRequest, requestBody);
-            }
-
-            return bucketPublicUrl + "/" + key;
-
-        } catch (Exception e) {
-            log.error("Failed to upload image to S3: key={}", key, e);
-            throw new ImageUploadException("Failed to upload image to S3", e);
-        } finally {
-            if (connection != null) {
+                return uploadToS3(inputStream, contentLength, contentType, key);
+            } finally {
                 connection.disconnect();
             }
+        } catch (Exception e) {
+            log.error("Failed to upload image from URL to S3: key={}", key, e);
+            throw new ImageUploadException("Failed to upload image to S3", e);
+        }
+    }
+
+    public String uploadImage(MultipartFile file, String key) {
+        try (InputStream inputStream = file.getInputStream()) {
+            long contentLength = file.getSize();
+            String contentType = file.getContentType();
+            return uploadToS3(inputStream, contentLength, contentType, key);
+        } catch (IOException e) {
+            log.error("Failed to upload MultipartFile to S3: key={}", key, e);
+            throw new ImageUploadException("Failed to upload image to S3", e);
+        }
+    }
+
+    public void deleteFile(String oldImageUrl) {
+        try {
+            String prefix = bucketPublicUrl + "/";
+
+            if (!oldImageUrl.startsWith(prefix)) {
+                log.warn("Invalid image url. Skip deletion. url={}", oldImageUrl);
+                return;
+            }
+
+            String key = oldImageUrl.substring(prefix.length());
+
+            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                                                                         .bucket(bucketName)
+                                                                         .key(key)
+                                                                         .build();
+
+            s3Client.deleteObject(deleteObjectRequest);
+            log.debug("Deleted file from R2: bucket={}, key={}", bucketName, key);
+
+        } catch (Exception e) {
+            log.error("Failed to delete file from R2: url={}", oldImageUrl, e);
+        }
+    }
+
+    private String uploadToS3(InputStream inputStream, long contentLength, String contentType, String key) {
+        try {
+            RequestBody requestBody = RequestBody.fromInputStream(inputStream, contentLength);
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                                                                .bucket(bucketName)
+                                                                .key(key)
+                                                                .contentType(contentType)
+                                                                .build();
+
+            s3Client.putObject(putObjectRequest, requestBody);
+            return bucketPublicUrl + "/" + key;
+        } catch (Exception e) {
+            log.error("Failed to upload input stream to S3: key={}", key, e);
+            throw new ImageUploadException("Failed to upload image to S3", e);
         }
     }
 }
