@@ -27,6 +27,8 @@ jobs:
               ports: "8081"
               build: ./gradlew clean build
               env: 
+                SPRING_PROFILES_ACTIVE: prod
+            
                 PROD_DB_URL: ${{ secrets.PROD_DB_URL}}
                 PROD_DB_USERNAME: ${{ secrets.PROD_DB_USERNAME}}
                 PROD_DB_PASSWORD: ${{ secrets.PROD_DB_PASSWORD}}
