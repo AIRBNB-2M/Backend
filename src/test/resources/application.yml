@@ -79,3 +79,5 @@ portone:
 
 rest-day:
   api-key: test
+
+frontend-url: http://exmaple:3000
