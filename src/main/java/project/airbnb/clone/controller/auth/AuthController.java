@@ -73,12 +73,7 @@ public class AuthController {
 
     @GetMapping("/email/verify")
     public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
-        boolean success = emailVerificationService.verifyToken(token);
-
-        //TODO : 프론트엔드 배포 주소 연결
-        String redirectUrl = success
-                ? "http://localhost:3000/users/profile?emailVerify=success"
-                : "http://localhost:3000/users/profile?emailVerify=failed";
+        String redirectUrl = emailVerificationService.verifyToken(token);
 
         return ResponseEntity.status(HttpStatus.FOUND)
                              .location(URI.create(redirectUrl))

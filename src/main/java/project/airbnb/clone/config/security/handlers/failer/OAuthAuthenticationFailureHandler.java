@@ -1,9 +1,9 @@
 package project.airbnb.clone.config.security.handlers.failer;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.DefaultRedirectStrategy;
@@ -18,10 +18,13 @@ import java.io.IOException;
 @Component
 public class OAuthAuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
+    @Value("${frontend-url}")
+    private String frondEndUrl;
+
     private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
     @Override
-    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
         log.debug("인증 실패 : {}", exception.getMessage());
 
         int statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
@@ -31,7 +34,6 @@ public class OAuthAuthenticationFailureHandler extends SimpleUrlAuthenticationFa
             statusCode = HttpStatus.CONFLICT.value();
         }
 
-        //TODO: 운영 환경에서 프론트엔드 배포 주소 연결
-        redirectStrategy.sendRedirect(request, response, "http://localhost:3000/auth/callback?error=" + statusCode);
+        redirectStrategy.sendRedirect(request, response, frondEndUrl + "/auth/callback?error=" + statusCode);
     }
 }

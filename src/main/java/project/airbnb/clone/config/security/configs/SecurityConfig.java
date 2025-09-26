@@ -18,6 +18,8 @@ import project.airbnb.clone.common.jwt.JwtProperties;
 import project.airbnb.clone.config.security.jwt.JwtAuthenticationFilter;
 import project.airbnb.clone.config.security.jwt.JwtExceptionFilter;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -60,7 +62,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.addAllowedOrigin("http://localhost:3000");
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://frontend-liard-eight-40.vercel.app"));
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);

@@ -4,6 +4,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -20,6 +21,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class EmailVerificationService {
+
+    @Value("${frontend-url}")
+    private String frondEndUrl;
 
     private final JavaMailSender javaMailSender;
     private final GuestRepository guestRepository;
@@ -54,12 +58,14 @@ public class EmailVerificationService {
     }
 
     @Transactional
-    public boolean verifyToken(String token) {
+    public String verifyToken(String token) {
         String key = getRedisKey(token);
         String value = redisRepository.getValue(key);
 
+        String redirectUrl = frondEndUrl + "/users/profile?emailVerify=";
+
         if (value == null) {
-            return false;
+            return redirectUrl + "failed";
         }
 
         Long guestId = Long.valueOf(value);
@@ -68,7 +74,7 @@ public class EmailVerificationService {
         guest.verifyEmail();
         redisRepository.deleteValue(key);
 
-        return true;
+        return redirectUrl + "success";
     }
 
     private String getRedisKey(String token) {
