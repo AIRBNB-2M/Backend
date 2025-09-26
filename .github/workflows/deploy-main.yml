@@ -24,43 +24,68 @@ jobs:
             name: backend
             app: java@17
             options:
-              ports: "8081"
-              build: ./gradlew clean build
-              env: 
-                SPRING_PROFILES_ACTIVE: prod
-            
-                PROD_DB_URL: ${{ secrets.PROD_DB_URL }}
-                PROD_DB_USERNAME: ${{ secrets.PROD_DB_USERNAME }}
-                PROD_DB_PASSWORD: ${{ secrets.PROD_DB_PASSWORD }}
-            
-                GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-                GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-                GH_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
-                GH_CLIENT_SECRET: ${{ secrets.GH_CLIENT_SECRET }}
-                NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
-                NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
-                KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
-                KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
-            
-                TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
-            
-                JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
-                JWT_ACCESS_EXP: ${{ secrets.JWT_ACCESS_EXP }}
-                JWT_REFRESH_EXP: ${{ secrets.JWT_REFRESH_EXP }}
-            
-                R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
-                R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
-                R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-                R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY }}
-                R2_SECRET_KEY: ${{ secrets.R2_SECRET_KEY }}
-            
-                PORTONE_API_ID: ${{ secrets.PORTONE_API_ID }}
-                PORTONE_API_SECRET: ${{ secrets.PORTONE_API_SECRET }}
-            
-                REST_DAY_API_KEY: ${{ secrets.REST_DAY_API_KEY }}
-            
-                GMAIL_SMTP_PWD: ${{ secrets.GMAIL_SMTP_PWD }}
-              buildenv: []
+              ports: "8080"
+              build: ./gradlew build
+              env: []
+              buildenv: 
+                - name: SPRING_PROFILES_ACTIVE
+                  value: prod
+          
+                - name: PROD_DB_URL
+                  value: ${{ secrets.PROD_DB_URL }}
+                - name: PROD_DB_USERNAME
+                  value: ${{ secrets.PROD_DB_USERNAME }}
+                - name: PROD_DB_PASSWORD
+                  value: ${{ secrets.PROD_DB_PASSWORD }}
+          
+                - name: GOOGLE_CLIENT_ID
+                  value: ${{ secrets.GOOGLE_CLIENT_ID }}
+                - name: GOOGLE_CLIENT_SECRET
+                  value: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+                - name: GH_CLIENT_ID
+                  value: ${{ secrets.GH_CLIENT_ID }}
+                - name: GH_CLIENT_SECRET
+                  value: ${{ secrets.GH_CLIENT_SECRET }}
+                - name: NAVER_CLIENT_ID
+                  value: ${{ secrets.NAVER_CLIENT_ID }}
+                - name: NAVER_CLIENT_SECRET
+                  value: ${{ secrets.NAVER_CLIENT_SECRET }}
+                - name: KAKAO_CLIENT_ID
+                  value: ${{ secrets.KAKAO_CLIENT_ID }}
+                - name: KAKAO_CLIENT_SECRET
+                  value: ${{ secrets.KAKAO_CLIENT_SECRET }}
+          
+                - name: TOUR_API_KEY
+                  value: ${{ secrets.TOUR_API_KEY }}
+          
+                - name: JWT_SECRET_KEY
+                  value: ${{ secrets.JWT_SECRET_KEY }}
+                - name: JWT_ACCESS_EXP
+                  value: ${{ secrets.JWT_ACCESS_EXP }}
+                - name: JWT_REFRESH_EXP
+                  value: ${{ secrets.JWT_REFRESH_EXP }}
+          
+                - name: R2_ENDPOINT_URL
+                  value: ${{ secrets.R2_ENDPOINT_URL }}
+                - name: R2_PUBLIC_URL
+                  value: ${{ secrets.R2_PUBLIC_URL }}
+                - name: R2_BUCKET_NAME
+                  value: ${{ secrets.R2_BUCKET_NAME }}
+                - name: R2_ACCESS_KEY
+                  value: ${{ secrets.R2_ACCESS_KEY }}
+                - name: R2_SECRET_KEY
+                  value: ${{ secrets.R2_SECRET_KEY }}
+          
+                - name: PORTONE_API_ID
+                  value: ${{ secrets.PORTONE_API_ID }}
+                - name: PORTONE_API_SECRET
+                  value: ${{ secrets.PORTONE_API_SECRET }}
+          
+                - name: REST_DAY_API_KEY
+                  value: ${{ secrets.REST_DAY_API_KEY }}
+          
+                - name: GMAIL_SMTP_PWD
+                  value: ${{ secrets.GMAIL_SMTP_PWD }}
             context:
               git:
                 url: git@github.com:${{ github.repository }}.git
