@@ -1,5 +1,6 @@
 spring:
-
+  profiles:
+    active: ${SPRING_ACTIVE_PROFILE}
   mail:
     host: smtp.gmail.com
     port: 587
