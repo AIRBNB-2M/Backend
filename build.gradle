@@ -50,6 +50,7 @@ dependencies {
     // Database & Querydsl
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'com.mysql:mysql-connector-j'
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
     annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
@@ -83,6 +84,7 @@ dependencies {
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:mysql'
+    testImplementation 'org.testcontainers:mariadb'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'com.github.codemonstur:embedded-redis:1.4.3'
 }
