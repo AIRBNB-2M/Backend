@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-@Profile("!test")
+@Profile("local || prod")
 @Component
 @RequiredArgsConstructor
 public class HolidaysInitializer implements ApplicationListener<ContextRefreshedEvent> {

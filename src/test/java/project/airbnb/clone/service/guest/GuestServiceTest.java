@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import project.airbnb.clone.TestContainersConfig;
+import project.airbnb.clone.DynamicTestSupport;
 import project.airbnb.clone.common.exceptions.EmailAlreadyExistsException;
 import project.airbnb.clone.consts.SocialType;
 import project.airbnb.clone.dto.guest.DefaultProfileResDto;
@@ -22,7 +22,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class GuestServiceTest extends TestContainersConfig {
+class GuestServiceTest extends DynamicTestSupport {
 
     @Autowired GuestService guestService;
     @Autowired GuestRepository guestRepository;

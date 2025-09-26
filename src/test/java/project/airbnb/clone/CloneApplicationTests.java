@@ -1,8 +1,10 @@
 package project.airbnb.clone;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
-class CloneApplicationTests extends IntegrationTestSupport {
+@SpringBootTest
+class CloneApplicationTests {
 
 	@Test
 	void contextLoads() {

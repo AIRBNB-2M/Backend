@@ -14,6 +14,8 @@ jobs:
         with:
           token: ${{ secrets.CLOUDTYPE_TOKEN }}
           ghtoken: ${{ secrets.GHP_TOKEN }}
+      - name: Generate Swagger Docs
+        run: ./gradlew copyOasToSwagger -Pspring.profiles.active=h2
       - name: Deploy
         uses: cloudtype-github-actions/deploy@v1
         with:
@@ -25,7 +27,7 @@ jobs:
             app: java@17
             options:
               ports: "8080"
-              build: ./gradlew build
+              build: ./gradlew build -x test
               env: []
               buildenv: 
                 - name: SPRING_PROFILES_ACTIVE

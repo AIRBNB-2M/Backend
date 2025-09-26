@@ -11,7 +11,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.util.ReflectionTestUtils;
-import project.airbnb.clone.TestContainersConfig;
+import project.airbnb.clone.DynamicTestSupport;
 import project.airbnb.clone.common.events.logout.OAuthLogoutEvent;
 import project.airbnb.clone.common.jwt.JwtProperties;
 import project.airbnb.clone.common.jwt.JwtProperties.TokenProperties;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-class TokenServiceTest extends TestContainersConfig {
+class TokenServiceTest extends DynamicTestSupport {
 
     @Autowired TokenService tokenService;
     @Autowired GuestRepository guestRepository;
