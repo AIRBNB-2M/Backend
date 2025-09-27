@@ -107,7 +107,7 @@ public class HttpClientConfig {
     @Bean
     public RestClient.Builder restClientBuilder() {
         HttpClient httpClient = HttpClient.newBuilder()
-                                          .connectTimeout(Duration.ofSeconds(5))
+                                          .connectTimeout(Duration.ofSeconds(10))
                                           .build();
 
         JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
