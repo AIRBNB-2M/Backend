@@ -1,4 +1,7 @@
 spring:
+  data:
+    redis:
+      password: ${REDIS_PASSWORD}
   batch:
     job:
       enabled: false

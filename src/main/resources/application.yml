@@ -1,7 +1,6 @@
 spring:
   profiles:
     active: ${SPRING_ACTIVE_PROFILE}
-    validate: false
   data:
     redis:
       host: ${REDIS_HOST}
