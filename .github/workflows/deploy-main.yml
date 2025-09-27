@@ -6,11 +6,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    services:
-      redis:
-        image: redis
-        ports:
-          - 6379:6379
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -19,12 +14,6 @@ jobs:
         with:
           token: ${{ secrets.CLOUDTYPE_TOKEN }}
           ghtoken: ${{ secrets.GHP_TOKEN }}
-      - name: Set execute permission for gradlew
-        run: chmod +x ./gradlew
-      - name: Run Tests
-        run: ./gradlew test -Dspring.profiles.active=h2
-      - name: Generate Swagger Docs
-        run: ./gradlew copyOasToSwagger
       - name: Deploy
         uses: cloudtype-github-actions/deploy@v1
         with:
@@ -33,12 +22,11 @@ jobs:
           stage: main
           yaml: |
             name: backend
-            app: java@17
+            app: dockerfile
             options:
-              ports: "8080"
-              build: ./gradlew build -x test
-              env: []
-              buildenv: 
+              ports: 3000
+              dockerfile: Dockerfile
+              env: 
                 - name: SPRING_ACTIVE_PROFILE
                   value: prod
                 - name: BASE_URL
@@ -98,7 +86,9 @@ jobs:
           
                 - name: GMAIL_SMTP_PWD
                   value: ${{ secrets.GMAIL_SMTP_PWD }}
+              args: []
             context:
               git:
                 url: git@github.com:${{ github.repository }}.git
                 ref: ${{ github.ref }}
+              preset: dockerfile

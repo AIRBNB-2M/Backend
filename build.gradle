@@ -108,6 +108,14 @@ openapi3 {
     format = "yaml"
 }
 
+gradle.taskGraph.whenReady { taskGraph ->
+    if (taskGraph.hasTask(tasks.openapi3)) {
+        tasks.test.configure {
+            include 'project/airbnb/clone/controller/**/*Test.class'
+        }
+    }
+}
+
 tasks.register('copyOasToSwagger', Copy) {
     delete "src/main/resources/static/swagger-ui/openapi3.yaml"
     from "${buildDir}/api-spec/openapi3.yaml"
