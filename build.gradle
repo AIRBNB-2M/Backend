@@ -101,7 +101,10 @@ clean {
 
 // OpenAPI3 설정
 openapi3 {
-    server = 'http://localhost:8081'
+    servers = [
+            { url = 'http://localhost:8081' },
+            { url = 'https://port-0-backend-mdl85cydd9f8761f.sel5.cloudtype.app'}
+    ]
     title = "Airbnb-2M 백엔드 API 문서"
     description = "RestDocsWithSwagger Docs"
     version = "0.0.1"
