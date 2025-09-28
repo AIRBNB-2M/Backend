@@ -39,15 +39,15 @@ public class AuthController {
     private final EmailVerificationService emailVerificationService;
 
     @PostMapping("/refresh")
-    public void refreshAccessToken(@CookieValue(value = REFRESH_TOKEN_KEY, required = false) String refreshToken,
+    public void refreshAccessToken(@CookieValue(REFRESH_TOKEN_KEY) String refreshToken,
                                    HttpServletResponse response, HttpServletRequest request) {
         log.debug("RefreshTokenController.refreshAccessToken");
         tokenService.refreshAccessToken(refreshToken, response, request);
     }
 
     @PostMapping("/logout")
-    public void logout(@RequestHeader(value = AUTHORIZATION_HEADER, required = false) String accessToken,
-                       @CookieValue(value = REFRESH_TOKEN_KEY, required = false) String refreshToken,
+    public void logout(@RequestHeader(AUTHORIZATION_HEADER) String accessToken,
+                       @CookieValue(REFRESH_TOKEN_KEY) String refreshToken,
                        HttpServletResponse response) {
         tokenService.logoutProcess(accessToken, refreshToken);
 
