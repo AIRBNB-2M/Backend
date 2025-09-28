@@ -1,6 +1,7 @@
 package project.airbnb.clone.service.jwt;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -99,18 +100,21 @@ public class TokenService {
     }
 
     private void addBlackList(String accessToken) {
-        accessToken = accessToken.substring(TOKEN_PREFIX.length());
-        String key = BLACK_LIST_PREFIX + accessToken;
+        try {
+            accessToken = accessToken.substring(TOKEN_PREFIX.length());
+            String key = BLACK_LIST_PREFIX + accessToken;
 
-        Date now = new Date();
-        Claims claims = jwtProvider.parseClaims(accessToken);
-        Date expiration = claims.getExpiration();
+            Date now = new Date();
+            Claims claims = jwtProvider.parseClaims(accessToken);
+            Date expiration = claims.getExpiration();
 
-        long remain = expiration.getTime() - now.getTime();
+            long remain = expiration.getTime() - now.getTime();
 
-        if (remain > 0) {
-            redisRepository.setValue(key, "logout", Duration.ofMillis(remain));
-            log.debug("Access Token added to blacklist: {}", accessToken);
+            if (remain > 0) {
+                redisRepository.setValue(key, "logout", Duration.ofMillis(remain));
+                log.debug("Access Token added to blacklist: {}", accessToken);
+            }
+        } catch (ExpiredJwtException ignored) {
         }
     }
 
