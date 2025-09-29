@@ -11,6 +11,8 @@ import project.airbnb.clone.common.events.guest.GuestImageUploadEvent;
 import project.airbnb.clone.common.events.guest.GuestProfileImageChangedEvent;
 import project.airbnb.clone.common.exceptions.EmailAlreadyExistsException;
 import project.airbnb.clone.consts.SocialType;
+import project.airbnb.clone.dto.guest.ChatGuestSearchDto;
+import project.airbnb.clone.dto.guest.ChatGuestsSearchResDto;
 import project.airbnb.clone.dto.guest.DefaultProfileResDto;
 import project.airbnb.clone.dto.guest.EditProfileReqDto;
 import project.airbnb.clone.dto.guest.EditProfileResDto;
@@ -20,6 +22,8 @@ import project.airbnb.clone.model.ProviderUser;
 import project.airbnb.clone.repository.dto.DefaultProfileQueryDto;
 import project.airbnb.clone.repository.jpa.GuestRepository;
 import project.airbnb.clone.repository.query.GuestQueryRepository;
+
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -85,6 +89,11 @@ public class GuestService {
         DefaultProfileQueryDto profileQueryDto = guestQueryRepository.getDefaultProfile(guestId)
                                                                      .orElseThrow(() -> new EntityNotFoundException("Guest with id " + guestId + "cannot be found"));
         return DefaultProfileResDto.from(profileQueryDto);
+    }
+
+    public ChatGuestsSearchResDto findGuestsByName(String name) {
+        List<ChatGuestSearchDto> guests = guestQueryRepository.findGuestsByName(name);
+        return new ChatGuestsSearchResDto(guests);
     }
 
     private void validateExistsEmail(String email) {
