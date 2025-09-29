@@ -74,6 +74,8 @@ public class TokenService {
 
         ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_KEY, refreshToken)
                                               .path("/")
+                                              .secure(true)
+                                              .sameSite("None")
                                               .httpOnly(true)
                                               .maxAge(refreshDuration)
                                               .build();
