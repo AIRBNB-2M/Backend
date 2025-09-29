@@ -15,4 +15,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MariaDBDialect
 
-frontend-url: https://frontend-liard-eight-40.vercel.app
+app:
+  frontend-url: https://frontend-liard-eight-40.vercel.app
+  base-url: https://port-0-backend-mdl85cydd9f8761f.sel5.cloudtype.app

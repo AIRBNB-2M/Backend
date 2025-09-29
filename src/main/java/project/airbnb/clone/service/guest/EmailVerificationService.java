@@ -22,8 +22,11 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class EmailVerificationService {
 
-    @Value("${frontend-url}")
+    @Value("${app.frontend-url}")
     private String frondEndUrl;
+
+    @Value("${app.base-url}")
+    private String baseUrl;
 
     private final JavaMailSender javaMailSender;
     private final GuestRepository guestRepository;
@@ -37,7 +40,7 @@ public class EmailVerificationService {
         String key = getRedisKey(token);
 
         //TODO : 배포 주소 연결
-        String link = "http://localhost:8081/api/auth/email/verify?token=" + token;
+        String link = baseUrl + "/api/auth/email/verify?token=" + token;
         String subject = "[Airbnb-2M] 이메일 인증을 완료해주세요.";
         String html = generateHtml(link);
 
@@ -141,8 +144,6 @@ public class EmailVerificationService {
                             <p style="text-align: center;">
                                 <a href="%s" class="button">이메일 인증하기</a>
                             </p>
-                            <p>만약 버튼이 작동하지 않는다면, 아래 링크를 복사해서 브라우저에 붙여넣어주세요:</p>
-                            <p><a href="%s">%s</a></p>
                             <p style="color:#555; font-size:13px;">※ 본 메일은 발신 전용으로 회신이 불가합니다.</p>
                         </div>
                         <div class="footer">
@@ -151,6 +152,6 @@ public class EmailVerificationService {
                     </div>
                 </body>
                 </html>
-                """.formatted(link, link, link);
+                """.formatted(link);
     }
 }

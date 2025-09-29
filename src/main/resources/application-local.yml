@@ -25,4 +25,6 @@ logging:
   level:
     project.airbnb.clone: debug
 
-frontend-url: http://localhost:3000
+app:
+  frontend-url: http://localhost:3000
+  base-url: http://localhost:8081

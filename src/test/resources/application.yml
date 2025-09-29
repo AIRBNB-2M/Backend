@@ -81,4 +81,6 @@ portone:
 rest-day:
   api-key: test
 
-frontend-url: http://exmaple:3000
+app:
+  frontend-url: http://exmaple:3000
+  base-url: http://exmaple:8081

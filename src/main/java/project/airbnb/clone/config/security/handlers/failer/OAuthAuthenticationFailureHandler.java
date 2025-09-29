@@ -18,7 +18,7 @@ import java.io.IOException;
 @Component
 public class OAuthAuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
-    @Value("${frontend-url}")
+    @Value("${app.frontend-url}")
     private String frondEndUrl;
 
     private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
