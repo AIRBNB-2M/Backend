@@ -32,17 +32,21 @@ public class OAuthLogoutListener {
 
     @EventListener
     public void handleOAuthLogoutEvent(OAuthLogoutEvent event) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!(authentication.getPrincipal() instanceof PrincipalUser)) {
+            return;
+        }
         log.debug("OAuthLogoutListener.handleOAuthLogoutEvent: {}", event);
 
         SocialType socialType = event.socialType();
         switch (socialType) {
             case KAKAO -> {
-                String accessToken = getAccessToken(socialType.getSocialName());
+                String accessToken = getAccessToken(socialType.getSocialName(), authentication);
                 KakaoIdResponse response = kakaoAppClient.logout(TOKEN_PREFIX + accessToken);
                 log.debug("kakao logout success: response={}", response);
             }
             case NAVER -> {
-                String accessToken = getAccessToken(socialType.getSocialName());
+                String accessToken = getAccessToken(socialType.getSocialName(), authentication);
                 String encodedToken = URLEncoder.encode(accessToken, StandardCharsets.UTF_8);
 
                 NaverResponse response = naverAppClient.logout(encodedToken);
@@ -52,13 +56,11 @@ public class OAuthLogoutListener {
         }
     }
 
-    private String getAccessToken(String registrationId) {
-        Authentication authentication = SecurityContextHolder.getContextHolderStrategy().getContext().getAuthentication();
+    private String getAccessToken(String registrationId, Authentication authentication) {
         PrincipalUser principalUser = (PrincipalUser) authentication.getPrincipal();
 
         String principalName = principalUser.getPrincipalName();
-
-        Assert.notNull(principalUser, "PrincipalName Cannot be null");
+        Assert.notNull(principalName, "PrincipalName Cannot be null");
 
         OAuth2AuthorizedClient authorizedClient = oAuth2AuthorizedClientService.loadAuthorizedClient(registrationId, principalName);
         return authorizedClient.getAccessToken().getTokenValue();
