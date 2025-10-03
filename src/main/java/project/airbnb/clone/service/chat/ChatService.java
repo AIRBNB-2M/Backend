@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.airbnb.clone.dto.chat.ChatMessageReqDto;
 import project.airbnb.clone.dto.chat.ChatMessageResDto;
+import project.airbnb.clone.dto.chat.ChatMessagesResDto;
 import project.airbnb.clone.dto.chat.ChatRoomResDto;
 import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.entity.chat.ChatMessage;
@@ -17,6 +18,7 @@ import project.airbnb.clone.repository.jpa.ChatParticipantRepository;
 import project.airbnb.clone.repository.jpa.ChatRoomRepository;
 import project.airbnb.clone.repository.jpa.GuestRepository;
 import project.airbnb.clone.repository.jpa.ReadStatusRepository;
+import project.airbnb.clone.repository.query.ChatMessageQueryRepository;
 import project.airbnb.clone.repository.query.ChatRoomQueryRepository;
 
 import java.util.List;
@@ -32,6 +34,7 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomQueryRepository chatRoomQueryRepository;
     private final ChatParticipantRepository chatParticipantRepository;
+    private final ChatMessageQueryRepository chatMessageQueryRepository;
 
     @Transactional
     public ChatRoomResDto createOrGetChatRoom(Long otherGuestId, Long creatorId) {
@@ -79,6 +82,17 @@ public class ChatService {
 
     public List<ChatRoomResDto> getChatRooms(Long guestId) {
         return chatRoomQueryRepository.findChatRooms(guestId);
+    }
+
+    public ChatMessagesResDto getMessageHistories(Long lastMessageId, Long roomId, int pageSize) {
+        List<ChatMessageResDto> messages = chatMessageQueryRepository.getMessages(lastMessageId, roomId, pageSize);
+        boolean hasMore = messages.size() > pageSize;
+
+        if (hasMore) {
+            messages.remove(messages.size() - 1);
+        }
+
+        return new ChatMessagesResDto(messages, hasMore);
     }
 
     private ChatRoom createNewChatRoom(Long otherGuestId, Long creatorId) {
