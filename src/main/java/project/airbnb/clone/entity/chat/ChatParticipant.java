@@ -45,6 +45,10 @@ public class ChatParticipant extends BaseEntity {
     @JoinColumn(name = "guest_id", nullable = false)
     private Guest guest;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "last_read_message")
+    private ChatMessage lastReadMessage;
+
     @Column(name = "is_creator", nullable = false)
     private Boolean isCreator;
 
@@ -83,5 +87,9 @@ public class ChatParticipant extends BaseEntity {
         }
         this.isActive = true;
         this.lastRejoinedAt = LocalDateTime.now();
+    }
+
+    public void updateLastReadMessage(ChatMessage lastReadMessage) {
+        this.lastReadMessage = lastReadMessage;
     }
 }

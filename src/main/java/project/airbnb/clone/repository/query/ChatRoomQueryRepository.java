@@ -13,7 +13,6 @@ import project.airbnb.clone.entity.chat.ChatRoom;
 import project.airbnb.clone.entity.chat.QChatMessage;
 import project.airbnb.clone.entity.chat.QChatParticipant;
 import project.airbnb.clone.entity.chat.QChatRoom;
-import project.airbnb.clone.entity.chat.QReadStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +29,6 @@ public class ChatRoomQueryRepository {
     private static final QGuest OTHER_GUEST = new QGuest("otherGuest");
     private static final QChatMessage CM = QChatMessage.chatMessage;
     private static final QChatMessage SUB_CM = new QChatMessage("subMessage");
-    private static final QReadStatus RS = QReadStatus.readStatus;
 
     private final JPAQueryFactory queryFactory;
 
@@ -61,7 +59,10 @@ public class ChatRoomQueryRepository {
     }
 
     private JPQLQuery<ChatRoomResDto> buildChatRoomQuery(Long guestId, BooleanExpression otherGuestCond) {
-
+        JPQLQuery<Integer> unreadCount = JPAExpressions.select(SUB_CM.count().intValue())
+                                                        .from(SUB_CM)
+                                                        .where(SUB_CM.chatRoom.eq(CR).and(CP1.lastReadMessage.isNull()
+                                                                                                             .or(SUB_CM.id.gt(CP1.lastReadMessage.id))));
         return queryFactory
                 .select(Projections.constructor(ChatRoomResDto.class,
                         CR.id,
@@ -72,7 +73,7 @@ public class ChatRoomQueryRepository {
                         CP2.isActive,
                         CM.content,
                         CM.createdAt,
-                        RS.id.count().intValue().coalesce(0)
+                        unreadCount
                 ))
                 .from(CR)
                 .join(CP1).on(CP1.chatRoom.eq(CR),
@@ -85,10 +86,6 @@ public class ChatRoomQueryRepository {
                         JPAExpressions.select(SUB_CM.id.max())
                                       .from(SUB_CM)
                                       .where(SUB_CM.chatRoom.eq(CR))
-                ))
-                .leftJoin(RS).on(RS.chatRoom.eq(CR)
-                                            .and(RS.guest.id.eq(guestId))
-                                            .and(RS.isRead.eq(false)))
-                .groupBy(CR.id, CP1.customRoomName, OTHER_GUEST.id, OTHER_GUEST.name, OTHER_GUEST.profileUrl, CP2.isActive, CM.content, CM.createdAt);
+                ));
     }
 }

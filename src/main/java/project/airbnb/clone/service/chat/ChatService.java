@@ -17,7 +17,6 @@ import project.airbnb.clone.repository.jpa.ChatMessageRepository;
 import project.airbnb.clone.repository.jpa.ChatParticipantRepository;
 import project.airbnb.clone.repository.jpa.ChatRoomRepository;
 import project.airbnb.clone.repository.jpa.GuestRepository;
-import project.airbnb.clone.repository.jpa.ReadStatusRepository;
 import project.airbnb.clone.repository.query.ChatMessageQueryRepository;
 import project.airbnb.clone.repository.query.ChatRoomQueryRepository;
 
@@ -30,7 +29,6 @@ public class ChatService {
 
     private final GuestRepository guestRepository;
     private final ChatRoomRepository chatRoomRepository;
-    private final ReadStatusRepository readStatusRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomQueryRepository chatRoomQueryRepository;
     private final ChatParticipantRepository chatParticipantRepository;
@@ -75,25 +73,27 @@ public class ChatService {
                                                                     .writer(writer)
                                                                     .content(content)
                                                                     .build());
-
-        List<ReadStatus> readStatuses = participants.stream()
-                                                    .map(participant ->
-                                                            ReadStatus.builder()
-                                                                      .chatRoom(chatRoom)
-                                                                      .chatMessage(message)
-                                                                      .guest(participant.getGuest())
-                                                                      .isRead(participant.getGuest().getId().equals(writer.getId()))
-                                                                      .build()
-                                                    ).toList();
-        readStatusRepository.saveAll(readStatuses);
+        ChatParticipant chatParticipant = participants.stream()
+                                                      .filter(participant -> participant.getGuest().getId().equals(writer.getId()))
+                                                      .findFirst()
+                                                      .orElseThrow(() -> new EntityNotFoundException("Writer " + writer.getId() + " not found in participants"));
+        chatParticipant.updateLastReadMessage(message);
 
         return ChatMessageResDto.from(message, writer, chatRoom.getId());
     }
 
     @Transactional
     public ChatMessagesResDto getMessageHistories(Long lastMessageId, Long roomId, int pageSize, Long guestId) {
-        readStatusRepository.markAllIsRead(roomId, guestId);
         List<ChatMessageResDto> messages = chatMessageQueryRepository.getMessages(lastMessageId, roomId, pageSize);
+
+        if (lastMessageId == null && !messages.isEmpty()) {
+            Long lastId = messages.get(0).messageId();
+            ChatParticipant chatParticipant = getChatParticipant(roomId, guestId);
+            ChatMessage lastMessage = chatMessageRepository.findById(lastId)
+                                                           .orElseThrow(() -> new EntityNotFoundException("ChatMessage with id: " + lastId + "cannot be found"));
+            chatParticipant.updateLastReadMessage(lastMessage);
+        }
+
         boolean hasMore = messages.size() > pageSize;
 
         if (hasMore) {
