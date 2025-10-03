@@ -45,8 +45,6 @@ public class ChatService {
         ChatRoom chatRoom = chatRoomRepository.findByGuestsId(otherGuestId, creatorId)
                                               .orElseGet(() -> createNewChatRoom(otherGuestId, creatorId));
 
-        readStatusRepository.markAllIsRead(chatRoom, creatorId);
-
         return chatRoomQueryRepository.findChatRoomInfo(otherGuestId, creatorId, chatRoom)
                                       .orElseThrow(() -> new EntityNotFoundException("Chatroom with guests id " + otherGuestId + " and " + creatorId + "cannot be found"));
     }
@@ -80,11 +78,9 @@ public class ChatService {
         return ChatMessageResDto.from(message, writer, chatRoom.getId());
     }
 
-    public List<ChatRoomResDto> getChatRooms(Long guestId) {
-        return chatRoomQueryRepository.findChatRooms(guestId);
-    }
-
-    public ChatMessagesResDto getMessageHistories(Long lastMessageId, Long roomId, int pageSize) {
+    @Transactional
+    public ChatMessagesResDto getMessageHistories(Long lastMessageId, Long roomId, int pageSize, Long guestId) {
+        readStatusRepository.markAllIsRead(roomId, guestId);
         List<ChatMessageResDto> messages = chatMessageQueryRepository.getMessages(lastMessageId, roomId, pageSize);
         boolean hasMore = messages.size() > pageSize;
 
@@ -93,6 +89,10 @@ public class ChatService {
         }
 
         return new ChatMessagesResDto(messages, hasMore);
+    }
+
+    public List<ChatRoomResDto> getChatRooms(Long guestId) {
+        return chatRoomQueryRepository.findChatRooms(guestId);
     }
 
     private ChatRoom createNewChatRoom(Long otherGuestId, Long creatorId) {

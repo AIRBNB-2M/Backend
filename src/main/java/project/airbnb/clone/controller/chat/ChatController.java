@@ -40,8 +40,9 @@ public class ChatController {
     @GetMapping("/{roomId}/messages")
     public ResponseEntity<ChatMessagesResDto> getMessageHistories(@RequestParam(value = "lastMessageId", required = false) Long lastMessageId,
                                                                   @RequestParam("size") int pageSize,
-                                                                  @PathVariable("roomId") Long roomId) {
-        ChatMessagesResDto response = chatService.getMessageHistories(lastMessageId, roomId, pageSize);
+                                                                  @PathVariable("roomId") Long roomId,
+                                                                  @CurrentGuestId Long guestId) {
+        ChatMessagesResDto response = chatService.getMessageHistories(lastMessageId, roomId, pageSize, guestId);
         return ResponseEntity.ok(response);
     }
 }
