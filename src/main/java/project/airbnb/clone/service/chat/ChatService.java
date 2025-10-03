@@ -91,6 +91,20 @@ public class ChatService {
         return new ChatMessagesResDto(messages, hasMore);
     }
 
+    @Transactional
+    public ChatRoomResDto updateChatRoomName(String customName, Long otherGuestId, Long myId, Long roomId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                                              .orElseThrow(() -> new EntityNotFoundException("Chatroom with id " + roomId + "cannot be found"));
+
+        int updated = chatParticipantRepository.updateCustomName(customName, chatRoom, myId);
+        if (updated == 0) {
+            throw new EntityNotFoundException("ChatParticipant with roomId: " + roomId + " and guestId: " + myId + "cannot be found");
+        }
+
+        return chatRoomQueryRepository.findChatRoomInfo(otherGuestId, myId, chatRoom)
+                                      .orElseThrow(() -> new EntityNotFoundException("Chatroom with guests id " + otherGuestId + " and " + myId + " cannot be found"));
+    }
+
     public List<ChatRoomResDto> getChatRooms(Long guestId) {
         return chatRoomQueryRepository.findChatRooms(guestId);
     }

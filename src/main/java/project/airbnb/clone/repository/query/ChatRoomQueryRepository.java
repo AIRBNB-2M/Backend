@@ -65,6 +65,7 @@ public class ChatRoomQueryRepository {
         return queryFactory
                 .select(Projections.constructor(ChatRoomResDto.class,
                         CR.id,
+                        CP1.customRoomName,
                         OTHER_GUEST.id,
                         OTHER_GUEST.name,
                         OTHER_GUEST.profileUrl,
