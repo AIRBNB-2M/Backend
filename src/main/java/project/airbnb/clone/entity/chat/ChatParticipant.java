@@ -18,6 +18,8 @@ import lombok.NoArgsConstructor;
 import project.airbnb.clone.entity.BaseEntity;
 import project.airbnb.clone.entity.Guest;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Builder
@@ -48,7 +50,33 @@ public class ChatParticipant extends BaseEntity {
     @Column(name = "custom_room_name", nullable = false)
     private String customRoomName;
 
-    public void updateCustomRoomName(String newName) {
-        this.customRoomName = newName;
+    @Builder.Default
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
+
+    @Column(name = "left_at")
+    private LocalDateTime leftAt;
+
+    @Column(name = "last_rejoined_at")
+    private LocalDateTime lastRejoinedAt;
+
+    public void leave() {
+        if (!this.isActive) {
+            return;
+        }
+        this.isActive = false;
+        this.leftAt = LocalDateTime.now();
+    }
+
+    public boolean hasLeft() {
+        return !isActive && leftAt != null;
+    }
+
+    public void rejoin() {
+        if (this.isActive) {
+            return;
+        }
+        this.isActive = true;
+        this.lastRejoinedAt = LocalDateTime.now();
     }
 }

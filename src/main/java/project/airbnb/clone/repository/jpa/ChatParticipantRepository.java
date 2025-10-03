@@ -8,6 +8,7 @@ import project.airbnb.clone.entity.chat.ChatParticipant;
 import project.airbnb.clone.entity.chat.ChatRoom;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ChatParticipantRepository extends JpaRepository<ChatParticipant, Long> {
 
@@ -21,4 +22,6 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
                 AND cp.guest.id = :guestId
             """)
     int updateCustomName(@Param("customName") String customName, @Param("chatRoom") ChatRoom chatRoom, @Param("guestId") Long guestId);
+
+    Optional<ChatParticipant> findByChatRoomIdAndGuestId(Long chatRoomId, Long guestId);
 }

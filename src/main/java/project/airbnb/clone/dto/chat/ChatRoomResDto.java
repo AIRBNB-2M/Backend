@@ -8,6 +8,7 @@ public record ChatRoomResDto(
         Long guestId,
         String guestName,
         String guestProfileImage,
+        boolean isOtherGuestActive,
         String lastMessage,
         LocalDateTime lastMessageTime,
         int unreadCount) {

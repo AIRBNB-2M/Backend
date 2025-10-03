@@ -69,12 +69,16 @@ public class ChatRoomQueryRepository {
                         OTHER_GUEST.id,
                         OTHER_GUEST.name,
                         OTHER_GUEST.profileUrl,
+                        CP2.isActive,
                         CM.content,
                         CM.createdAt,
                         RS.id.count().intValue().coalesce(0)
                 ))
                 .from(CR)
-                .join(CP1).on(CP1.chatRoom.eq(CR), CP1.guest.id.eq(guestId))
+                .join(CP1).on(CP1.chatRoom.eq(CR),
+                        CP1.guest.id.eq(guestId),
+                        CP1.isActive.isTrue()
+                )
                 .join(CP2).on(otherGuestCond)
                 .join(CP2.guest, OTHER_GUEST)
                 .leftJoin(CM).on(CM.id.eq(
@@ -85,6 +89,6 @@ public class ChatRoomQueryRepository {
                 .leftJoin(RS).on(RS.chatRoom.eq(CR)
                                             .and(RS.guest.id.eq(guestId))
                                             .and(RS.isRead.eq(false)))
-                .groupBy(CR.id, OTHER_GUEST.id, OTHER_GUEST.name, OTHER_GUEST.profileUrl, CM.content, CM.createdAt);
+                .groupBy(CR.id, CP1.customRoomName, OTHER_GUEST.id, OTHER_GUEST.name, OTHER_GUEST.profileUrl, CP2.isActive, CM.content, CM.createdAt);
     }
 }

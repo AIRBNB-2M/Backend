@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import project.airbnb.clone.dto.chat.ChatMessageResDto;
 import project.airbnb.clone.entity.QGuest;
 import project.airbnb.clone.entity.chat.QChatMessage;
+import project.airbnb.clone.entity.chat.QChatParticipant;
 import project.airbnb.clone.entity.chat.QChatRoom;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class ChatMessageQueryRepository {
     private static final QChatRoom CR = QChatRoom.chatRoom;
     private static final QChatMessage CM = QChatMessage.chatMessage;
     private static final QGuest GUEST = QGuest.guest;
+    private static final QChatParticipant CP = QChatParticipant.chatParticipant;
 
     private final JPAQueryFactory queryFactory;
 
@@ -33,7 +35,11 @@ public class ChatMessageQueryRepository {
                            .from(CM)
                            .join(CM.chatRoom, CR)
                            .join(CM.writer, GUEST)
-                           .where(CR.id.eq(roomId).and(lastMessageId != null ? CM.id.lt(lastMessageId) : null))
+                           .join(CP).on(CP.chatRoom.eq(CR))
+                           .where(CR.id.eq(roomId),
+                                   lastMessageId != null ? CM.id.lt(lastMessageId) : null,
+                                   CP.lastRejoinedAt != null ? CM.createdAt.after(CP.lastRejoinedAt) : null
+                           )
                            .orderBy(CM.id.desc())
                            .limit(pageSize + 1)
                            .fetch();
