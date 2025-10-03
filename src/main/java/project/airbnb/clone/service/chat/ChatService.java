@@ -13,7 +13,6 @@ import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.entity.chat.ChatMessage;
 import project.airbnb.clone.entity.chat.ChatParticipant;
 import project.airbnb.clone.entity.chat.ChatRoom;
-import project.airbnb.clone.entity.chat.ReadStatus;
 import project.airbnb.clone.repository.jpa.ChatMessageRepository;
 import project.airbnb.clone.repository.jpa.ChatParticipantRepository;
 import project.airbnb.clone.repository.jpa.ChatRoomRepository;
@@ -127,6 +126,12 @@ public class ChatService {
 
     public List<ChatRoomResDto> getChatRooms(Long guestId) {
         return chatRoomQueryRepository.findChatRooms(guestId);
+    }
+
+    public boolean isChatRoomParticipant(Long roomId, Long guestId) {
+        return chatParticipantRepository.findByChatRoomIdAndGuestId(roomId, guestId)
+                                        .map(ChatParticipant::isActiveParticipant)
+                                        .orElse(false);
     }
 
     private ChatRoom createNewChatRoom(Long otherGuestId, Long creatorId) {
