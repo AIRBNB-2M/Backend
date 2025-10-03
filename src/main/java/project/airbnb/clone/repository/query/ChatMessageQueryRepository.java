@@ -35,10 +35,10 @@ public class ChatMessageQueryRepository {
                            .from(CM)
                            .join(CM.chatRoom, CR)
                            .join(CM.writer, GUEST)
-                           .join(CP).on(CP.chatRoom.eq(CR))
+                           .join(CP).on(CP.chatRoom.eq(CR).and(CP.guest.eq(GUEST)))
                            .where(CR.id.eq(roomId),
                                    lastMessageId != null ? CM.id.lt(lastMessageId) : null,
-                                   CP.lastRejoinedAt != null ? CM.createdAt.after(CP.lastRejoinedAt) : null
+                                   CP.lastRejoinedAt.isNull().or(CM.createdAt.after(CP.lastRejoinedAt))
                            )
                            .orderBy(CM.id.desc())
                            .limit(pageSize + 1)
