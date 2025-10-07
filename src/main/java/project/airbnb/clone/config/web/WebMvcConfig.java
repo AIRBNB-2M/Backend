@@ -3,6 +3,7 @@ package project.airbnb.clone.config.web;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import project.airbnb.clone.common.resolvers.CurrentGuestIdArgumentResolver;
 
@@ -23,5 +24,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
         registry.addResourceHandler("swagger-ui.html")
                 .addResourceLocations("classpath:/static/dist/swagger-ui/");
+    }
+
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addRedirectViewController("/api-docs", "/static/dist/swagger-ui.html");
     }
 }
