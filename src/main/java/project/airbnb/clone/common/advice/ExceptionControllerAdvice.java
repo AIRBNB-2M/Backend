@@ -21,6 +21,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import project.airbnb.clone.common.exceptions.EmailAlreadyExistsException;
+import project.airbnb.clone.common.exceptions.chat.ChatException;
 import project.airbnb.clone.repository.redis.RedisRepository;
 
 import java.util.List;
@@ -115,6 +116,16 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
         ErrorResponse<String> errorResponse = createErrorResponse(serverError, "Email verification send failed", request);
 
         return new ResponseEntity<>(errorResponse, serverError);
+    }
+
+    @ExceptionHandler(ChatException.class)
+    public ResponseEntity<?> handleChatException(ChatException e, HttpServletRequest request) {
+        log.debug("ExceptionControllerAdvice.ChatException: {}", e.getMessage());
+
+        HttpStatus badRequest = HttpStatus.BAD_REQUEST;
+        ErrorResponse<String> errorResponse = createErrorResponse(badRequest, "Chat is in an invalid state", request);
+
+        return new ResponseEntity<>(errorResponse, badRequest);
     }
 
     @ExceptionHandler(Exception.class)
