@@ -18,9 +18,8 @@ public class StompWebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/connect")
-                .setAllowedOrigins("http://localhost:3000")
+                .setAllowedOrigins("http://localhost:3000", "https://frontend-liard-eight-40.vercel.app")
                 .withSockJS();
-        //TODO : 배포주소 연결
     }
 
     @Override
