@@ -42,7 +42,6 @@ public class ChatService {
 
         ChatRoom chatRoom = chatRoomRepository.findByGuestsId(otherGuestId, creatorId)
                                               .map(existingRoom -> {
-                                                  reactiveIfHasLeft(existingRoom.getId(), otherGuestId);
                                                   reactiveIfHasLeft(existingRoom.getId(), creatorId);
                                                   return existingRoom;
                                               })
