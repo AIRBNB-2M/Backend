@@ -118,10 +118,15 @@ public class ChatService {
     }
 
     @Transactional
-    public void leaveChatRoom(Long roomId, Long guestId) {
+    public void leaveChatRoom(Long roomId, Long guestId, Boolean active) {
         ChatParticipant chatParticipant = getChatParticipant(roomId, guestId);
         chatParticipant.leave();
         //TODO : 상대방에게 채팅방 나감을 알리는 이벤트 발행
+
+        if (active) {
+            chatMessageRepository.findFirstByChatRoomIdOrderByIdDesc(roomId)
+                                 .ifPresent(chatParticipant::updateLastReadMessage);
+        }
     }
 
     public List<ChatRoomResDto> getChatRooms(Long guestId) {
