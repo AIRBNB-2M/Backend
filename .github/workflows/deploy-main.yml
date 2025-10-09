@@ -24,68 +24,9 @@ jobs:
             name: backend
             app: dockerfile
             options:
-              ports: 3000
+              ports: 8080
               dockerfile: Dockerfile
-              env: 
-                - name: SPRING_ACTIVE_PROFILE
-                  value: prod
-                - name: BASE_URL
-                  value: https://port-0-backend-mdl85cydd9f8761f.sel5.cloudtype.app
-                - name: PROD_DB_URL
-                  value: ${{ secrets.PROD_DB_URL }}
-                - name: PROD_DB_USERNAME
-                  value: ${{ secrets.PROD_DB_USERNAME }}
-                - name: PROD_DB_PASSWORD
-                  value: ${{ secrets.PROD_DB_PASSWORD }}
-          
-                - name: GOOGLE_CLIENT_ID
-                  value: ${{ secrets.GOOGLE_CLIENT_ID }}
-                - name: GOOGLE_CLIENT_SECRET
-                  value: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-                - name: GH_CLIENT_ID
-                  value: ${{ secrets.GH_CLIENT_ID }}
-                - name: GH_CLIENT_SECRET
-                  value: ${{ secrets.GH_CLIENT_SECRET }}
-                - name: NAVER_CLIENT_ID
-                  value: ${{ secrets.NAVER_CLIENT_ID }}
-                - name: NAVER_CLIENT_SECRET
-                  value: ${{ secrets.NAVER_CLIENT_SECRET }}
-                - name: KAKAO_CLIENT_ID
-                  value: ${{ secrets.KAKAO_CLIENT_ID }}
-                - name: KAKAO_CLIENT_SECRET
-                  value: ${{ secrets.KAKAO_CLIENT_SECRET }}
-          
-                - name: TOUR_API_KEY
-                  value: ${{ secrets.TOUR_API_KEY }}
-          
-                - name: JWT_SECRET_KEY
-                  value: ${{ secrets.JWT_SECRET_KEY }}
-                - name: JWT_ACCESS_EXP
-                  value: ${{ secrets.JWT_ACCESS_EXP }}
-                - name: JWT_REFRESH_EXP
-                  value: ${{ secrets.JWT_REFRESH_EXP }}
-          
-                - name: R2_ENDPOINT_URL
-                  value: ${{ secrets.R2_ENDPOINT_URL }}
-                - name: R2_PUBLIC_URL
-                  value: ${{ secrets.R2_PUBLIC_URL }}
-                - name: R2_BUCKET_NAME
-                  value: ${{ secrets.R2_BUCKET_NAME }}
-                - name: R2_ACCESS_KEY
-                  value: ${{ secrets.R2_ACCESS_KEY }}
-                - name: R2_SECRET_KEY
-                  value: ${{ secrets.R2_SECRET_KEY }}
-          
-                - name: PORTONE_API_ID
-                  value: ${{ secrets.PORTONE_API_ID }}
-                - name: PORTONE_API_SECRET
-                  value: ${{ secrets.PORTONE_API_SECRET }}
-          
-                - name: REST_DAY_API_KEY
-                  value: ${{ secrets.REST_DAY_API_KEY }}
-          
-                - name: GMAIL_SMTP_PWD
-                  value: ${{ secrets.GMAIL_SMTP_PWD }}
+              env: []
               args: []
             context:
               git:
