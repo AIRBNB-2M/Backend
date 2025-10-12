@@ -35,7 +35,7 @@ public record AuthProviderUser(Guest guest, String principalName) implements Pro
 
     @Override
     public List<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"));  //TODO: 여러 권한 추가
+        return List.of(new SimpleGrantedAuthority(guest.getRole().getRoleName()));
     }
 
     @Override

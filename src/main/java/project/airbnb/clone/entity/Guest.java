@@ -14,6 +14,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import project.airbnb.clone.consts.Role;
 import project.airbnb.clone.consts.SocialType;
 
 import java.time.LocalDate;
@@ -64,6 +65,11 @@ public class Guest extends BaseEntity {
     @Builder.Default
     @Column(name = "is_email_verified", nullable = false)
     private Boolean isEmailVerified = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    @Builder.Default
+    private Role role = Role.GUEST;
 
     public void updateProfile(String name, String aboutMe) {
         this.name = name;

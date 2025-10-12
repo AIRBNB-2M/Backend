@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
 import project.airbnb.clone.common.jwt.JwtProperties.TokenProperties;
 import project.airbnb.clone.config.security.jwt.JwtAuthenticationToken;
+import project.airbnb.clone.consts.Role;
 import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.model.AuthProviderUser;
 import project.airbnb.clone.model.PrincipalUser;
@@ -196,6 +197,7 @@ class JwtProviderUnitTest {
             //given
             Guest guest = mock(Guest.class);
             given(guest.getId()).willReturn(1L);
+            given(guest.getRole()).willReturn(Role.GUEST);
             given(guestRepository.getGuestById(1L)).willReturn(guest);
 
             String token = jwtProvider.generateAccessToken(guest, "principal");
