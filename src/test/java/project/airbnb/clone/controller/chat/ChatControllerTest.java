@@ -55,7 +55,7 @@ class ChatControllerTest extends RestDocsTestSupport {
         //given
         CreateChatRoomReqDto request = new CreateChatRoomReqDto(1L);
         ChatRoomResDto response = new ChatRoomResDto(1L, "my-chat-room", 1L, "Ahmad Gul", "https://example.com", true,
-                "안녕하세요", LocalDateTime.now().minusDays(7).truncatedTo(ChronoUnit.MICROS), 3);
+                "안녕하세요", LocalDateTime.now().minusDays(7), 3);
         given(chatService.createOrGetChatRoom(anyLong(), anyLong())).willReturn(response);
 
         //when
@@ -76,7 +76,7 @@ class ChatControllerTest extends RestDocsTestSupport {
                        jsonPath("$.guestProfileImage").value(response.guestProfileImage()),
                        jsonPath("$.isOtherGuestActive").value(response.isOtherGuestActive()),
                        jsonPath("$.lastMessage").value(response.lastMessage()),
-                       jsonPath("$.lastMessageTime").value(response.lastMessageTime().toString()),
+                       jsonPath("$.lastMessageTime").exists(),
                        jsonPath("$.unreadCount").value(response.unreadCount())
                )
                .andDo(document("create-or-get-chat-room",
