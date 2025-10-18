@@ -118,11 +118,7 @@ public class AccommodationService {
     }
 
     public List<ViewHistoryResDto> getRecentViewAccommodations(Long guestId) {
-        LocalDate now = LocalDate.now();
-        Season season = dateManager.getSeason(now);
-        DayType dayType = dateManager.getDayType(now);
-
-        return accommodationQueryRepository.findViewHistories(guestId, season, dayType)
+        return accommodationQueryRepository.findViewHistories(guestId)
                                            .stream()
                                            .collect(Collectors.groupingBy(
                                                    dto -> dto.viewDate().toLocalDate(),

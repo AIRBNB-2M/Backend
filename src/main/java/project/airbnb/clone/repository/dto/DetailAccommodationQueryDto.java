@@ -17,4 +17,8 @@ public record DetailAccommodationQueryDto(
         Long wishlistId,
         String wishlistName,
         Double avgRate) {
+
+    public DetailAccommodationQueryDto(Long accommodationId, String title, int maxPeople, String address, double mapX, double mapY, String checkIn, String checkOut, String description, String number, String refundRegulation, int price, Double avgRate) {
+        this(accommodationId, title, maxPeople, address, mapX, mapY, checkIn, checkOut, description, number, refundRegulation, price, false, null, null, avgRate);
+    }
 }
