@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import project.airbnb.clone.DynamicTestSupport;
+import project.airbnb.clone.TestContainerSupport;
 import project.airbnb.clone.dto.wishlist.AddAccToWishlistReqDto;
 import project.airbnb.clone.dto.wishlist.MemoUpdateReqDto;
 import project.airbnb.clone.dto.wishlist.WishlistCreateReqDto;
@@ -29,7 +29,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class WishlistServiceTest extends DynamicTestSupport {
+class WishlistServiceTest extends TestContainerSupport {
 
     @Autowired EntityManager em;
     @Autowired WishlistService wishlistService;

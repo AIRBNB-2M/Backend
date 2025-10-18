@@ -2,7 +2,6 @@ package project.airbnb.clone.service.tour;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.airbnb.clone.common.clients.TourApiClient;
@@ -20,7 +19,6 @@ import static org.springframework.util.StringUtils.hasText;
 
 @Slf4j
 @Service
-@Profile("local")
 @RequiredArgsConstructor
 public class TourService {
 

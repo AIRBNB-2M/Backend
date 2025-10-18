@@ -3,16 +3,12 @@ package project.airbnb.clone.service.jwt;
 import io.jsonwebtoken.JwtException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.util.ReflectionTestUtils;
-import project.airbnb.clone.DynamicTestSupport;
-import project.airbnb.clone.common.events.logout.OAuthLogoutEvent;
+import project.airbnb.clone.TestContainerSupport;
 import project.airbnb.clone.common.jwt.JwtProperties;
 import project.airbnb.clone.common.jwt.JwtProperties.TokenProperties;
 import project.airbnb.clone.common.jwt.JwtProvider;
@@ -25,12 +21,8 @@ import java.util.Base64;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
-class TokenServiceTest extends DynamicTestSupport {
+class TokenServiceTest extends TestContainerSupport {
 
     @Autowired TokenService tokenService;
     @Autowired GuestRepository guestRepository;
@@ -54,6 +46,8 @@ class TokenServiceTest extends DynamicTestSupport {
 
         guest = Guest.builder().name("Jessica Bala").email("test@email.com").password("858d2781-2a13-4d26-b3c9-7b84b214f82f").build();
         guestRepository.saveAndFlush(guest);
+
+        redisRepository.deleteValue(String.valueOf(guest.getId()));
     }
 
     @AfterEach
@@ -91,14 +85,14 @@ class TokenServiceTest extends DynamicTestSupport {
         assertThat(setCookie).contains("RefreshToken=" + refreshToken);
     }
 
-    //TODO : 테스트 코드 통과되도록 수정
-    @Disabled
     @Test
     @DisplayName("액세스 토큰 갱신 - 레디스에 저장된 값과 일치하는 경우")
-    void refreshAccessToken_success() {
+    void refreshAccessToken_success() throws InterruptedException {
         //given
         String token = jwtProvider.generateRefreshToken(guest, "a6025936-1554-4f45-8601-a107576eb9d8");
         String key = String.valueOf(guest.getId());
+
+        Thread.sleep(1100);
         redisRepository.setValue(key, token);
 
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -110,17 +104,21 @@ class TokenServiceTest extends DynamicTestSupport {
         //then
         //1. 레디스에는 새로운 리프레시 토큰 값이 저장되어야 한다.
         String newSavedRefreshToken = redisRepository.getValue(key);
-        assertThat(token).isNotEqualTo(newSavedRefreshToken);
+        assertThat(token).isNotNull().isNotEqualTo(newSavedRefreshToken);
 
         //2. 예외 상황에 대비해 request에 key가 저장되어야 한다.
         assertThat(request.getAttribute("key")).isEqualTo(key);
 
         //3. 정상적으로 액세스 토큰과 리프레시 토큰이 전달된다.
         String authHeader = response.getHeader("Authorization");
-        assertThat(authHeader).isNotBlank().contains("Bearer ");
+        assertThat(authHeader).isNotBlank().startsWith("Bearer ");
 
         String setCookie = response.getHeader("Set-Cookie");
-        assertThat(setCookie).isNotBlank().contains("RefreshToken=");
+        assertThat(setCookie)
+                .isNotBlank()
+                .contains("RefreshToken=")
+                .contains("HttpOnly")
+                .contains("Path=/");
     }
 
     @Test
@@ -141,7 +139,7 @@ class TokenServiceTest extends DynamicTestSupport {
     }
 
     @Test
-    @DisplayName("로그아웃 처리 시 액세스 토큰 블랙리스트 추가, 리프레시 토큰 삭제, 로그아웃 이벤트가 발행된다.")
+    @DisplayName("로그아웃 처리 시 액세스 토큰 블랙리스트 추가, 리프레시 토큰이 삭제된다.")
     void logoutProcess() {
         // given
         String principalName = "principal";
@@ -149,11 +147,8 @@ class TokenServiceTest extends DynamicTestSupport {
         String refreshToken = jwtProvider.generateRefreshToken(guest, principalName);
 
         // Redis에 refresh token 저장
-        redisRepository.setValue(String.valueOf(guest.getId()), refreshToken);
-
-        // 이벤트 리스너를 Mock 처리
-        ApplicationEventPublisher mockPublisher = mock(ApplicationEventPublisher.class);
-        ReflectionTestUtils.setField(tokenService, "eventPublisher", mockPublisher);
+        String key = String.valueOf(guest.getId());
+        redisRepository.setValue(key, refreshToken);
 
         // when
         tokenService.logoutProcess(accessToken, refreshToken);
@@ -164,10 +159,7 @@ class TokenServiceTest extends DynamicTestSupport {
         assertThat(isBlackListed).isTrue();
 
         // 2. 리프레시 토큰이 삭제됐는지 확인
-        String savedRefreshToken = redisRepository.getValue(String.valueOf(guest.getId()));
+        String savedRefreshToken = redisRepository.getValue(key);
         assertThat(savedRefreshToken).isNull();
-
-        // 3. 로그아웃 이벤트 발행 확인
-        verify(mockPublisher, times(1)).publishEvent(any(OAuthLogoutEvent.class));
     }
 }

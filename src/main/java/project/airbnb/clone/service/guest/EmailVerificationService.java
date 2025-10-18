@@ -39,7 +39,6 @@ public class EmailVerificationService {
         String token = UUID.randomUUID().toString();
         String key = getRedisKey(token);
 
-        //TODO : 배포 주소 연결
         String link = baseUrl + "/api/auth/email/verify?token=" + token;
         String subject = "[Airbnb-2M] 이메일 인증을 완료해주세요.";
         String html = generateHtml(link);

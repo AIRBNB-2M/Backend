@@ -2,6 +2,7 @@ package project.airbnb.clone.common.events.logout;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,6 +24,7 @@ import static project.airbnb.clone.common.jwt.JwtProperties.TOKEN_PREFIX;
 
 @Slf4j
 @Component
+@Profile("!test")
 @RequiredArgsConstructor
 public class OAuthLogoutListener {
 
