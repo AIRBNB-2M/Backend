@@ -36,3 +36,4 @@ gradle.properties
 /src/test/resources/
 /src/main/resources/static/dist/
 /src/main/resources/static/swagger-ui/
+/stress-test/
