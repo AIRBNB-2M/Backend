@@ -161,9 +161,9 @@ public class EmailVerificationService {
                         <div class="header">Airbnb-2M</div>
                         <div class="content">
                             <p>안녕하세요,</p>
-                            <p>회원가입을 완료하시려면 아래 버튼을 클릭해 이메일 인증을 진행해주세요.</p>
+                            <p>인증을 완료하시려면 아래 버튼을 클릭해 인증을 진행해주세요.</p>
                             <p style="text-align: center;">
-                                <a href="%s" class="button">이메일 인증하기</a>
+                                <a href="%s" class="button">인증하기</a>
                             </p>
                             <p style="color:#555; font-size:13px;">※ 본 메일은 발신 전용으로 회신이 불가합니다.</p>
                         </div>
