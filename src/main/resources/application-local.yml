@@ -1,4 +1,16 @@
 spring:
+  mail:
+    host: localhost
+    port: 1025
+    username:
+    password:
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+            required: false
   datasource:
     url: ${LOCAL_DB_URL}
     username: ${LOCAL_DB_USERNAME}

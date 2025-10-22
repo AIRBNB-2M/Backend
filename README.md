@@ -10,7 +10,7 @@
 
 <img src="https://img.shields.io/badge/프로젝트 기간-2025.07~ing-green?style=flat&logo=&logoColor=white" />
 
-<img src="https://img.shields.io/badge/마지막 리드미 수정-2025.10.08-gold?style=flat&logo=&logoColor=white" />
+<img src="https://img.shields.io/badge/마지막 리드미 수정-2025.10.22-gold?style=flat&logo=&logoColor=white" />
 
 <div>
 </div>
@@ -82,6 +82,7 @@
 ## 📝 API 설계
 
 👉🏻 [API 문서 보러가기](https://port-0-backend-mdl85cydd9f8761f.sel5.cloudtype.app/api-docs)
+
 ## 🛠️ 프로젝트 아키텍쳐
 
 ### 🗺️ ERD 설계
@@ -91,3 +92,8 @@
 ### 🔄 CI/CD 아키텍처
 
 ![img_3.png](readme-images/img_3.png)
+
+## 📌 TodoList
+- [ ] 숙소 예약 및 결제
+- [ ] 여행한 숙소 리뷰 등록
+- [ ] 내가 여행한 목록 & 작성한 후기 목록 조회
