@@ -20,6 +20,7 @@ import static project.airbnb.clone.entity.QAccommodation.accommodation;
 import static project.airbnb.clone.entity.QAccommodationImage.accommodationImage;
 import static project.airbnb.clone.entity.QGuest.guest;
 import static project.airbnb.clone.entity.QReservation.reservation;
+import static project.airbnb.clone.entity.QReview.review;
 
 @Repository
 @RequiredArgsConstructor
@@ -58,17 +59,21 @@ public class GuestQueryRepository {
 
     public Page<TripHistoryResDto> getTripsHistory(Long guestId, Pageable pageable) {
         List<TripHistoryResDto> content = queryFactory.select(Projections.constructor(TripHistoryResDto.class,
+                                                              reservation.id,
                                                               accommodation.id,
                                                               accommodationImage.imageUrl,
                                                               accommodation.title,
                                                               reservation.startDate,
-                                                              reservation.endDate
+                                                              reservation.endDate,
+                                                              review.isNotNull()
                                                       ))
                                                       .from(accommodation)
                                                       .join(accommodationImage)
                                                       .on(accommodationImage.accommodation.eq(accommodation)
                                                                                           .and(accommodationImage.thumbnail.isTrue()))
-                                                      .leftJoin(reservation).on(reservation.accommodation.eq(accommodation))
+                                                      .leftJoin(reservation)
+                                                      .on(reservation.accommodation.eq(accommodation))
+                                                      .leftJoin(review).on(review.reservation.eq(reservation))
                                                       .where(
                                                               reservation.isNotNull(),
                                                               reservation.guest.id.eq(guestId),
