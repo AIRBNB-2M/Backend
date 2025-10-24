@@ -3,6 +3,8 @@ package project.airbnb.clone.service.guest;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,12 +13,14 @@ import project.airbnb.clone.common.events.guest.GuestImageUploadEvent;
 import project.airbnb.clone.common.events.guest.GuestProfileImageChangedEvent;
 import project.airbnb.clone.common.exceptions.EmailAlreadyExistsException;
 import project.airbnb.clone.consts.SocialType;
+import project.airbnb.clone.dto.PageResponseDto;
 import project.airbnb.clone.dto.guest.ChatGuestSearchDto;
 import project.airbnb.clone.dto.guest.ChatGuestsSearchResDto;
 import project.airbnb.clone.dto.guest.DefaultProfileResDto;
 import project.airbnb.clone.dto.guest.EditProfileReqDto;
 import project.airbnb.clone.dto.guest.EditProfileResDto;
 import project.airbnb.clone.dto.guest.SignupRequestDto;
+import project.airbnb.clone.dto.guest.TripHistoryResDto;
 import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.model.ProviderUser;
 import project.airbnb.clone.repository.dto.DefaultProfileQueryDto;
@@ -94,6 +98,17 @@ public class GuestService {
     public ChatGuestsSearchResDto findGuestsByName(String name) {
         List<ChatGuestSearchDto> guests = guestQueryRepository.findGuestsByName(name);
         return new ChatGuestsSearchResDto(guests);
+    }
+
+    public PageResponseDto<TripHistoryResDto> getTripsHistory(Long guestId, Pageable pageable) {
+        Page<TripHistoryResDto> result = guestQueryRepository.getTripsHistory(guestId, pageable);
+
+        return PageResponseDto.<TripHistoryResDto>builder()
+                              .contents(result.getContent())
+                              .pageNumber(pageable.getPageNumber())
+                              .pageSize(pageable.getPageSize())
+                              .total(result.getTotalElements())
+                              .build();
     }
 
     private void validateExistsEmail(String email) {

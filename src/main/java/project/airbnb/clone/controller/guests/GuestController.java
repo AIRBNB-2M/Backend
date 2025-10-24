@@ -2,6 +2,7 @@ package project.airbnb.clone.controller.guests;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -11,10 +12,12 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import project.airbnb.clone.common.annotations.CurrentGuestId;
+import project.airbnb.clone.dto.PageResponseDto;
 import project.airbnb.clone.dto.guest.ChatGuestsSearchResDto;
 import project.airbnb.clone.dto.guest.DefaultProfileResDto;
 import project.airbnb.clone.dto.guest.EditProfileReqDto;
 import project.airbnb.clone.dto.guest.EditProfileResDto;
+import project.airbnb.clone.dto.guest.TripHistoryResDto;
 import project.airbnb.clone.service.guest.GuestService;
 
 @RestController
@@ -41,6 +44,13 @@ public class GuestController {
     @GetMapping("/search")
     public ResponseEntity<ChatGuestsSearchResDto> findGuestsByName(@RequestParam("name") String name) {
         ChatGuestsSearchResDto response = guestService.findGuestsByName(name);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/me/trips/past")
+    public ResponseEntity<PageResponseDto<TripHistoryResDto>> getTripsHistory(@CurrentGuestId Long guestId,
+                                                                              Pageable pageable) {
+        PageResponseDto<TripHistoryResDto> response = guestService.getTripsHistory(guestId, pageable);
         return ResponseEntity.ok(response);
     }
 }
