@@ -8,12 +8,16 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import project.airbnb.clone.WithMockGuest;
 import project.airbnb.clone.controller.RestDocsTestSupport;
+import project.airbnb.clone.dto.guest.ChatGuestSearchDto;
+import project.airbnb.clone.dto.guest.ChatGuestsSearchResDto;
 import project.airbnb.clone.dto.guest.DefaultProfileResDto;
 import project.airbnb.clone.dto.guest.EditProfileReqDto;
 import project.airbnb.clone.dto.guest.EditProfileResDto;
 import project.airbnb.clone.service.guest.GuestService;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
@@ -21,15 +25,18 @@ import static com.epages.restdocs.apispec.ResourceSnippetParameters.builder;
 import static com.epages.restdocs.apispec.Schema.schema;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart;
 import static org.springframework.restdocs.payload.JsonFieldType.BOOLEAN;
+import static org.springframework.restdocs.payload.JsonFieldType.NUMBER;
 import static org.springframework.restdocs.payload.JsonFieldType.STRING;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestPartFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.partWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParts;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
@@ -169,5 +176,56 @@ class GuestControllerTest extends RestDocsTestSupport {
                                        .build()
                        )
                ));
+    }
+
+    @Test
+    @DisplayName("이름으로 사용자 조회")
+    void findGuestsByName() throws Exception {
+        //given
+        LocalDateTime now = LocalDateTime.now();
+        List<ChatGuestSearchDto> guestSearchDtos = List.of(
+                new ChatGuestSearchDto(1L, "kim-1", now.minusDays(5), "https://example-a.com"),
+                new ChatGuestSearchDto(2L, "kim-2", now.minusDays(6), "https://example-b.com"),
+                new ChatGuestSearchDto(3L, "kim-3", now.minusDays(7), "https://example-c.com")
+        );
+        ChatGuestsSearchResDto response = new ChatGuestsSearchResDto(guestSearchDtos);
+        given(guestService.findGuestsByName(anyString())).willReturn(response);
+
+        //when
+        //then
+        mockMvc.perform(get("/api/guests/search")
+                       .param("name", "kim"))
+               .andExpectAll(
+                       handler().handlerType(GuestController.class),
+                       handler().methodName("findGuestsByName"),
+                       status().isOk(),
+                       jsonPath("$.guests.length()").value(guestSearchDtos.size())
+               )
+               .andDo(document("find-guest-by-name",
+                       resource(
+                               builder()
+                                       .tag(GUEST_API_TAG)
+                                       .summary("이름으로 사용자 조회")
+                                       .description("name 파라미터 값이 포함된 모든 사용자를 응답합니다.")
+                                       .queryParameters(parameterWithName("name").description("검색 이름"))
+                                       .responseFields(
+                                               fieldWithPath("guests[].id")
+                                                       .type(NUMBER)
+                                                       .description("ID"),
+                                               fieldWithPath("guests[].name")
+                                                       .type(STRING)
+                                                       .description("이름"),
+                                               fieldWithPath("guests[].createdDateTime")
+                                                       .type(STRING)
+                                                       .description("가입일"),
+                                               fieldWithPath("guests[].profileImageUrl")
+                                                       .type(STRING)
+                                                       .optional()
+                                                       .description("프로필 이미지 URL")
+                                       )
+                                       .responseSchema(schema("GuestSearchResponse"))
+                                       .build()
+                       ))
+               );
     }
 }
