@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -38,4 +39,12 @@ public class Review extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "guest_id", nullable = false)
     private Guest guest;
+
+    @Builder
+    public Review(String content, Double rating, Reservation reservation, Guest guest) {
+        this.content = content;
+        this.rating = rating;
+        this.reservation = reservation;
+        this.guest = guest;
+    }
 }
