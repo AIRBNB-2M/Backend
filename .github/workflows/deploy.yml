@@ -39,6 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DOCKER_IMAGE_NAME: airbnb-backend
+      OWNER_LC: airbnb-2m
     outputs:
       DOCKER_IMAGE_NAME: ${{ env.DOCKER_IMAGE_NAME }}
       OWNER_LC: ${{ env.OWNER_LC }}

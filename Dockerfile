@@ -1,24 +1,3 @@
-#FROM eclipse-temurin:17
-#
-#WORKDIR /app
-#
-#COPY build.gradle .
-#COPY settings.gradle .
-#
-#RUN gradle dependencies --no-daemon
-#
-##COPY . .
-#COPY src src
-#
-#RUN chmod +x ./gradlew
-#
-#RUN ./gradlew copyOasToSwagger
-#RUN ./gradlew build -x test
-#
-#EXPOSE 8080
-#
-#ENTRYPOINT ["java", "-jar", "build/libs/airbnb-clone-project-0.0.1-SNAPSHOT.jar"]
-
 # 첫 번째 스테이지: 빌드 스테이지
 FROM eclipse-temurin:17 AS builder
 
