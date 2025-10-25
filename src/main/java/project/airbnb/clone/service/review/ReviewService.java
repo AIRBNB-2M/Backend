@@ -34,8 +34,18 @@ public class ReviewService {
 
     @Transactional
     public void updateReview(Long reviewId, UpdateReviewReqDto reqDto, Long guestId) {
-        Review review = reviewRepository.findByIdAndGuestId(reviewId, guestId)
-                                        .orElseThrow(() -> new EntityNotFoundException("Cannot be found Review for id: " + reviewId + " and guestId: " + guestId));
+        Review review = getReview(reviewId, guestId);
         review.update(reqDto.rating().doubleValue(), reqDto.content());
+    }
+
+    @Transactional
+    public void deleteReview(Long reviewId, Long guestId) {
+        Review review = getReview(reviewId, guestId);
+        reviewRepository.delete(review);
+    }
+
+    private Review getReview(Long reviewId, Long guestId) {
+        return reviewRepository.findByIdAndGuestId(reviewId, guestId)
+                               .orElseThrow(() -> new EntityNotFoundException("Cannot be found Review for id: " + reviewId + " and guestId: " + guestId));
     }
 }

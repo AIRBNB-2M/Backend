@@ -3,6 +3,7 @@ package project.airbnb.clone.controller.review;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -34,6 +35,13 @@ public class ReviewController {
                                           @RequestBody UpdateReviewReqDto reqDto,
                                           @CurrentGuestId Long guestId) {
         reviewService.updateReview(reviewId, reqDto, guestId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{reviewId}")
+    public ResponseEntity<?> deleteReview(@PathVariable("reviewId") Long reviewId,
+                                          @CurrentGuestId Long guestId) {
+        reviewService.deleteReview(reviewId, guestId);
         return ResponseEntity.ok().build();
     }
 }
