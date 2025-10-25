@@ -33,13 +33,13 @@ COPY gradle/wrapper/ gradle/wrapper/
 
 RUN chmod +x ./gradlew
 
-# 종속성 설치
-RUN ./gradlew dependencies --no-daemon
-RUN ./gradlew copyOasToSwagger
-
 # 소스 코드 복사
 COPY .env /app/.env
 COPY src src
+
+# 종속성 설치
+RUN ./gradlew dependencies --no-daemon
+RUN ./gradlew copyOasToSwagger
 
 # 애플리케이션 빌드
 RUN ./gradlew build --no-daemon
