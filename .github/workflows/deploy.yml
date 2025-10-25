@@ -55,7 +55,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: .env 파일 생성
-        run: echo "${{ secrets.APP_ENV }}" > .env
+        run: |
+          mkdir -p config
+          echo "${{ secrets.APP_ENV }}" > config/app.env
       - name: Owner 이름 소문자 변환
         run: |
           echo "OWNER_LC=${OWNER,,}" >> ${GITHUB_ENV}
