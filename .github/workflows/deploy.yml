@@ -52,6 +52,8 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create .env file
+        run: echo "${{ secrets.APP_ENV }}" > .env
       - name: set lower case owner name
         run: |
           echo "OWNER_LC=${OWNER,,}" >> ${GITHUB_ENV}
