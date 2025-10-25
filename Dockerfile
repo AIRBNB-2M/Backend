@@ -34,7 +34,7 @@ RUN gradle dependencies --no-daemon
 RUN gradle copyOasToSwagger
 
 # 소스 코드 복사
-COPY .env .
+COPY .env /app/.env
 COPY src src
 
 # 애플리케이션 빌드
