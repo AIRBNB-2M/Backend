@@ -13,7 +13,7 @@
 #RUN chmod +x ./gradlew
 #
 #RUN ./gradlew copyOasToSwagger
-#RUN ./gradlew build -x test
+RUN #./gradlew build -x test
 #
 #EXPOSE 8080
 #
@@ -42,7 +42,7 @@ RUN ./gradlew dependencies --no-daemon
 RUN ./gradlew copyOasToSwagger
 
 # 애플리케이션 빌드
-RUN ./gradlew build --no-daemon
+RUN ./gradlew build --no-daemon -x test
 
 # 두 번째 스테이지: 실행 스테이지
 FROM container-registry.oracle.com/graalvm/jdk:17
