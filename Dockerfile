@@ -29,7 +29,7 @@ WORKDIR /app
 COPY build.gradle .
 COPY settings.gradle .
 COPY gradlew .
-COPY gradle/gradle-wrapper/ gradle/gradle-wrapper/
+COPY gradle/wrapper/ gradle/wrapper/
 
 # 종속성 설치
 RUN ./gradlew dependencies --no-daemon
