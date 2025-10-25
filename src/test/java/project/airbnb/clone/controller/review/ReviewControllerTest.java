@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
 import static org.springframework.restdocs.payload.JsonFieldType.ARRAY;
@@ -181,6 +182,36 @@ class ReviewControllerTest extends RestDocsTestSupport {
                                                        .type(STRING)
                                        )
                                        .requestSchema(schema("UpdateReviewRequest"))
+                                       .build()
+                       )
+               ));
+    }
+
+    @Test
+    @DisplayName("등록한 후기 삭제")
+    @WithMockGuest
+    void deleteReview() throws Exception {
+        //given
+
+        //when
+        //then
+        mockMvc.perform(delete("/api/reviews/{reviewId}", 1L)
+                       .header(AUTHORIZATION, "Bearer {access-token}")
+                       .contentType(MediaType.APPLICATION_JSON_VALUE)
+               )
+               .andExpectAll(
+                       handler().handlerType(ReviewController.class),
+                       handler().methodName("deleteReview"),
+                       status().isOk()
+               ).andDo(document("delete-review",
+                       resource(
+                               builder()
+                                       .tag(REVIEW_API_TAG)
+                                       .summary("리뷰 삭제")
+                                       .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
+                                       .pathParameters(ResourceDocumentation.parameterWithName("reviewId")
+                                                                            .type(SimpleType.NUMBER)
+                                                                            .description("삭제할 리뷰 ID"))
                                        .build()
                        )
                ));
