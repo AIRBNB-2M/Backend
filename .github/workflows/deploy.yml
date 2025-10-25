@@ -57,7 +57,7 @@ jobs:
       - name: .env 파일 생성
         run: |
           mkdir -p config
-          echo "${{ secrets.APP_ENV }}" > config/app.env
+          echo "${{ secrets.APP_ENV }}" > .env
       - name: Owner 이름 소문자 변환
         run: |
           echo "OWNER_LC=${OWNER,,}" >> ${GITHUB_ENV}
@@ -116,7 +116,9 @@ jobs:
             docker rm app1 2>/dev/null
             
             # 새 이미지를 실행해서 새 컨테이너 생성
-            docker run -d --name app1 -p 8080:8080 ghcr.io/${{ env.OWNER_LC }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+            docker run -d --name app1 -p 8080:8080 \
+            --env-file /home/ec2-user/.env \
+            ghcr.io/${{ env.OWNER_LC }}/${{ env.DOCKER_IMAGE_NAME }}:latest
             
             # 기존 이미지 제거
             docker rmi $(docker images -f "dangling=true" -q)

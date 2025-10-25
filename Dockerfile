@@ -10,7 +10,7 @@ COPY build.gradle .
 COPY settings.gradle .
 
 # 소스 코드 복사
-COPY .env /app/.env
+#COPY .env /app/.env
 COPY src src
 
 # 종속성 설치
@@ -28,7 +28,7 @@ WORKDIR /app
 
 # 첫 번째 스테이지에서 빌드된 JAR 파일 복사
 COPY --from=builder /app/build/libs/*.jar app.jar
-COPY --from=builder /app/.env .env
+#COPY --from=builder /app/.env .env
 
 # 실행할 JAR 파일 지정
 ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-jar", "app.jar"]
