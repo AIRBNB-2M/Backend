@@ -13,7 +13,7 @@
 #RUN chmod +x ./gradlew
 #
 #RUN ./gradlew copyOasToSwagger
-RUN #./gradlew build -x test
+#RUN ./gradlew build -x test
 #
 #EXPOSE 8080
 #
