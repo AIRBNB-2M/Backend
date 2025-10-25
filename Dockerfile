@@ -31,6 +31,8 @@ COPY settings.gradle .
 COPY gradlew .
 COPY gradle/wrapper/ gradle/wrapper/
 
+RUN chmod +x ./gradlew
+
 # 종속성 설치
 RUN ./gradlew dependencies --no-daemon
 RUN ./gradlew copyOasToSwagger
