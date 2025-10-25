@@ -325,6 +325,7 @@ class GuestControllerTest extends RestDocsTestSupport {
                                                        .type(BOOLEAN)
                                                        .description("리뷰 등록 여부")
                                        )
+                                       .responseSchema(schema("TripHistoryResponse"))
                                        .build()
                        ))
                );
