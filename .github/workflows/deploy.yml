@@ -96,11 +96,37 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           instance-ids: ${{ env.INSTANCE_ID }}
-          working-directory: /
+          working-directory: /tmp
           comment: Deploy
           command: |
+            set -e
+            echo "Logging into GitHub Container Registry..."
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            echo "Pulling latest image..."
             docker pull ghcr.io/${{ env.OWNER_LC }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-            docker stop app1 2>/dev/null
-            docker rm app1 2>/dev/null
-            docker run -d --network common --name app1 -p 8080:8080 ghcr.io/${{ env.OWNER_LC }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-            docker rmi $(docker images -f "dangling=true" -q)
+            
+            echo "Stopping existing container..."
+            docker stop app1 2>/dev/null || true
+            docker rm app1 2>/dev/null || true
+            
+            echo "Creating .env file in /root/config..."
+            mkdir -p /root/config
+            cat > /root/config/app.env << 'ENVEOF'
+            ${{ secrets.APP_ENV }}
+            ENVEOF
+            chmod 600 /root/config/app.env
+            
+            echo "Starting new container..."
+            docker run -d --restart unless-stopped --network common --name app1 -p 8080:8080 \
+              --env-file /root/config/app.env \
+              ghcr.io/${{ env.OWNER_LC }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+            
+            echo "Cleaning up dangling images..."
+            if [ "$(docker images -f 'dangling=true' -q)" ]; then
+              docker rmi $(docker images -f "dangling=true" -q) || true
+            fi
+            
+            echo "Deployment completed!"
+            docker ps | grep app1
+            docker logs app1 --tail 20
