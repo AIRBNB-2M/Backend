@@ -103,37 +103,20 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           instance-ids: ${{ env.INSTANCE_ID }}
-          comment: Deploy backend container
+          working-directory: /
+          comment: Deploy
           command: |
-            set -e
-
-            echo "[1] GitHub Container Registry 로그인"
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-            echo "[2] 최신 이미지 Pull"
+            # 새 이미지 다운로드
             docker pull ghcr.io/${{ env.OWNER_LC }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-
-            echo "[3] 기존 컨테이너 중지 및 삭제"
-            docker stop app1 2>/dev/null || true
-            docker rm app1 2>/dev/null || true
-
-            echo "[4] 환경변수 파일 생성"
-            mkdir -p /root/config
-            cat > /root/config/app.env << 'ENVEOF'
-            ${{ secrets.APP_ENV }}
-            ENVEOF
-            chmod 600 /root/config/app.env
-
-            echo "[5] 새 컨테이너 실행"
-            docker run -d --restart unless-stopped \
-              --network common \
-              --name app1 \
-              -p 8080:8080 \
-              --env-file /root/config/app.env \
-              ghcr.io/${{ env.OWNER_LC }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-
-            echo "[6] 불필요한 dangling 이미지 정리"
-            docker image prune -f || true
-
-            echo "[7] 배포 완료. 컨테이너 상태:"
-            docker ps | grep app1
+            
+            # 기존 컨테이너 중지
+            docker stop app1 2>/dev/null
+            
+            # 기존 컨테이너 제거
+            docker rm app1 2>/dev/null
+            
+            # 새 이미지를 실행해서 새 컨테이너 생성
+            docker run -d --name app1 -p 8080:8080 ghcr.io/${{ env.OWNER_LC }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+            
+            # 기존 이미지 제거
+            docker rmi $(docker images -f "dangling=true" -q)
