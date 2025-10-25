@@ -8,11 +8,13 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import project.airbnb.clone.WithMockGuest;
 import project.airbnb.clone.controller.RestDocsTestSupport;
+import project.airbnb.clone.dto.PageResponseDto;
 import project.airbnb.clone.dto.guest.ChatGuestSearchDto;
 import project.airbnb.clone.dto.guest.ChatGuestsSearchResDto;
 import project.airbnb.clone.dto.guest.DefaultProfileResDto;
 import project.airbnb.clone.dto.guest.EditProfileReqDto;
 import project.airbnb.clone.dto.guest.EditProfileResDto;
+import project.airbnb.clone.dto.guest.TripHistoryResDto;
 import project.airbnb.clone.service.guest.GuestService;
 
 import java.time.LocalDate;
@@ -31,6 +33,7 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart;
+import static org.springframework.restdocs.payload.JsonFieldType.ARRAY;
 import static org.springframework.restdocs.payload.JsonFieldType.BOOLEAN;
 import static org.springframework.restdocs.payload.JsonFieldType.NUMBER;
 import static org.springframework.restdocs.payload.JsonFieldType.STRING;
@@ -224,6 +227,104 @@ class GuestControllerTest extends RestDocsTestSupport {
                                                        .description("프로필 이미지 URL")
                                        )
                                        .responseSchema(schema("GuestSearchResponse"))
+                                       .build()
+                       ))
+               );
+    }
+
+    @Test
+    @DisplayName("여행한 숙소 목록 조회")
+    @WithMockGuest
+    void getTripsHistory() throws Exception {
+        //given
+        LocalDate now = LocalDate.now();
+        List<TripHistoryResDto> dtos = List.of(
+                new TripHistoryResDto(1L, 1L, "https://example-a.com", "title-A", now.minusDays(14), now.minusDays(12), true),
+                new TripHistoryResDto(2L, 2L, "https://example-b.com", "title-B", now.minusDays(10), now.minusDays(9), false),
+                new TripHistoryResDto(3L, 3L, "https://example-c.com", "title-C", now.minusDays(7), now.minusDays(4), true)
+        );
+        PageResponseDto<TripHistoryResDto> response = PageResponseDto.<TripHistoryResDto>builder()
+                                                                         .contents(dtos)
+                                                                         .pageNumber(0)
+                                                                         .pageSize(10)
+                                                                         .total(dtos.size())
+                                                                         .build();
+        given(guestService.getTripsHistory(anyLong(), any()))
+                .willReturn(response);
+
+        //when
+        //then
+        mockMvc.perform(get("/api/guests/me/trips/past")
+                       .header(AUTHORIZATION, "Bearer {access-token}")
+                       .param("page", "0")
+                       .param("size", "10")
+               )
+               .andExpectAll(
+                       handler().handlerType(GuestController.class),
+                       handler().methodName("getTripsHistory"),
+                       status().isOk(),
+                       jsonPath("$.contents.length()").value(dtos.size())
+               )
+               .andDo(document("get-trips-past",
+                       resource(
+                               builder()
+                                       .tag(GUEST_API_TAG)
+                                       .summary("여행한 숙소 목록 조회")
+                                       .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
+                                       .queryParameters(
+                                               parameterWithName("size").optional().description("페이지 크기"),
+                                               parameterWithName("page").optional().description("페이지 번호 (0-index)")
+                                       )
+                                       .responseFields(
+                                               fieldWithPath("contents")
+                                                       .type(ARRAY)
+                                                       .description("검색 페이지 데이터"),
+                                               fieldWithPath("hasPrev")
+                                                       .type(BOOLEAN)
+                                                       .description("이전 페이지 존재 여부"),
+                                               fieldWithPath("hasNext")
+                                                       .type(BOOLEAN)
+                                                       .description("다음 페이지 존재 여부"),
+                                               fieldWithPath("totalCount")
+                                                       .type(NUMBER)
+                                                       .description("검색된 전체 데이터 개수"),
+                                               fieldWithPath("prevPage")
+                                                       .type(NUMBER)
+                                                       .description("이전 페이지 번호 (0-index, 없으면 -1)"),
+                                               fieldWithPath("nextPage")
+                                                       .type(NUMBER)
+                                                       .description("다음 페이지 번호 (0-index, 없으면 -1)"),
+                                               fieldWithPath("totalPage")
+                                                       .type(NUMBER)
+                                                       .description("총 페이지 개수"),
+                                               fieldWithPath("current")
+                                                       .type(NUMBER)
+                                                       .description("현재 페이지 번호 (0-index)"),
+                                               fieldWithPath("size")
+                                                       .type(NUMBER)
+                                                       .description("페이지 크기"),
+                                               fieldWithPath("contents[].reservationId")
+                                                       .type(NUMBER)
+                                                       .description("예약 ID"),
+                                               fieldWithPath("contents[].accommodationId")
+                                                       .type(NUMBER)
+                                                       .description("숙소 ID"),
+                                               fieldWithPath("contents[].thumbnailUrl")
+                                                       .type(STRING)
+                                                       .description("숙소 썸네일 URL"),
+                                               fieldWithPath("contents[].title")
+                                                       .type(STRING)
+                                                       .description("숙소 제목"),
+                                               fieldWithPath("contents[].startDate")
+                                                       .type(STRING)
+                                                       .description("여행 시작일"),
+                                               fieldWithPath("contents[].endDate")
+                                                       .type(STRING)
+                                                       .description("여행 종료일"),
+                                               fieldWithPath("contents[].hasReviewed")
+                                                       .type(BOOLEAN)
+                                                       .description("리뷰 등록 여부")
+                                       )
                                        .build()
                        ))
                );
