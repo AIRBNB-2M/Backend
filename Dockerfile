@@ -28,17 +28,19 @@ WORKDIR /app
 # 소스 코드와 Gradle 래퍼 복사
 COPY build.gradle .
 COPY settings.gradle .
+COPY gradlew .
+COPY gradle/gradle-wrapper/ gradle/gradle-wrapper/
 
 # 종속성 설치
-RUN gradle dependencies --no-daemon
-RUN gradle copyOasToSwagger
+RUN ./gradlew dependencies --no-daemon
+RUN ./gradlew copyOasToSwagger
 
 # 소스 코드 복사
 COPY .env /app/.env
 COPY src src
 
 # 애플리케이션 빌드
-RUN gradle build --no-daemon
+RUN ./gradlew build --no-daemon
 
 # 두 번째 스테이지: 실행 스테이지
 FROM container-registry.oracle.com/graalvm/jdk:17
