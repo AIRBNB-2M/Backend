@@ -10,7 +10,7 @@
 
 <img src="https://img.shields.io/badge/프로젝트 기간-2025.07~ing-green?style=flat&logo=&logoColor=white" />
 
-<img src="https://img.shields.io/badge/마지막 리드미 수정-2025.10.22-gold?style=flat&logo=&logoColor=white" />
+<img src="https://img.shields.io/badge/마지막 리드미 수정-2025.10.26-gold?style=flat&logo=&logoColor=white" />
 
 <div>
 </div>
@@ -68,6 +68,9 @@
 <img src="https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white" />
 <img src="https://img.shields.io/badge/Cloudflare-F38020?style=flat&logo=cloudflare&logoColor=white" />
 <img src="https://img.shields.io/badge/Cloudtype-black?style=flat&logoColor=white">
+<img src="https://img.shields.io/badge/terraform-844FBA?style=flat&logo=terraform&logoColor=white">
+<img src="https://img.shields.io/badge/Nginx Proxy Manager-F15833?style=flat&logo=nginxproxymanager&logoColor=white">
+<img src="https://img.shields.io/badge/AWS EC2-F38020?style=flat&logoColor=white" />
 </div>
 
 ### 💬 Communication
@@ -91,7 +94,8 @@
 
 ### 🔄 CI/CD 아키텍처
 
-![img_3.png](readme-images/img_3.png)
+<img width="2837" height="2242" alt="image" src="https://github.com/user-attachments/assets/3e29f6be-8845-4af7-9b65-e9a1e09b859c" />
+
 
 ## 📌 TodoList
 - [ ] 숙소 예약 및 결제
