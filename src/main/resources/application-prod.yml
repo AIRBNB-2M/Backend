@@ -40,5 +40,5 @@ logging:
     org.springframework.transaction.interceptor: info
 
 app:
-  frontend-url: https://frontend-liard-eight-40.vercel.app
-  base-url: https://port-0-backend-mdl85cydd9f8761f.sel5.cloudtype.app
+  frontend-url: https://www.jgy914.shop
+  base-url: https://airbackend.jgy914.shop
