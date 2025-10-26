@@ -68,7 +68,7 @@
 <img src="https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white" />
 <img src="https://img.shields.io/badge/Cloudflare-F38020?style=flat&logo=cloudflare&logoColor=white" />
 <img src="https://img.shields.io/badge/Cloudtype-black?style=flat&logoColor=white">
-<img src="https://img.shields.io/badge/terraform-844FBA?style=flat&logo=terraform&logoColor=white">
+<img src="https://img.shields.io/badge/Terraform-844FBA?style=flat&logo=terraform&logoColor=white">
 <img src="https://img.shields.io/badge/Nginx Proxy Manager-F15833?style=flat&logo=nginxproxymanager&logoColor=white">
 <img src="https://img.shields.io/badge/AWS EC2-F38020?style=flat&logoColor=white" />
 </div>
