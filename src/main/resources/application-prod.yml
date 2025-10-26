@@ -1,4 +1,24 @@
 spring:
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: jgy091411@gmail.com
+    password: ${GMAIL_SMTP_PWD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connection-timeout: 5000
+          timeout: 5000
+          write-timeout: 5000
   batch:
     job:
       enabled: false
@@ -11,9 +31,13 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MariaDBDialect
+
+logging:
+  level:
+    project.airbnb.clone: info
+    org.hibernate.orm.jdbc.bind: info
+    org.hibernate.orm.jdbc.extract: info
+    org.springframework.transaction.interceptor: info
 
 app:
   frontend-url: https://frontend-liard-eight-40.vercel.app
