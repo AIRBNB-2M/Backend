@@ -15,7 +15,7 @@
 <div>
 </div>
 
-[![배포 주소](https://img.shields.io/badge/서비스_보러_가기-yellow?style=flat&logo=vercel&logoColor=white)](https://frontend-liard-eight-40.vercel.app)
+[![배포 주소](https://img.shields.io/badge/서비스_보러_가기-yellow?style=flat&logo=vercel&logoColor=white)](https://www.jgy914.shop)
 
 </div>
 
@@ -81,7 +81,7 @@
 
 ## 📝 API 설계
 
-👉🏻 [API 문서 보러가기](https://port-0-backend-mdl85cydd9f8761f.sel5.cloudtype.app/api-docs)
+👉🏻 [API 문서 보러가기](https://airbackend.jgy914.shop/api-docs)
 
 ## 🛠️ 프로젝트 아키텍쳐
 
