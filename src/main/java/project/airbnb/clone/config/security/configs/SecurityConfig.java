@@ -66,7 +66,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://frontend-liard-eight-40.vercel.app"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://frontend-liard-eight-40.vercel.app", "https://www.jgy914.shop"));
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
