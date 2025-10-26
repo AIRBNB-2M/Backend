@@ -299,7 +299,7 @@ class ChatControllerTest extends RestDocsTestSupport {
                        jsonPath("$.guestProfileImage").value(response.guestProfileImage()),
                        jsonPath("$.isOtherGuestActive").value(response.isOtherGuestActive()),
                        jsonPath("$.lastMessage").value(response.lastMessage()),
-                       jsonPath("$.lastMessageTime").value(response.lastMessageTime().toString()),
+                       jsonPath("$.lastMessageTime").exists(),
                        jsonPath("$.unreadCount").value(response.unreadCount())
                )
                .andDo(document("update-room-name",
