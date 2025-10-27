@@ -94,7 +94,9 @@
 
 ### 🔄 CI/CD 아키텍처
 
-<img width="2837" height="2242" alt="image" src="https://github.com/user-attachments/assets/3e29f6be-8845-4af7-9b65-e9a1e09b859c" />
+<!-- <img width="2837" height="2242" alt="image" src="https://github.com/user-attachments/assets/3e29f6be-8845-4af7-9b65-e9a1e09b859c" /> -->
+
+<img width="2735" height="2242" alt="image" src="https://github.com/user-attachments/assets/724d0f97-e770-4bf0-ad31-95607784d589" />
 
 
 ## 📌 TodoList
