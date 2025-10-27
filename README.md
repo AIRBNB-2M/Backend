@@ -94,7 +94,7 @@
 
 ### 🔄 CI/CD 아키텍처
 
-<img alt="image" src="https://github.com/user-attachments/assets/724d0f97-e770-4bf0-ad31-95607784d589" />
+<img alt="image" src="readme-images/img_1.png" />
 
 ## 📌 TodoList
 - [ ] 숙소 예약 및 결제
