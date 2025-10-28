@@ -68,7 +68,14 @@ public class ChatService {
                                                       .orElseThrow(() -> new EntityNotFoundException("Writer " + writer.getId() + " not found in participants"));
         chatParticipant.updateLastReadMessage(message);
 
-        return ChatMessageResDto.from(message, writer, chatRoom.getId());
+        return ChatMessageResDto.builder()
+                                .messageId(message.getId())
+                                .roomId(roomId)
+                                .senderId(writer.getId())
+                                .senderName(writer.getName())
+                                .content(message.getContent())
+                                .timestamp(message.getCreatedAt())
+                                .build();
     }
 
     @Transactional
