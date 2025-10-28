@@ -106,7 +106,7 @@ jobs:
             echo "${{ secrets.APP_ENV }}" | base64 --decode > /home/ec2-user/.env
             chmod 600 /home/ec2-user/.env
             
-            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            echo ${{ secrets.GHCR_TOKEN  }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             
             # 새 이미지 다운로드
             docker pull ghcr.io/${{ env.OWNER_LC }}/${{ env.DOCKER_IMAGE_NAME }}:latest
