@@ -8,7 +8,7 @@ import project.airbnb.clone.dto.reservation.PostReviewReqDto;
 import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.entity.Reservation;
 import project.airbnb.clone.entity.Review;
-import project.airbnb.clone.repository.ReviewRepository;
+import project.airbnb.clone.repository.jpa.ReviewRepository;
 import project.airbnb.clone.repository.jpa.GuestRepository;
 import project.airbnb.clone.repository.jpa.ReservationRepository;
 

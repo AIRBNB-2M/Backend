@@ -9,7 +9,7 @@ import project.airbnb.clone.entity.AccommodationImage;
 import project.airbnb.clone.entity.AccommodationPrice;
 import project.airbnb.clone.entity.Amenity;
 import project.airbnb.clone.entity.SigunguCode;
-import project.airbnb.clone.service.tour.TourRepositoryFacadeManager;
+import project.airbnb.clone.repository.facade.TourRepositoryFacadeManager;
 
 import java.util.ArrayList;
 import java.util.List;

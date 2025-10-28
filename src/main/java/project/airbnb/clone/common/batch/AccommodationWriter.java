@@ -7,7 +7,7 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import project.airbnb.clone.dto.accommodation.AccommodationProcessorDto;
-import project.airbnb.clone.service.tour.TourRepositoryFacadeManager;
+import project.airbnb.clone.repository.facade.TourRepositoryFacadeManager;
 import project.airbnb.clone.service.tour.workers.AccommodationSaveWorker;
 
 @Slf4j

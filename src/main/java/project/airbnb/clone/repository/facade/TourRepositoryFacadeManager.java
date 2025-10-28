@@ -1,4 +1,4 @@
-package project.airbnb.clone.service.tour;
+package project.airbnb.clone.repository.facade;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

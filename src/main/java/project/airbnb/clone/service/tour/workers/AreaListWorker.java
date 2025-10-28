@@ -5,7 +5,7 @@ import project.airbnb.clone.common.clients.TourApiClient;
 import project.airbnb.clone.dto.accommodation.AccommodationProcessorDto;
 import project.airbnb.clone.entity.Accommodation;
 import project.airbnb.clone.service.tour.HttpClientTemplate;
-import project.airbnb.clone.service.tour.TourRepositoryFacadeManager;
+import project.airbnb.clone.repository.facade.TourRepositoryFacadeManager;
 
 import java.util.List;
 import java.util.Map;
