@@ -16,6 +16,8 @@ import project.airbnb.clone.dto.chat.ChatMessagesResDto;
 import project.airbnb.clone.dto.chat.ChatRoomResDto;
 import project.airbnb.clone.dto.chat.CreateChatRoomReqDto;
 import project.airbnb.clone.dto.chat.LeaveChatRoomReqDto;
+import project.airbnb.clone.dto.chat.RequestChatReqDto;
+import project.airbnb.clone.dto.chat.RequestChatResDto;
 import project.airbnb.clone.dto.chat.UpdateChatRoomNameReqDto;
 import project.airbnb.clone.service.chat.ChatService;
 
@@ -27,6 +29,13 @@ import java.util.List;
 public class ChatController {
 
     private final ChatService chatService;
+
+    @PostMapping("/requests")
+    public ResponseEntity<RequestChatResDto> requestChat(@Valid @RequestBody RequestChatReqDto requestChatReqDto,
+                                                         @CurrentGuestId Long senderId) {
+        RequestChatResDto response = chatService.requestChat(requestChatReqDto.receiverId(), senderId);
+        return ResponseEntity.ok(response);
+    }
 
     @PostMapping("/rooms")
     public ResponseEntity<ChatRoomResDto> createOrGetChatRoom(@RequestBody CreateChatRoomReqDto reqDto,

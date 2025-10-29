@@ -4,18 +4,25 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import project.airbnb.clone.common.exceptions.chat.AlreadyRequestException;
 import project.airbnb.clone.common.exceptions.chat.ParticipantLeftException;
+import project.airbnb.clone.common.exceptions.chat.SameParticipantException;
 import project.airbnb.clone.dto.chat.ChatMessageReqDto;
 import project.airbnb.clone.dto.chat.ChatMessageResDto;
 import project.airbnb.clone.dto.chat.ChatMessagesResDto;
 import project.airbnb.clone.dto.chat.ChatRoomResDto;
+import project.airbnb.clone.dto.chat.RequestChatResDto;
 import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.entity.chat.ChatMessage;
 import project.airbnb.clone.entity.chat.ChatParticipant;
 import project.airbnb.clone.entity.chat.ChatRoom;
+import project.airbnb.clone.repository.dto.ChatRequest;
 import project.airbnb.clone.repository.facade.ChatRepositoryFacadeManager;
 import project.airbnb.clone.repository.jpa.GuestRepository;
+import project.airbnb.clone.repository.redis.RedisJsonRepository;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -24,6 +31,7 @@ import java.util.List;
 public class ChatService {
 
     private final GuestRepository guestRepository;
+    private final RedisJsonRepository redisJsonRepository;
     private final ChatRepositoryFacadeManager chatRepositoryFacade;
 
     @Transactional
@@ -129,6 +137,38 @@ public class ChatService {
         return chatRepositoryFacade.findByChatRoomIdAndGuestId(roomId, guestId)
                                    .map(ChatParticipant::isActiveParticipant)
                                    .orElse(false);
+    }
+
+    public RequestChatResDto requestChat(Long receiverId, Long senderId) {
+        String requestKey = "chat:request:" + senderId + ":" + receiverId;
+
+        if (receiverId.equals(senderId)) throw new SameParticipantException("자기 자신과는 채팅할 수 없습니다.");
+        if (redisJsonRepository.exists(requestKey)) throw new AlreadyRequestException("이미 요청된 채팅입니다.");
+
+        LocalDateTime now = LocalDateTime.now();
+        Duration requestTTL = Duration.ofDays(1);
+
+        Guest sender = guestRepository.findById(senderId)
+                                      .orElseThrow(() -> new EntityNotFoundException("요청자 정보(id: %d)를 찾을 수 없습니다.".formatted(senderId)));
+        Guest receiver = guestRepository.findById(receiverId)
+                                        .orElseThrow(() -> new EntityNotFoundException("수신자 정보(id: %d)를 찾을 수 없습니다.".formatted(receiverId)));
+
+        ChatRequest request = ChatRequest.builder()
+                                         .senderId(senderId)
+                                         .senderName(sender.getName())
+                                         .senderProfileImage(sender.getProfileUrl())
+                                         .receiverId(receiverId)
+                                         .receiverName(receiver.getName())
+                                         .receiverProfileImage(receiver.getProfileUrl())
+                                         .createdAt(now)
+                                         .expiresAt(now.plus(requestTTL))
+                                         .build();
+        redisJsonRepository.save(requestKey, request, requestTTL);
+
+        // TODO : WebSocket 이벤트 발행
+        // eventPublisher.publishEvent(new ChatRequestCreatedEvent(senderId, receiverId, request.getExpiresAt()));
+
+        return request.toResDto(requestKey);
     }
 
     private ChatRoom createNewChatRoom(Long otherGuestId, Long creatorId) {
