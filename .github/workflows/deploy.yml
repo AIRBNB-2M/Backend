@@ -229,6 +229,7 @@ jobs:
               --restart unless-stopped \
               --network "${NET}" \
               -e TZ=Asia/Seoul \
+              --env-file /home/ec2-user/.env \
               "${IMAGE}"
 
             # ---------------------------------------------------------
