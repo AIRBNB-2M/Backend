@@ -100,11 +100,11 @@ jobs:
         with:
           context: .
           push: true
-          cache-from: type=registry,ref=ghcr.io/${{ env.OWNER_LC }}/${{ env.DOCKER_IMAGE_NAME }}:cache
-          cache-to: type=registry,ref=ghcr.io/${{ env.OWNER_LC }}/${{ env.DOCKER_IMAGE_NAME }}:cache,mode=max
+          cache-from: type=registry,ref=ghcr.io/${{ env.OWNER_LC }}/${{ env.IMAGE_REPOSITORY }}:cache
+          cache-to: type=registry,ref=ghcr.io/${{ env.OWNER_LC }}/${{ env.IMAGE_REPOSITORY }}:cache,mode=max
           tags: |
-            ghcr.io/${{ env.OWNER_LC }}/${{ env.DOCKER_IMAGE_NAME }}:${{ needs.makeTagAndRelease.outputs.tag_name }}
-            ghcr.io/${{ env.OWNER_LC }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+            ghcr.io/${{ env.OWNER_LC }}/${{ env.IMAGE_REPOSITORY }}:${{ needs.makeTagAndRelease.outputs.tag_name }}
+            ghcr.io/${{ env.OWNER_LC }}/${{ env.IMAGE_REPOSITORY }}:latest
 
   # ---------------------------------------------------------
   # 3) Blue/Green 무중단 배포 (EC2 + NPM 스위치)
@@ -147,29 +147,6 @@ jobs:
             # Base64로 전달된 Secrets 디코딩 후 .env 생성
             echo "${{ secrets.APP_ENV }}" | base64 --decode > /home/ec2-user/.env
             chmod 600 /home/ec2-user/.env
-            
-            echo ${{ secrets.GHCR_TOKEN  }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-            # 새 이미지 다운로드
-            docker pull ghcr.io/${{ env.OWNER_LC }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-
-            # 기존 컨테이너 중지 & 제거
-            docker stop app1 2>/dev/null || true
-            docker rm app1 2>/dev/null || true
-
-            # 새 이미지를 실행해서 새 컨테이너 생성
-            docker run -d \
-            --name app1 \
-            --restart unless-stopped \
-            -p 8080:8080 \
-            --network common \
-            --env-file /home/ec2-user/.env \
-            ghcr.io/${{ env.OWNER_LC }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-
-            # 기존 이미지 제거
-            docker rmi $(docker images -f "dangling=true" -q) || true
-            
-            -------------------------------------------------------------------------------------
             
             set -Eeuo pipefail
 
