@@ -1,8 +1,19 @@
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info
+    endpoint:
+      health:
+        probes:
+          enabled: true                 # /actuator/health/{liveness,readiness} 활성화
+        show-details: never             # 프로브 용도면 never 권장(민감정보 차단)
 spring:
   data:
     redis:
       repositories:
-        enabled: false
+        enabled: true
       host: localhost
       port: 6379
       password:
