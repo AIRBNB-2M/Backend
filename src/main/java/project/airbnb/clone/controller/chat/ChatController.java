@@ -37,6 +37,18 @@ public class ChatController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/requests/received")
+    public ResponseEntity<List<RequestChatResDto>> getReceivedChatRequests(@CurrentGuestId Long guestId) {
+        List<RequestChatResDto> response = chatService.getReceivedChatRequests(guestId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/requests/sent")
+    public ResponseEntity<List<RequestChatResDto>> getSentChatRequests(@CurrentGuestId Long guestId) {
+        List<RequestChatResDto> response = chatService.getSentChatRequests(guestId);
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/rooms")
     public ResponseEntity<ChatRoomResDto> createOrGetChatRoom(@RequestBody CreateChatRoomReqDto reqDto,
                                                               @CurrentGuestId Long guestId) {

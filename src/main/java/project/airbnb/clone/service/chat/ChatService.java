@@ -19,7 +19,7 @@ import project.airbnb.clone.entity.chat.ChatRoom;
 import project.airbnb.clone.repository.dto.ChatRequest;
 import project.airbnb.clone.repository.facade.ChatRepositoryFacadeManager;
 import project.airbnb.clone.repository.jpa.GuestRepository;
-import project.airbnb.clone.repository.redis.RedisJsonRepository;
+import project.airbnb.clone.repository.redis.ChatRequestRepository;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -31,7 +31,7 @@ import java.util.List;
 public class ChatService {
 
     private final GuestRepository guestRepository;
-    private final RedisJsonRepository redisJsonRepository;
+    private final ChatRequestRepository chatRequestRepository;
     private final ChatRepositoryFacadeManager chatRepositoryFacade;
 
     @Transactional
@@ -143,7 +143,7 @@ public class ChatService {
         String requestKey = "chat:request:" + senderId + ":" + receiverId;
 
         if (receiverId.equals(senderId)) throw new SameParticipantException("자기 자신과는 채팅할 수 없습니다.");
-        if (redisJsonRepository.exists(requestKey)) throw new AlreadyRequestException("이미 요청된 채팅입니다.");
+        if (chatRequestRepository.existsById(requestKey)) throw new AlreadyRequestException("이미 요청된 채팅입니다.");
 
         LocalDateTime now = LocalDateTime.now();
         Duration requestTTL = Duration.ofDays(1);
@@ -163,12 +163,26 @@ public class ChatService {
                                          .createdAt(now)
                                          .expiresAt(now.plus(requestTTL))
                                          .build();
-        redisJsonRepository.save(requestKey, request, requestTTL);
+        chatRequestRepository.save(request);
 
         // TODO : WebSocket 이벤트 발행
         // eventPublisher.publishEvent(new ChatRequestCreatedEvent(senderId, receiverId, request.getExpiresAt()));
 
-        return request.toResDto(requestKey);
+        return request.toResDto();
+    }
+
+    public List<RequestChatResDto> getReceivedChatRequests(Long guestId) {
+        return chatRequestRepository.findByReceiverId(guestId)
+                                    .stream()
+                                    .map(ChatRequest::toResDto)
+                                    .toList();
+    }
+
+    public List<RequestChatResDto> getSentChatRequests(Long guestId) {
+        return chatRequestRepository.findBySenderId(guestId)
+                                    .stream()
+                                    .map(ChatRequest::toResDto)
+                                    .toList();
     }
 
     private ChatRoom createNewChatRoom(Long otherGuestId, Long creatorId) {
