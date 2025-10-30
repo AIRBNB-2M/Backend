@@ -12,6 +12,8 @@ import project.airbnb.clone.dto.chat.ChatMessagesResDto;
 import project.airbnb.clone.dto.chat.ChatRoomResDto;
 import project.airbnb.clone.dto.chat.CreateChatRoomReqDto;
 import project.airbnb.clone.dto.chat.LeaveChatRoomReqDto;
+import project.airbnb.clone.dto.chat.RequestChatReqDto;
+import project.airbnb.clone.dto.chat.RequestChatResDto;
 import project.airbnb.clone.dto.chat.UpdateChatRoomNameReqDto;
 import project.airbnb.clone.service.chat.ChatService;
 
@@ -47,6 +49,81 @@ class ChatControllerTest extends RestDocsTestSupport {
     private static final String CHAT_API_TAG = "Chat API";
 
     @MockitoBean ChatService chatService;
+
+    @Test
+    @DisplayName("대화 요청")
+    @WithMockGuest
+    void requestChat() throws Exception {
+        //given
+        RequestChatReqDto request = new RequestChatReqDto(1L);
+        RequestChatResDto response = new RequestChatResDto("request-id", 2L, "Walter Umar", "https://sender-profile.com",
+                1L, "Amina Morales", "https://sender-profile.com", LocalDateTime.now().plusDays(1));
+        given(chatService.requestChat(anyLong(), anyLong())).willReturn(response);
+
+        //when
+        //then
+        mockMvc.perform(post("/api/chat/requests")
+                       .header(AUTHORIZATION, "Bearer {access-token}")
+                       .contentType(MediaType.APPLICATION_JSON_VALUE)
+                       .content(creatJson(request))
+               )
+               .andExpectAll(
+                       handler().handlerType(ChatController.class),
+                       handler().methodName("requestChat"),
+                       status().isOk(),
+                       jsonPath("$.requestId").value(response.requestId()),
+                       jsonPath("$.senderId").value(response.senderId()),
+                       jsonPath("$.senderName").value(response.senderName()),
+                       jsonPath("$.senderProfileImage").value(response.senderProfileImage()),
+                       jsonPath("$.receiverId").value(response.receiverId()),
+                       jsonPath("$.receiverName").value(response.receiverName()),
+                       jsonPath("$.receiverProfileImage").value(response.receiverProfileImage()),
+                       jsonPath("$.expiresAt").exists()
+               )
+               .andDo(document("request-chat",
+                       resource(
+                               builder()
+                                       .tag(CHAT_API_TAG)
+                                       .summary("대화 요청")
+                                       .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
+                                       .requestFields(fieldWithPath("receiverId")
+                                               .description("대화를 원하는 상대방 사용자 ID")
+                                               .type(NUMBER)
+                                       )
+                                       .responseFields(
+                                               fieldWithPath("requestId")
+                                                       .type(STRING)
+                                                       .description("대화 요청 ID"),
+                                               fieldWithPath("senderId")
+                                                       .type(NUMBER)
+                                                       .description("요청 보낸 사용자 ID"),
+                                               fieldWithPath("senderName")
+                                                       .type(STRING)
+                                                       .description("요청 보낸 사용자 이름"),
+                                               fieldWithPath("senderProfileImage")
+                                                       .optional()
+                                                       .type(STRING)
+                                                       .description("요청 보낸 사용자 프로필 이미지"),
+                                               fieldWithPath("receiverId")
+                                                       .type(NUMBER)
+                                                       .description("요청 받은 사용자 ID"),
+                                               fieldWithPath("receiverName")
+                                                       .type(STRING)
+                                                       .description("요청 받은 사용자 이름"),
+                                               fieldWithPath("receiverProfileImage")
+                                                       .optional()
+                                                       .type(STRING)
+                                                       .description("요청 받은 사용자 프로필 이미지"),
+                                               fieldWithPath("expiresAt")
+                                                       .type(STRING)
+                                                       .description("요청 만료시간(24시간)")
+                                       )
+                                       .requestSchema(schema("RequestChatRequest"))
+                                       .responseSchema(schema("RequestChatResponse"))
+                                       .build()
+                       )
+               ));
+    }
 
     @Test
     @DisplayName("새 채팅방 생성 또는 기존 채팅방 반환")
