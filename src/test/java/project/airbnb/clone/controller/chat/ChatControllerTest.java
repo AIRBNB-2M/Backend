@@ -51,13 +51,145 @@ class ChatControllerTest extends RestDocsTestSupport {
     @MockitoBean ChatService chatService;
 
     @Test
+    @DisplayName("받은 대화 요청 목록 조회")
+    @WithMockGuest
+    void getReceivedChatRequests() throws Exception {
+        //given
+        List<RequestChatResDto> response = List.of(
+                new RequestChatResDto("request-id-1", 1L, "Walter Umar", "https://sender-1-profile.com",
+                        2L, "Amina Morales", "https://receiver-1-profile.com", LocalDateTime.now().plusDays(1)),
+                new RequestChatResDto("request-id-2", 3L, "Natalya Bello", "https://sender-2-profile.com",
+                        4L, "Richard Santos", "https://receiver-2-profile.com", LocalDateTime.now().plusHours(3)),
+                new RequestChatResDto("request-id-3", 5L, "Dmitriy Sari", "https://sender-3-profile.com",
+                        6L, "Frank Rai", "https://receiver-3-profile.com", LocalDateTime.now().plusHours(5)));
+        given(chatService.getReceivedChatRequests(anyLong())).willReturn(response);
+
+        //when
+        //then
+        mockMvc.perform(get("/api/chat/requests/received")
+                       .header(AUTHORIZATION, "Bearer {access-token}")
+               )
+               .andExpectAll(
+                       handler().handlerType(ChatController.class),
+                       handler().methodName("getReceivedChatRequests"),
+                       status().isOk(),
+                       jsonPath("$.length()").value(response.size())
+               )
+               .andDo(
+                       document("get-received-request-chat",
+                               resource(
+                                       builder()
+                                               .tag(CHAT_API_TAG)
+                                               .summary("받은 대화 요청 목록 조회")
+                                               .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
+                                               .responseFields(
+                                                       fieldWithPath("[].requestId")
+                                                               .type(STRING)
+                                                               .description("대화 요청 ID"),
+                                                       fieldWithPath("[].senderId")
+                                                               .type(NUMBER)
+                                                               .description("요청 보낸 사용자 ID"),
+                                                       fieldWithPath("[].senderName")
+                                                               .type(STRING)
+                                                               .description("요청 보낸 사용자 이름"),
+                                                       fieldWithPath("[].senderProfileImage")
+                                                               .optional()
+                                                               .type(STRING)
+                                                               .description("요청 보낸 사용자 프로필 이미지"),
+                                                       fieldWithPath("[].receiverId")
+                                                               .type(NUMBER)
+                                                               .description("요청 받은 사용자 ID"),
+                                                       fieldWithPath("[].receiverName")
+                                                               .type(STRING)
+                                                               .description("요청 받은 사용자 이름"),
+                                                       fieldWithPath("[].receiverProfileImage")
+                                                               .optional()
+                                                               .type(STRING)
+                                                               .description("요청 받은 사용자 프로필 이미지"),
+                                                       fieldWithPath("[].expiresAt")
+                                                               .type(STRING)
+                                                               .description("요청 만료시간(24시간)")
+                                               )
+                                               .responseSchema(schema("RequestChatResponse"))
+                                               .build()
+                               )
+                       ));
+    }
+
+    @Test
+    @DisplayName("보낸 대화 요청 목록 조회")
+    @WithMockGuest
+    void getSentChatRequests() throws Exception {
+        //given
+        List<RequestChatResDto> response = List.of(
+                new RequestChatResDto("request-id-1", 1L, "Walter Umar", "https://sender-1-profile.com",
+                        2L, "Amina Morales", "https://receiver-1-profile.com", LocalDateTime.now().plusDays(1)),
+                new RequestChatResDto("request-id-2", 3L, "Natalya Bello", "https://sender-2-profile.com",
+                        4L, "Richard Santos", "https://receiver-2-profile.com", LocalDateTime.now().plusHours(3)),
+                new RequestChatResDto("request-id-3", 5L, "Dmitriy Sari", "https://sender-3-profile.com",
+                        6L, "Frank Rai", "https://receiver-3-profile.com", LocalDateTime.now().plusHours(5)));
+        given(chatService.getSentChatRequests(anyLong())).willReturn(response);
+
+        //when
+        //then
+        mockMvc.perform(get("/api/chat/requests/sent")
+                       .header(AUTHORIZATION, "Bearer {access-token}")
+               )
+               .andExpectAll(
+                       handler().handlerType(ChatController.class),
+                       handler().methodName("getSentChatRequests"),
+                       status().isOk(),
+                       jsonPath("$.length()").value(response.size())
+               )
+               .andDo(
+                       document("get-sent-request-chat",
+                               resource(
+                                       builder()
+                                               .tag(CHAT_API_TAG)
+                                               .summary("보낸 대화 요청 목록 조회")
+                                               .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
+                                               .responseFields(
+                                                       fieldWithPath("[].requestId")
+                                                               .type(STRING)
+                                                               .description("대화 요청 ID"),
+                                                       fieldWithPath("[].senderId")
+                                                               .type(NUMBER)
+                                                               .description("요청 보낸 사용자 ID"),
+                                                       fieldWithPath("[].senderName")
+                                                               .type(STRING)
+                                                               .description("요청 보낸 사용자 이름"),
+                                                       fieldWithPath("[].senderProfileImage")
+                                                               .optional()
+                                                               .type(STRING)
+                                                               .description("요청 보낸 사용자 프로필 이미지"),
+                                                       fieldWithPath("[].receiverId")
+                                                               .type(NUMBER)
+                                                               .description("요청 받은 사용자 ID"),
+                                                       fieldWithPath("[].receiverName")
+                                                               .type(STRING)
+                                                               .description("요청 받은 사용자 이름"),
+                                                       fieldWithPath("[].receiverProfileImage")
+                                                               .optional()
+                                                               .type(STRING)
+                                                               .description("요청 받은 사용자 프로필 이미지"),
+                                                       fieldWithPath("[].expiresAt")
+                                                               .type(STRING)
+                                                               .description("요청 만료시간(24시간)")
+                                               )
+                                               .responseSchema(schema("RequestChatResponse"))
+                                               .build()
+                               )
+                       ));
+    }
+
+    @Test
     @DisplayName("대화 요청")
     @WithMockGuest
     void requestChat() throws Exception {
         //given
         RequestChatReqDto request = new RequestChatReqDto(1L);
         RequestChatResDto response = new RequestChatResDto("request-id", 2L, "Walter Umar", "https://sender-profile.com",
-                1L, "Amina Morales", "https://sender-profile.com", LocalDateTime.now().plusDays(1));
+                1L, "Amina Morales", "https://receiver-profile.com", LocalDateTime.now().plusDays(1));
         given(chatService.requestChat(anyLong(), anyLong())).willReturn(response);
 
         //when
