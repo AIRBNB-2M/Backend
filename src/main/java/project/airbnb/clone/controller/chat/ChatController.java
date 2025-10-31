@@ -37,6 +37,20 @@ public class ChatController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/requests/{requestId}/accept")
+    public ResponseEntity<ChatRoomResDto> acceptRequestChat(@PathVariable("requestId") String requestId,
+                                                            @CurrentGuestId Long guestId) {
+        ChatRoomResDto response = chatService.acceptRequestChat(requestId, guestId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/requests/{requestId}/reject")
+    public ResponseEntity<?> rejectRequestChat(@PathVariable("requestId") String requestId,
+                                               @CurrentGuestId Long guestId) {
+        chatService.rejectRequestChat(requestId, guestId);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/requests/received")
     public ResponseEntity<List<RequestChatResDto>> getReceivedChatRequests(@CurrentGuestId Long guestId) {
         List<RequestChatResDto> response = chatService.getReceivedChatRequests(guestId);

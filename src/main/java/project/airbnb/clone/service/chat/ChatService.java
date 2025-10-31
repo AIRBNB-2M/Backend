@@ -2,8 +2,10 @@ package project.airbnb.clone.service.chat;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import project.airbnb.clone.common.exceptions.chat.AlreadyActiveChatException;
 import project.airbnb.clone.common.exceptions.chat.AlreadyRequestException;
 import project.airbnb.clone.common.exceptions.chat.ParticipantLeftException;
 import project.airbnb.clone.common.exceptions.chat.SameParticipantException;
@@ -129,14 +131,35 @@ public class ChatService {
         }
     }
 
-    public List<ChatRoomResDto> getChatRooms(Long guestId) {
-        return chatRepositoryFacade.findChatRoomsByGuestId(guestId);
+    @Transactional
+    public ChatRoomResDto acceptRequestChat(String requestId, Long accepterId) {
+        ChatRequest chatRequest = chatRequestRepository.findById(requestId)
+                                                       .orElseThrow(() -> new EntityNotFoundException("요청이 존재하지 않거나 만료되었습니다. => " + requestId));
+
+        if (!chatRequest.getReceiverId().equals(accepterId)) throw new AccessDeniedException("본인에게 온 요청만 수락할 수 있습니다.");
+
+        chatRequestRepository.delete(chatRequest);
+
+        ChatRoom chatRoom = chatRepositoryFacade.findChatRoomByGuestsId(chatRequest.getSenderId(), accepterId)
+                                                .map(existingRoom -> {
+                                                    reactiveIfHasLeft(existingRoom.getId(), chatRequest.getSenderId());
+                                                    reactiveIfHasLeft(existingRoom.getId(), accepterId);
+                                                    return existingRoom;
+                                                })
+                                                .orElseGet(() -> createNewChatRoom(chatRequest.getSenderId(), accepterId));
+
+        return chatRepositoryFacade.getChatRoomInfo(accepterId, chatRequest.getSenderId(), chatRoom);
     }
 
-    public boolean isChatRoomParticipant(Long roomId, Long guestId) {
-        return chatRepositoryFacade.findByChatRoomIdAndGuestId(roomId, guestId)
-                                   .map(ChatParticipant::isActiveParticipant)
-                                   .orElse(false);
+    public void rejectRequestChat(String requestId, Long rejecterId) {
+        ChatRequest chatRequest = chatRequestRepository.findById(requestId)
+                                                       .orElseThrow(() -> new EntityNotFoundException("요청이 존재하지 않거나 만료되었습니다. => " + requestId));
+
+        if (!chatRequest.getReceiverId().equals(rejecterId)) throw new AccessDeniedException("본인에게 온 요청만 거절할 수 있습니다.");
+
+        chatRequestRepository.delete(chatRequest);
+        // TODO: WebSocket 이벤트 발행 (요청자에게 거절 알림)
+        // eventPublisher.publishEvent(new ChatRequestRejectedEvent(request));
     }
 
     public RequestChatResDto requestChat(Long receiverId, Long senderId) {
@@ -144,6 +167,14 @@ public class ChatService {
 
         if (receiverId.equals(senderId)) throw new SameParticipantException("자기 자신과는 채팅할 수 없습니다.");
         if (chatRequestRepository.existsById(requestKey)) throw new AlreadyRequestException("이미 요청된 채팅입니다.");
+
+        chatRepositoryFacade.findChatRoomByGuestsId(receiverId, senderId)
+                            .map(chatRoom -> getChatParticipant(chatRoom.getId(), senderId))
+                            .ifPresent(participant -> {
+                                if (participant.isActiveParticipant()) {
+                                    throw new AlreadyActiveChatException("이미 참가 중인 채팅방이 존재합니다.");
+                                }
+                            });
 
         LocalDateTime now = LocalDateTime.now();
         Duration requestTTL = Duration.ofDays(1);
@@ -169,6 +200,16 @@ public class ChatService {
         // eventPublisher.publishEvent(new ChatRequestCreatedEvent(senderId, receiverId, request.getExpiresAt()));
 
         return request.toResDto();
+    }
+
+    public List<ChatRoomResDto> getChatRooms(Long guestId) {
+        return chatRepositoryFacade.findChatRoomsByGuestId(guestId);
+    }
+
+    public boolean isChatRoomParticipant(Long roomId, Long guestId) {
+        return chatRepositoryFacade.findByChatRoomIdAndGuestId(roomId, guestId)
+                                   .map(ChatParticipant::isActiveParticipant)
+                                   .orElse(false);
     }
 
     public List<RequestChatResDto> getReceivedChatRequests(Long guestId) {
