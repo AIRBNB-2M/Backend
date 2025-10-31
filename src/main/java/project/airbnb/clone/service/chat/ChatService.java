@@ -143,12 +143,11 @@ public class ChatService {
         ChatRoom chatRoom = chatRepositoryFacade.findChatRoomByGuestsId(chatRequest.getSenderId(), accepterId)
                                                 .map(existingRoom -> {
                                                     reactiveIfHasLeft(existingRoom.getId(), chatRequest.getSenderId());
-                                                    reactiveIfHasLeft(existingRoom.getId(), accepterId);
                                                     return existingRoom;
                                                 })
                                                 .orElseGet(() -> createNewChatRoom(chatRequest.getSenderId(), accepterId));
 
-        return chatRepositoryFacade.getChatRoomInfo(accepterId, chatRequest.getSenderId(), chatRoom);
+        return chatRepositoryFacade.getChatRoomInfo(chatRequest.getSenderId(), accepterId, chatRoom);
     }
 
     public void rejectRequestChat(String requestId, Long rejecterId) {
