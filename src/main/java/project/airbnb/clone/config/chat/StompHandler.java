@@ -39,7 +39,14 @@ public class StompHandler implements ChannelInterceptor {
 
             validateToken(accessor);
 
-            Long roomId = extractRoomId(accessor.getDestination());
+            String destination = accessor.getDestination();
+
+            // 개인 구독은 검증 통과
+            if (destination != null && destination.startsWith("/user")) {
+                return message;
+            }
+
+            Long roomId = extractRoomId(destination);
             if (roomId == null) {
                 log.warn("{} 요청: destination에서 roomId 추출 실패", accessor.getCommand());
                 return null;
