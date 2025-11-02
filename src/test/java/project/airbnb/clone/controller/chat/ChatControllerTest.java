@@ -10,7 +10,6 @@ import project.airbnb.clone.controller.RestDocsTestSupport;
 import project.airbnb.clone.dto.chat.ChatMessageResDto;
 import project.airbnb.clone.dto.chat.ChatMessagesResDto;
 import project.airbnb.clone.dto.chat.ChatRoomResDto;
-import project.airbnb.clone.dto.chat.CreateChatRoomReqDto;
 import project.airbnb.clone.dto.chat.LeaveChatRoomReqDto;
 import project.airbnb.clone.dto.chat.RequestChatReqDto;
 import project.airbnb.clone.dto.chat.RequestChatResDto;
@@ -252,85 +251,6 @@ class ChatControllerTest extends RestDocsTestSupport {
                                        )
                                        .requestSchema(schema("RequestChatRequest"))
                                        .responseSchema(schema("RequestChatResponse"))
-                                       .build()
-                       )
-               ));
-    }
-
-    @Test
-    @DisplayName("새 채팅방 생성 또는 기존 채팅방 반환")
-    @WithMockGuest
-    void createOrGetChatRoom() throws Exception {
-        //given
-        CreateChatRoomReqDto request = new CreateChatRoomReqDto(1L);
-        ChatRoomResDto response = new ChatRoomResDto(1L, "my-chat-room", 1L, "Ahmad Gul", "https://example.com", true,
-                "안녕하세요", LocalDateTime.now().minusDays(7), 3);
-        given(chatService.createOrGetChatRoom(anyLong(), anyLong())).willReturn(response);
-
-        //when
-        //then
-        mockMvc.perform(post("/api/chat/rooms")
-                       .header(AUTHORIZATION, "Bearer {access-token}")
-                       .contentType(MediaType.APPLICATION_JSON_VALUE)
-                       .content(creatJson(request))
-               )
-               .andExpectAll(
-                       handler().handlerType(ChatController.class),
-                       handler().methodName("createOrGetChatRoom"),
-                       status().isOk(),
-                       jsonPath("$.roomId").value(response.roomId()),
-                       jsonPath("$.customRoomName").value(response.customRoomName()),
-                       jsonPath("$.guestId").value(response.guestId()),
-                       jsonPath("$.guestName").value(response.guestName()),
-                       jsonPath("$.guestProfileImage").value(response.guestProfileImage()),
-                       jsonPath("$.isOtherGuestActive").value(response.isOtherGuestActive()),
-                       jsonPath("$.lastMessage").value(response.lastMessage()),
-                       jsonPath("$.lastMessageTime").exists(),
-                       jsonPath("$.unreadCount").value(response.unreadCount())
-               )
-               .andDo(document("create-or-get-chat-room",
-                       resource(
-                               builder()
-                                       .tag(CHAT_API_TAG)
-                                       .summary("새 채팅방 생성 or 기존 채팅방 반환")
-                                       .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
-                                       .requestFields(fieldWithPath("otherGuestId")
-                                               .description("대화를 원하는 상대방 사용자 ID")
-                                               .type(NUMBER)
-                                       )
-                                       .responseFields(
-                                               fieldWithPath("roomId")
-                                                       .type(NUMBER)
-                                                       .description("채팅방 ID"),
-                                               fieldWithPath("customRoomName")
-                                                       .type(STRING)
-                                                       .description("채팅방 이름 (초기에는 \"~님과의 대화\"로 생성)"),
-                                               fieldWithPath("guestId")
-                                                       .type(NUMBER)
-                                                       .description("상대방 ID"),
-                                               fieldWithPath("guestName")
-                                                       .type(STRING)
-                                                       .description("상대방 이름"),
-                                               fieldWithPath("guestProfileImage")
-                                                       .type(STRING)
-                                                       .description("상대방 프로필 이미지 URL"),
-                                               fieldWithPath("isOtherGuestActive")
-                                                       .type(BOOLEAN)
-                                                       .description("상대방 채팅방 나감 여부"),
-                                               fieldWithPath("lastMessage")
-                                                       .optional()
-                                                       .type(STRING)
-                                                       .description("마지막 메시지 내용 (기존 채팅방이 존재하는 경우)"),
-                                               fieldWithPath("lastMessageTime")
-                                                       .optional()
-                                                       .type(STRING)
-                                                       .description("마지막 메시지 전송 시간 (기존 채팅방이 존재하는 경우)"),
-                                               fieldWithPath("unreadCount")
-                                                       .type(NUMBER)
-                                                       .description("읽지 않은 메시지 개수")
-                                       )
-                                       .requestSchema(schema("CreateChatRoomRequest"))
-                                       .responseSchema(schema("ChatRoomResponse"))
                                        .build()
                        )
                ));

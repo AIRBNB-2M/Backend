@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import project.airbnb.clone.common.annotations.CurrentGuestId;
 import project.airbnb.clone.dto.chat.ChatMessagesResDto;
 import project.airbnb.clone.dto.chat.ChatRoomResDto;
-import project.airbnb.clone.dto.chat.CreateChatRoomReqDto;
 import project.airbnb.clone.dto.chat.LeaveChatRoomReqDto;
 import project.airbnb.clone.dto.chat.RequestChatReqDto;
 import project.airbnb.clone.dto.chat.RequestChatResDto;
@@ -60,13 +59,6 @@ public class ChatController {
     @GetMapping("/requests/sent")
     public ResponseEntity<List<RequestChatResDto>> getSentChatRequests(@CurrentGuestId Long guestId) {
         List<RequestChatResDto> response = chatService.getSentChatRequests(guestId);
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/rooms")
-    public ResponseEntity<ChatRoomResDto> createOrGetChatRoom(@RequestBody CreateChatRoomReqDto reqDto,
-                                                              @CurrentGuestId Long guestId) {
-        ChatRoomResDto response = chatService.createOrGetChatRoom(reqDto.otherGuestId(), guestId);
         return ResponseEntity.ok(response);
     }
 
