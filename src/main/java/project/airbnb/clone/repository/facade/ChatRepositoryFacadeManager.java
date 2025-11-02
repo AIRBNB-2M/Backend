@@ -27,8 +27,8 @@ public class ChatRepositoryFacadeManager {
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatMessageQueryRepository chatMessageQueryRepository;
 
-    public Optional<ChatRoom> findChatRoomByGuestsId(Long otherGuestId, Long creatorId) {
-        return chatRoomRepository.findByGuestsId(otherGuestId, creatorId);
+    public Optional<ChatRoom> findChatRoomByGuestsId(Long currentGuestId, Long otherGuestId) {
+        return chatRoomRepository.findByGuestsId(currentGuestId, otherGuestId);
     }
 
     public ChatRoom getChatRoomByRoomId(Long roomId) {
@@ -78,8 +78,8 @@ public class ChatRepositoryFacadeManager {
         chatParticipantRepository.saveAll(participants);
     }
 
-    public ChatRoomResDto getChatRoomInfo(Long otherGuestId, Long creatorId, ChatRoom chatRoom) {
-        return chatRoomQueryRepository.findChatRoomInfo(otherGuestId, creatorId, chatRoom)
-                                      .orElseThrow(() -> new EntityNotFoundException("Chatroom with guests id " + otherGuestId + " and " + creatorId + " cannot be found"));
+    public ChatRoomResDto getChatRoomInfo(Long currentGuestId, Long otherGuestId, ChatRoom chatRoom) {
+        return chatRoomQueryRepository.findChatRoomInfo(currentGuestId, otherGuestId, chatRoom)
+                                      .orElseThrow(() -> new EntityNotFoundException("Chatroom with guests id " + currentGuestId + " and " + otherGuestId + " cannot be found"));
     }
 }

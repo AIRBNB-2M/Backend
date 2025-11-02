@@ -2,9 +2,13 @@ package project.airbnb.clone.service.chat;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import project.airbnb.clone.common.events.chat.ChatRequestAcceptedEvent;
+import project.airbnb.clone.common.events.chat.ChatRequestCreatedEvent;
+import project.airbnb.clone.common.events.chat.ChatRequestRejectedEvent;
 import project.airbnb.clone.common.exceptions.chat.AlreadyActiveChatException;
 import project.airbnb.clone.common.exceptions.chat.AlreadyRequestException;
 import project.airbnb.clone.common.exceptions.chat.ParticipantLeftException;
@@ -35,22 +39,6 @@ public class ChatService {
     private final GuestRepository guestRepository;
     private final ChatRequestRepository chatRequestRepository;
     private final ChatRepositoryFacadeManager chatRepositoryFacade;
-
-    @Transactional
-    public ChatRoomResDto createOrGetChatRoom(Long otherGuestId, Long creatorId) {
-        if (otherGuestId.equals(creatorId)) {
-            throw new IllegalArgumentException("자기 자신과는 채팅할 수 없습니다.");
-        }
-
-        ChatRoom chatRoom = chatRepositoryFacade.findChatRoomByGuestsId(otherGuestId, creatorId)
-                                                .map(existingRoom -> {
-                                                    reactiveIfHasLeft(existingRoom.getId(), creatorId);
-                                                    return existingRoom;
-                                                })
-                                                .orElseGet(() -> createNewChatRoom(otherGuestId, creatorId));
-
-        return chatRepositoryFacade.getChatRoomInfo(otherGuestId, creatorId, chatRoom);
-    }
 
     @Transactional
     public ChatMessageResDto saveChatMessage(Long roomId, ChatMessageReqDto chatMessageDto) {
@@ -132,22 +120,27 @@ public class ChatService {
     }
 
     @Transactional
-    public ChatRoomResDto acceptRequestChat(String requestId, Long accepterId) {
+    public ChatRoomResDto acceptRequestChat(String requestId, Long receiverId) {
         ChatRequest chatRequest = chatRequestRepository.findById(requestId)
                                                        .orElseThrow(() -> new EntityNotFoundException("요청이 존재하지 않거나 만료되었습니다. => " + requestId));
 
-        if (!chatRequest.getReceiverId().equals(accepterId)) throw new AccessDeniedException("본인에게 온 요청만 수락할 수 있습니다.");
+        if (!chatRequest.getReceiverId().equals(receiverId)) throw new AccessDeniedException("본인에게 온 요청만 수락할 수 있습니다.");
 
         chatRequestRepository.delete(chatRequest);
 
-        ChatRoom chatRoom = chatRepositoryFacade.findChatRoomByGuestsId(chatRequest.getSenderId(), accepterId)
+        Long senderId = chatRequest.getSenderId();
+        ChatRoom chatRoom = chatRepositoryFacade.findChatRoomByGuestsId(receiverId, senderId)
                                                 .map(existingRoom -> {
-                                                    reactiveIfHasLeft(existingRoom.getId(), chatRequest.getSenderId());
+                                                    reactiveIfHasLeft(existingRoom.getId(), receiverId);
+                                                    reactiveIfHasLeft(existingRoom.getId(), senderId);
                                                     return existingRoom;
                                                 })
-                                                .orElseGet(() -> createNewChatRoom(chatRequest.getSenderId(), accepterId));
+                                                .orElseGet(() -> createNewChatRoom(receiverId, senderId));
 
-        return chatRepositoryFacade.getChatRoomInfo(chatRequest.getSenderId(), accepterId, chatRoom);
+        ChatRoomResDto senderChatRoomInfo = chatRepositoryFacade.getChatRoomInfo(senderId, receiverId, chatRoom);
+        eventPublisher.publishEvent(new ChatRequestAcceptedEvent(requestId, senderId, senderChatRoomInfo));
+
+        return  chatRepositoryFacade.getChatRoomInfo(receiverId, senderId, chatRoom);
     }
 
     public void rejectRequestChat(String requestId, Long rejecterId) {
@@ -157,12 +150,11 @@ public class ChatService {
         if (!chatRequest.getReceiverId().equals(rejecterId)) throw new AccessDeniedException("본인에게 온 요청만 거절할 수 있습니다.");
 
         chatRequestRepository.delete(chatRequest);
-        // TODO: WebSocket 이벤트 발행 (요청자에게 거절 알림)
-        // eventPublisher.publishEvent(new ChatRequestRejectedEvent(request));
+        eventPublisher.publishEvent(new ChatRequestRejectedEvent(requestId, chatRequest.getSenderId()));
     }
 
     public RequestChatResDto requestChat(Long receiverId, Long senderId) {
-        String requestKey = "chat:request:" + senderId + ":" + receiverId;
+        String requestKey = "chat:chatRequest:" + senderId + ":" + receiverId;
 
         if (receiverId.equals(senderId)) throw new SameParticipantException("자기 자신과는 채팅할 수 없습니다.");
         if (chatRequestRepository.existsById(requestKey)) throw new AlreadyRequestException("이미 요청된 채팅입니다.");
@@ -183,22 +175,22 @@ public class ChatService {
         Guest receiver = guestRepository.findById(receiverId)
                                         .orElseThrow(() -> new EntityNotFoundException("수신자 정보(id: %d)를 찾을 수 없습니다.".formatted(receiverId)));
 
-        ChatRequest request = ChatRequest.builder()
-                                         .senderId(senderId)
-                                         .senderName(sender.getName())
-                                         .senderProfileImage(sender.getProfileUrl())
-                                         .receiverId(receiverId)
-                                         .receiverName(receiver.getName())
-                                         .receiverProfileImage(receiver.getProfileUrl())
-                                         .createdAt(now)
-                                         .expiresAt(now.plus(requestTTL))
-                                         .build();
-        chatRequestRepository.save(request);
+        ChatRequest chatRequest = ChatRequest.builder()
+                                             .requestId(requestKey)
+                                             .senderId(senderId)
+                                             .senderName(sender.getName())
+                                             .senderProfileImage(sender.getProfileUrl())
+                                             .receiverId(receiverId)
+                                             .receiverName(receiver.getName())
+                                             .receiverProfileImage(receiver.getProfileUrl())
+                                             .createdAt(now)
+                                             .expiresAt(now.plus(requestTTL))
+                                             .build();
+        chatRequestRepository.save(chatRequest);
 
-        // TODO : WebSocket 이벤트 발행
-        // eventPublisher.publishEvent(new ChatRequestCreatedEvent(senderId, receiverId, request.getExpiresAt()));
+        eventPublisher.publishEvent(new ChatRequestCreatedEvent(chatRequest));
 
-        return request.toResDto();
+        return chatRequest.toResDto();
     }
 
     public List<ChatRoomResDto> getChatRooms(Long guestId) {
@@ -225,24 +217,24 @@ public class ChatService {
                                     .toList();
     }
 
-    private ChatRoom createNewChatRoom(Long otherGuestId, Long creatorId) {
-        Guest otherGuest = getGuestById(otherGuestId);
-        Guest creatorGuest = getGuestById(creatorId);
+    private ChatRoom createNewChatRoom(Long receiverId, Long senderId) {
+        Guest receiver = getGuestById(receiverId);
+        Guest sender = getGuestById(senderId);
 
         ChatRoom chatRoom = chatRepositoryFacade.saveChatRoom(new ChatRoom());
 
         List<ChatParticipant> newParticipants = List.of(
                 ChatParticipant.builder()
                                .chatRoom(chatRoom)
-                               .guest(otherGuest)
+                               .guest(receiver)
                                .isCreator(false)
-                               .customRoomName(creatorGuest.getName() + "님과의 대화")
+                               .customRoomName(sender.getName() + "님과의 대화")
                                .build(),
                 ChatParticipant.builder()
                                .chatRoom(chatRoom)
-                               .guest(creatorGuest)
+                               .guest(sender)
                                .isCreator(true)
-                               .customRoomName(otherGuest.getName() + "님과의 대화")
+                               .customRoomName(receiver.getName() + "님과의 대화")
                                .build()
         );
 
