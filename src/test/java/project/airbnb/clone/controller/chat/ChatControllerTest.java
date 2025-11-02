@@ -389,6 +389,9 @@ class ChatControllerTest extends RestDocsTestSupport {
                                                fieldWithPath("messages[].timestamp")
                                                        .type(STRING)
                                                        .description("메시지 전송 시간"),
+                                               fieldWithPath("messages[].isLeft")
+                                                       .type(BOOLEAN)
+                                                       .description("채팅방 나감 메시지 여부"),
                                                fieldWithPath("hasMore")
                                                        .type(BOOLEAN)
                                                        .description("더 과거 메시지 기록 존재 여부")

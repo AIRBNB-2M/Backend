@@ -11,5 +11,10 @@ public record ChatMessageResDto(
         Long senderId,
         String senderName,
         String content,
-        LocalDateTime timestamp) {
+        LocalDateTime timestamp,
+        boolean isLeft) {
+
+    public ChatMessageResDto(Long messageId, Long roomId, Long senderId, String senderName, String content, LocalDateTime timestamp) {
+        this(messageId, roomId, senderId, senderName, content, timestamp, false);
+    }
 }

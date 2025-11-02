@@ -6,6 +6,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import project.airbnb.clone.common.events.chat.ChatLeaveEvent;
 import project.airbnb.clone.common.events.chat.ChatRequestAcceptedEvent;
 import project.airbnb.clone.common.events.chat.ChatRequestCreatedEvent;
 import project.airbnb.clone.common.events.chat.ChatRequestRejectedEvent;
@@ -74,6 +75,7 @@ public class ChatService {
                                 .senderName(writer.getName())
                                 .content(message.getContent())
                                 .timestamp(message.getCreatedAt())
+                                .isLeft(false)
                                 .build();
     }
 
@@ -113,11 +115,9 @@ public class ChatService {
     public void leaveChatRoom(Long roomId, Long guestId, Boolean active) {
         ChatParticipant chatParticipant = getChatParticipant(roomId, guestId);
         chatParticipant.leave();
-        //TODO : 상대방에게 채팅방 나감을 알리는 이벤트 발행
 
-        if (active) {
-            chatRepositoryFacade.markLatestMessageAsRead(roomId, chatParticipant);
-        }
+        chatRepositoryFacade.markLatestMessageAsRead(roomId, chatParticipant);
+        eventPublisher.publishEvent(new ChatLeaveEvent(chatParticipant.getGuest().getName(), roomId));
     }
 
     @Transactional

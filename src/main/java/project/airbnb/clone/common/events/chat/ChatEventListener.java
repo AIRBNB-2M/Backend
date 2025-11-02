@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionalEventListener;
 import project.airbnb.clone.service.chat.ChatNotifyService;
 
 @Slf4j
@@ -26,5 +27,10 @@ public class ChatEventListener {
     @EventListener
     public void handleChatRequestRejectedEvent(ChatRequestRejectedEvent event) {
         chatNotifyService.sendChatRequestRejectedNotification(event.requestId(), event.senderId());
+    }
+
+    @TransactionalEventListener
+    public void handleChatLeaveEvent(ChatLeaveEvent event) {
+        chatNotifyService.sendChatLeaveNotification(event.name(), event.roomId());
     }
 }

@@ -4,10 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
+import project.airbnb.clone.dto.chat.ChatMessageResDto;
 import project.airbnb.clone.dto.chat.ChatRoomResDto;
 import project.airbnb.clone.dto.chat.StompChatRequestNotification;
 import project.airbnb.clone.dto.chat.StompChatRequestResponseNotification;
 import project.airbnb.clone.repository.dto.ChatRequest;
+
+import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -58,5 +61,19 @@ public class ChatNotifyService {
                 "/queue/chat-request-responses",
                 notification
         );
+    }
+
+    public void sendChatLeaveNotification(String name, Long roomId) {
+        ChatMessageResDto leaveMessage = ChatMessageResDto.builder()
+                                                          .messageId(-1L)
+                                                          .roomId(roomId)
+                                                          .senderId(null)
+                                                          .senderName(null)
+                                                          .content(name + "님이 대화를 떠났습니다.")
+                                                          .timestamp(LocalDateTime.now())
+                                                          .isLeft(true)
+                                                          .build();
+
+        messageTemplate.convertAndSend("/topic/" + roomId, leaveMessage);
     }
 }
