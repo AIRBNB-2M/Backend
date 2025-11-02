@@ -257,6 +257,107 @@ class ChatControllerTest extends RestDocsTestSupport {
     }
 
     @Test
+    @DisplayName("대화 요청 수락")
+    @WithMockGuest
+    void acceptRequestChat() throws Exception {
+        //given
+        ChatRoomResDto response = new ChatRoomResDto(1L, "custom-room-name", 1L, "Ahmad Gul", "https://example.com", true,
+                "안녕하세요", LocalDateTime.now().minusDays(7).truncatedTo(ChronoUnit.MICROS), 3);
+
+        given(chatService.acceptRequestChat(anyString(), anyLong())).willReturn(response);
+
+        //when
+        //then
+        mockMvc.perform(post("/api/chat/requests/{requestId}/accept", "chat:request:1:2")
+                       .header(AUTHORIZATION, "Bearer {access-token}")
+               )
+               .andExpectAll(
+                       handler().handlerType(ChatController.class),
+                       handler().methodName("acceptRequestChat"),
+                       status().isOk(),
+                       jsonPath("$.roomId").value(response.roomId()),
+                       jsonPath("$.customRoomName").value(response.customRoomName()),
+                       jsonPath("$.guestId").value(response.guestId()),
+                       jsonPath("$.guestName").value(response.guestName()),
+                       jsonPath("$.guestProfileImage").value(response.guestProfileImage()),
+                       jsonPath("$.isOtherGuestActive").value(response.isOtherGuestActive()),
+                       jsonPath("$.lastMessage").value(response.lastMessage()),
+                       jsonPath("$.lastMessageTime").exists(),
+                       jsonPath("$.unreadCount").value(response.unreadCount())
+               )
+               .andDo(document("accept-request-chat",
+                       resource(
+                               builder()
+                                       .tag(CHAT_API_TAG)
+                                       .summary("대화 요청 수락")
+                                       .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
+                                       .pathParameters(parameterWithName("requestId").description("대화 요청 시 생성된 고유 ID"))
+                                       .responseFields(
+                                               fieldWithPath("roomId")
+                                                       .type(NUMBER)
+                                                       .description("채팅방 ID"),
+                                               fieldWithPath("customRoomName")
+                                                       .type(STRING)
+                                                       .description("채팅방 이름"),
+                                               fieldWithPath("guestId")
+                                                       .type(NUMBER)
+                                                       .description("상대방 ID"),
+                                               fieldWithPath("guestName")
+                                                       .type(STRING)
+                                                       .description("상대방 이름"),
+                                               fieldWithPath("guestProfileImage")
+                                                       .type(STRING)
+                                                       .description("상대방 프로필 이미지 URL"),
+                                               fieldWithPath("isOtherGuestActive")
+                                                       .type(BOOLEAN)
+                                                       .description("상대방 채팅방 나감 여부"),
+                                               fieldWithPath("lastMessage")
+                                                       .optional()
+                                                       .type(STRING)
+                                                       .description("마지막 메시지 내용"),
+                                               fieldWithPath("lastMessageTime")
+                                                       .optional()
+                                                       .type(STRING)
+                                                       .description("마지막 메시지 전송 시간"),
+                                               fieldWithPath("unreadCount")
+                                                       .type(NUMBER)
+                                                       .description("읽지 않은 메시지 개수")
+                                       )
+                                       .responseSchema(schema("ChatRoomResponse"))
+                                       .build()
+                       )
+               ));
+    }
+
+    @Test
+    @DisplayName("대화 요청 거절")
+    @WithMockGuest
+    void rejectRequestChat() throws Exception {
+        //given
+
+        //when
+        //then
+        mockMvc.perform(post("/api/chat/requests/{requestId}/reject", "chat:request:1:2")
+                       .header(AUTHORIZATION, "Bearer {access-token}")
+               )
+               .andExpectAll(
+                       handler().handlerType(ChatController.class),
+                       handler().methodName("rejectRequestChat"),
+                       status().isOk()
+               )
+               .andDo(document("reject-request-chat",
+                       resource(
+                               builder()
+                                       .tag(CHAT_API_TAG)
+                                       .summary("대화 요청 거절")
+                                       .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
+                                       .pathParameters(parameterWithName("requestId").description("대화 요청 시 생성된 고유 ID"))
+                                       .build()
+                       )
+               ));
+    }
+
+    @Test
     @DisplayName("참여중인 전체 채팅방 조회")
     @WithMockGuest
     void getChatRooms() throws Exception {
