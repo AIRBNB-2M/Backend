@@ -37,6 +37,7 @@ import java.util.List;
 public class ChatService {
 
     private final GuestRepository guestRepository;
+    private final ApplicationEventPublisher eventPublisher;
     private final ChatRequestRepository chatRequestRepository;
     private final ChatRepositoryFacadeManager chatRepositoryFacade;
 
