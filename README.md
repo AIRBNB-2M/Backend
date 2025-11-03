@@ -10,7 +10,7 @@
 
 <img src="https://img.shields.io/badge/프로젝트 기간-2025.07~ing-green?style=flat&logo=&logoColor=white" />
 
-<img src="https://img.shields.io/badge/마지막 리드미 수정-2025.10.30-gold?style=flat&logo=&logoColor=white" />
+<img src="https://img.shields.io/badge/마지막 리드미 수정-2025.11.3-gold?style=flat&logo=&logoColor=white" />
 
 <div>
 </div>
