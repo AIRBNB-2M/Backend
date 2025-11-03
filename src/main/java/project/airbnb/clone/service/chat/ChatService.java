@@ -218,6 +218,12 @@ public class ChatService {
                                     .toList();
     }
 
+    @Transactional
+    public void markChatRoomAsRead(Long roomId, Long guestId) {
+        ChatParticipant chatParticipant = getChatParticipant(roomId, guestId);
+        chatRepositoryFacade.markLatestMessageAsRead(roomId, chatParticipant);
+    }
+
     private ChatRoom createNewChatRoom(Long receiverId, Long senderId) {
         Guest receiver = getGuestById(receiverId);
         Guest sender = getGuestById(senderId);

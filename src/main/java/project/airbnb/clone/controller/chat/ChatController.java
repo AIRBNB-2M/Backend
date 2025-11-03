@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -90,6 +91,13 @@ public class ChatController {
                                            @RequestBody LeaveChatRoomReqDto reqDto,
                                            @CurrentGuestId Long guestId) {
         chatService.leaveChatRoom(roomId, guestId, reqDto.isActive());
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{roomId}/read")
+    public ResponseEntity<?> markChatRoomAsRead(@PathVariable("roomId") Long roomId,
+                                                @CurrentGuestId Long guestId) {
+        chatService.markChatRoomAsRead(roomId, guestId);
         return ResponseEntity.ok().build();
     }
 }

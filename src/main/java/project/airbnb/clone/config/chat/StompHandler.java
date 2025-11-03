@@ -37,8 +37,6 @@ public class StompHandler implements ChannelInterceptor {
             String token = getToken(accessor);
             jwtProvider.validateToken(token);
 
-            validateToken(accessor);
-
             String destination = accessor.getDestination();
 
             // 개인 구독은 검증 통과
@@ -77,11 +75,6 @@ public class StompHandler implements ChannelInterceptor {
             log.warn("roomId 파싱 실패: {}", parts[2], e);
             return null;
         }
-    }
-
-    private void validateToken(StompHeaderAccessor accessor) {
-        String token = getToken(accessor);
-        jwtProvider.validateToken(token);
     }
 
     private String getToken(StompHeaderAccessor accessor) {
