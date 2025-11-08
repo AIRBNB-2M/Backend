@@ -16,14 +16,16 @@ import project.airbnb.clone.common.jwt.JwtProperties;
 import project.airbnb.clone.common.jwt.JwtProvider;
 import project.airbnb.clone.dto.jwt.TokenResponse;
 import project.airbnb.clone.entity.Guest;
+import project.airbnb.clone.repository.dto.BlacklistedToken;
+import project.airbnb.clone.repository.dto.RefreshToken;
 import project.airbnb.clone.repository.jpa.GuestRepository;
-import project.airbnb.clone.repository.redis.RedisRepository;
+import project.airbnb.clone.repository.redis.BlacklistedTokenRepository;
+import project.airbnb.clone.repository.redis.RefreshTokenRepository;
 
 import java.time.Duration;
 import java.util.Date;
 
 import static project.airbnb.clone.common.jwt.JwtProperties.AUTHORIZATION_HEADER;
-import static project.airbnb.clone.common.jwt.JwtProperties.BLACK_LIST_PREFIX;
 import static project.airbnb.clone.common.jwt.JwtProperties.REFRESH_TOKEN_KEY;
 import static project.airbnb.clone.common.jwt.JwtProperties.TOKEN_PREFIX;
 
@@ -35,8 +37,9 @@ public class TokenService {
     private final JwtProvider jwtProvider;
     private final JwtProperties jwtProperties;
     private final GuestRepository guestRepository;
-    private final RedisRepository redisRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final BlacklistedTokenRepository blacklistedTokenRepository;
 
     public TokenResponse generateAndSendToken(String email, String principalName, HttpServletResponse response) {
         Guest guest = guestRepository.getGuestByEmail(email);
@@ -48,19 +51,23 @@ public class TokenService {
         jwtProvider.validateToken(refreshToken);
 
         Long id = jwtProvider.getId(refreshToken);
-        String key = String.valueOf(id);
+        request.setAttribute("key", String.valueOf(id)); //예외 발생 시 Advice에서 처리할 수 있도록 저장
 
-        String savedRefreshToken = redisRepository.getValue(key);
-        request.setAttribute("key", key); //예외 발생 시 Advice에서 처리할 수 있도록 저장
-
-        if (!refreshToken.equals(savedRefreshToken)) {
-            throw new JwtException("Refresh Token is invalid: " + refreshToken);
-        }
+        validateSavedRefreshToken(refreshToken);
 
         String principalName = jwtProvider.getPrincipalName(refreshToken);
 
         Guest guest = guestRepository.getGuestById(id);
         getTokenResponse(response, guest, principalName);
+    }
+
+    private void validateSavedRefreshToken(String refreshToken) {
+        boolean isValid = refreshTokenRepository.findById(refreshToken)
+                                                .map(savedRefreshToken -> savedRefreshToken.getToken().equals(refreshToken))
+                                                .orElse(false);
+        if (!isValid) {
+            throw new JwtException("Refresh Token is invalid: " + refreshToken);
+        }
     }
 
     private TokenResponse getTokenResponse(HttpServletResponse response, Guest guest, String principalName) {
@@ -70,7 +77,11 @@ public class TokenService {
         response.addHeader(AUTHORIZATION_HEADER, TOKEN_PREFIX + accessToken);
         Duration refreshDuration = Duration.ofSeconds(jwtProperties.getRefreshToken().getExpiration());
 
-        redisRepository.setValue(String.valueOf(guest.getId()), refreshToken, refreshDuration);
+        refreshTokenRepository.save(RefreshToken.builder()
+                                                .token(refreshToken)
+                                                .guestId(guest.getId())
+                                                .ttl(refreshDuration.getSeconds())
+                                                .build());
 
         ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_KEY, refreshToken)
                                               .path("/")
@@ -85,8 +96,7 @@ public class TokenService {
     }
 
     public boolean containsBlackList(String token) {
-        String key = BLACK_LIST_PREFIX + token;
-        return redisRepository.getValue(key) != null;
+        return blacklistedTokenRepository.existsById(token);
     }
 
     public void logoutProcess(String accessToken, String refreshToken) {
@@ -104,7 +114,6 @@ public class TokenService {
     private void addBlackList(String accessToken) {
         try {
             accessToken = accessToken.substring(TOKEN_PREFIX.length());
-            String key = BLACK_LIST_PREFIX + accessToken;
 
             Date now = new Date();
             Claims claims = jwtProvider.parseClaims(accessToken);
@@ -113,7 +122,7 @@ public class TokenService {
             long remain = expiration.getTime() - now.getTime();
 
             if (remain > 0) {
-                redisRepository.setValue(key, "logout", Duration.ofMillis(remain));
+                blacklistedTokenRepository.save(new BlacklistedToken(accessToken, remain));
                 log.debug("Access Token added to blacklist: {}", accessToken);
             }
         } catch (ExpiredJwtException ignored) {
@@ -122,7 +131,7 @@ public class TokenService {
 
     private Long removeRefreshToken(String refreshToken) {
         Long id = jwtProvider.getId(refreshToken);
-        redisRepository.deleteValue(String.valueOf(id));
+        refreshTokenRepository.deleteById(refreshToken);
         log.debug("Refresh Token removed from Redis: {}", refreshToken);
 
         return id;

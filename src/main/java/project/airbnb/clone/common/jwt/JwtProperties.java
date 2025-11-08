@@ -22,6 +22,5 @@ public class JwtProperties {
     public static final String AUTHORIZATION_HEADER = HttpHeaders.AUTHORIZATION;
     public static final String TOKEN_PREFIX = "Bearer ";
     public static final String REFRESH_TOKEN_KEY = "RefreshToken";
-    public static final String BLACK_LIST_PREFIX = "Blacklist: ";
     public static final String PRINCIPAL_NAME = "principalName";
 }
