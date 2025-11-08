@@ -224,10 +224,7 @@ jobs:
             #    - 같은 네트워크 상에서 NPM이 컨테이너명:PORT로 프록시하므로 -p 불필요
             # ---------------------------------------------------------
             docker rm -f "${GREEN}" >/dev/null 2>&1 || true
-            echo "🚀 run new container → ${GREEN}"
-            
-            docker compose -f monitoring-compose.yml up -d --no-deps ${GREEN}
-            
+            echo "🚀 run new container → ${GREEN}"          
             docker run -d --name "${GREEN}" \
               --restart unless-stopped \
               --network "${NET}" \
