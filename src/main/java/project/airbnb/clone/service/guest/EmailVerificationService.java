@@ -18,10 +18,10 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.airbnb.clone.entity.Guest;
+import project.airbnb.clone.repository.dto.EmailVerification;
 import project.airbnb.clone.repository.jpa.GuestRepository;
-import project.airbnb.clone.repository.redis.RedisRepository;
+import project.airbnb.clone.repository.redis.EmailVerificationRepository;
 
-import java.time.Duration;
 import java.util.UUID;
 
 @Slf4j
@@ -38,7 +38,7 @@ public class EmailVerificationService {
 
     private final JavaMailSender javaMailSender;
     private final GuestRepository guestRepository;
-    private final RedisRepository redisRepository;
+    private final EmailVerificationRepository emailVerificationRepository;
 
     @Async
     @Retryable(retryFor = MailSendException.class, backoff = @Backoff(delay = 1000))
@@ -47,7 +47,6 @@ public class EmailVerificationService {
                                      .orElseThrow(() -> new EntityNotFoundException("Guest with id " + guestId + "cannot be found"));
 
         String token = UUID.randomUUID().toString();
-        String key = getRedisKey(token);
 
         String link = baseUrl + "/api/auth/email/verify?token=" + token;
         String subject = "[Airbnb-2M] 이메일 인증을 완료해주세요.";
@@ -66,7 +65,7 @@ public class EmailVerificationService {
             log.debug("이메일 인증 링크 전송: {}, 시도 횟수 {}", email, retryCount);
 
             javaMailSender.send(mimeMessage);
-            redisRepository.setValue(key, guestId.toString(), Duration.ofHours(1));
+            emailVerificationRepository.save(new EmailVerification(token, guestId));
 
             log.debug("이메일 인증 링크 전송 성공: {}", email);
 
@@ -83,26 +82,21 @@ public class EmailVerificationService {
 
     @Transactional
     public String verifyToken(String token) {
-        String key = getRedisKey(token);
-        String value = redisRepository.getValue(key);
+        EmailVerification verification = emailVerificationRepository.findById(token).orElse(null);
 
         String redirectUrl = frondEndUrl + "/users/profile?emailVerify=";
 
-        if (value == null) {
+        if (verification == null) {
             return redirectUrl + "failed";
         }
 
-        Long guestId = Long.valueOf(value);
+        Long guestId = verification.getGuestId();
         Guest guest = guestRepository.findById(guestId)
                                      .orElseThrow(() -> new EntityNotFoundException("Guest with id " + guestId + "cannot be found"));
         guest.verifyEmail();
-        redisRepository.deleteValue(key);
+        emailVerificationRepository.delete(verification);
 
         return redirectUrl + "success";
-    }
-
-    private String getRedisKey(String token) {
-        return "email:verify:" + token;
     }
 
     private String generateHtml(String link) {
