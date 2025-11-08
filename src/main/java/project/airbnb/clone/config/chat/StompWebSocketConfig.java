@@ -9,7 +9,7 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
-import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
+import org.springframework.web.socket.server.support.AbstractHandshakeHandler;
 
 import java.security.Principal;
 import java.util.Map;
@@ -43,7 +43,7 @@ public class StompWebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registration.interceptors(stompHandler);
     }
 
-    private static class StompHandshakeHandler extends DefaultHandshakeHandler {
+    private static class StompHandshakeHandler extends AbstractHandshakeHandler {
 
         @Override
         protected Principal determineUser(ServerHttpRequest request, WebSocketHandler wsHandler, Map<String, Object> attributes) {
