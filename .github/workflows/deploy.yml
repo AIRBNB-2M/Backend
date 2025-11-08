@@ -226,7 +226,7 @@ jobs:
             docker rm -f "${GREEN}" >/dev/null 2>&1 || true
             echo "🚀 run new container → ${GREEN}"
             
-            docker-compose -f monitoring-compose.yml up -d --no-deps ${GREEN}
+            docker compose -f monitoring-compose.yml up -d --no-deps ${GREEN}
             
             docker run -d --name "${GREEN}" \
               --restart unless-stopped \
