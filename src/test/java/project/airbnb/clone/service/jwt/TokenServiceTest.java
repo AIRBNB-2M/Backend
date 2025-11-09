@@ -4,55 +4,48 @@ import io.jsonwebtoken.JwtException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import project.airbnb.clone.TestContainerSupport;
-import project.airbnb.clone.common.jwt.JwtProperties;
-import project.airbnb.clone.common.jwt.JwtProperties.TokenProperties;
 import project.airbnb.clone.common.jwt.JwtProvider;
 import project.airbnb.clone.dto.jwt.TokenResponse;
 import project.airbnb.clone.entity.Guest;
+import project.airbnb.clone.repository.dto.RefreshToken;
 import project.airbnb.clone.repository.jpa.GuestRepository;
-import project.airbnb.clone.repository.redis.RedisRepository;
-
-import java.util.Base64;
+import project.airbnb.clone.repository.redis.BlacklistedTokenRepository;
+import project.airbnb.clone.repository.redis.RefreshTokenRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class TokenServiceTest extends TestContainerSupport {
 
+    @Autowired JwtProvider jwtProvider;
     @Autowired TokenService tokenService;
     @Autowired GuestRepository guestRepository;
-    @Autowired RedisRepository redisRepository;
-    @Autowired JwtProperties jwtProperties;
-    @Autowired JwtProvider jwtProvider;
+    @Autowired RefreshTokenRepository refreshTokenRepository;
+    @Autowired BlacklistedTokenRepository blacklistedTokenRepository;
 
     Guest guest;
 
     @BeforeEach
     void setUp() {
-        jwtProperties.setSecretKey(Base64.getEncoder().encodeToString("test-secret-key".repeat(10).getBytes()));
-
-        TokenProperties accessToken = new TokenProperties();
-        accessToken.setExpiration(300_000);
-        jwtProperties.setAccessToken(accessToken);
-
-        TokenProperties refreshToken = new TokenProperties();
-        refreshToken.setExpiration(600_000);
-        jwtProperties.setRefreshToken(refreshToken);
-
-        guest = Guest.builder().name("Jessica Bala").email("test@email.com").password("858d2781-2a13-4d26-b3c9-7b84b214f82f").build();
+        guest = Guest.builder()
+                     .name("Jessica Bala")
+                     .email("test@email.com")
+                     .password("858d2781-2a13-4d26-b3c9-7b84b214f82f")
+                     .build();
         guestRepository.saveAndFlush(guest);
-
-        redisRepository.deleteValue(String.valueOf(guest.getId()));
     }
 
     @AfterEach
     void tearDown() {
-        redisRepository.deleteValue(String.valueOf(guest.getId()));
+        refreshTokenRepository.deleteAll();
+        blacklistedTokenRepository.deleteAll();
+        guestRepository.deleteAll();
     }
 
     @Test
@@ -75,67 +68,105 @@ class TokenServiceTest extends TestContainerSupport {
         assertThat(accessToken).isNotBlank();
         assertThat(refreshToken).isNotBlank();
 
-        String savedRefreshToken = redisRepository.getValue(String.valueOf(guest.getId()));
-        assertThat(savedRefreshToken).isEqualTo(refreshToken);
+        RefreshToken savedRefreshToken = refreshTokenRepository.findById(refreshToken)
+                                                               .orElseThrow(() -> new AssertionError("RefreshToken이 Redis에 저장되지 않았습니다."));
+        assertThat(savedRefreshToken.getToken()).isEqualTo(refreshToken);
+        assertThat(savedRefreshToken.getGuestId()).isEqualTo(guest.getId());
+        assertThat(savedRefreshToken.getTtl()).isGreaterThan(0L);
 
         String authHeader = response.getHeader("Authorization");
         assertThat(authHeader).isEqualTo("Bearer " + accessToken);
 
         String setCookie = response.getHeader("Set-Cookie");
-        assertThat(setCookie).contains("RefreshToken=" + refreshToken);
-    }
-
-    @Test
-    @DisplayName("액세스 토큰 갱신 - 레디스에 저장된 값과 일치하는 경우")
-    void refreshAccessToken_success() throws InterruptedException {
-        //given
-        String token = jwtProvider.generateRefreshToken(guest, "a6025936-1554-4f45-8601-a107576eb9d8");
-        String key = String.valueOf(guest.getId());
-
-        Thread.sleep(1100);
-        redisRepository.setValue(key, token);
-
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        MockHttpServletRequest request = new MockHttpServletRequest();
-
-        //when
-        tokenService.refreshAccessToken(token, response, request);
-
-        //then
-        //1. 레디스에는 새로운 리프레시 토큰 값이 저장되어야 한다.
-        String newSavedRefreshToken = redisRepository.getValue(key);
-        assertThat(token).isNotNull().isNotEqualTo(newSavedRefreshToken);
-
-        //2. 예외 상황에 대비해 request에 key가 저장되어야 한다.
-        assertThat(request.getAttribute("key")).isEqualTo(key);
-
-        //3. 정상적으로 액세스 토큰과 리프레시 토큰이 전달된다.
-        String authHeader = response.getHeader("Authorization");
-        assertThat(authHeader).isNotBlank().startsWith("Bearer ");
-
-        String setCookie = response.getHeader("Set-Cookie");
         assertThat(setCookie)
-                .isNotBlank()
-                .contains("RefreshToken=")
+                .contains("RefreshToken=" + refreshToken)
                 .contains("HttpOnly")
-                .contains("Path=/");
+                .contains("Path=/")
+                .contains("SameSite=None")
+                .contains("Secure");
     }
 
-    @Test
-    @DisplayName("액세스 토큰 갱신 - 레디스에 저장된 값과 일치하지 않는 경우")
-    void refreshAccessToken_fail() {
-        //given
-        String token = jwtProvider.generateRefreshToken(guest, "5e21afe5-3e80-4f9d-9f37-a41d309dcca9");
-        String key = String.valueOf(guest.getId());
-        redisRepository.setValue(key, "other-wrong-token");
+    @Nested
+    @DisplayName("액세스 토큰 갱신")
+    class refreshAccessToken {
 
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        MockHttpServletRequest request = new MockHttpServletRequest();
+        @Test
+        @DisplayName("성공 - 레디스에 저장된 값과 일치하는 경우")
+        void success() {
+            //given
+            String principalName = "a6025936-1554-4f45-8601-a107576eb9d8";
+            String oldRefreshToken = jwtProvider.generateRefreshToken(guest, principalName);
 
-        //when
-        assertThatThrownBy(() -> tokenService.refreshAccessToken(token, response, request))
-                .isInstanceOf(JwtException.class)
-                .hasMessageContaining("Refresh Token is invalid: ");
+            refreshTokenRepository.save(RefreshToken.builder()
+                                                    .token(oldRefreshToken)
+                                                    .guestId(guest.getId())
+                                                    .ttl(600L)
+                                                    .build());
+
+            MockHttpServletResponse response = new MockHttpServletResponse();
+            MockHttpServletRequest request = new MockHttpServletRequest();
+
+            //when
+            tokenService.refreshAccessToken(oldRefreshToken, response, request);
+
+            //then
+            //1. 예외 상황에 대비해 request에 key가 저장되어야 한다.
+            String key = String.valueOf(guest.getId());
+            assertThat(request.getAttribute("key")).isEqualTo(key);
+
+            //2. 정상적으로 액세스 토큰과 리프레시 토큰이 전달된다.
+            String authHeader = response.getHeader("Authorization");
+            assertThat(authHeader).isNotBlank().startsWith("Bearer ");
+
+            String setCookie = response.getHeader("Set-Cookie");
+            assertThat(setCookie)
+                    .isNotBlank()
+                    .contains("RefreshToken=")
+                    .contains("HttpOnly")
+                    .contains("Path=/");
+
+            //3. 새로운 리프레시 토큰이 Redis에 저장되었는지 확인
+            String newRefreshToken = extractRefreshTokenFromCookie(setCookie);
+            RefreshToken newToken = refreshTokenRepository.findById(newRefreshToken).orElse(null);
+            assertThat(newToken).isNotNull();
+            assertThat(newToken.getGuestId()).isEqualTo(guest.getId());
+
+            //4. 기존 리프레시 토큰이 Redis에서 삭제되었는지 확인
+            assertThat(refreshTokenRepository.existsById(oldRefreshToken)).isFalse();
+        }
+
+        @Test
+        @DisplayName("실패 - 레디스에 저장된 값과 일치하지 않는 경우")
+        void fail() {
+            //given
+            String token = jwtProvider.generateRefreshToken(guest, "5e21afe5-3e80-4f9d-9f37-a41d309dcca9");
+            refreshTokenRepository.save(RefreshToken.builder()
+                                                    .token("other-wrong-token")
+                                                    .guestId(guest.getId())
+                                                    .ttl(600L)
+                                                    .build());
+
+            MockHttpServletResponse response = new MockHttpServletResponse();
+            MockHttpServletRequest request = new MockHttpServletRequest();
+
+            //when
+            assertThatThrownBy(() -> tokenService.refreshAccessToken(token, response, request))
+                    .isInstanceOf(JwtException.class)
+                    .hasMessageContaining("Refresh Token is invalid: ");
+        }
+
+        /**
+         * Set-Cookie 헤더에서 RefreshToken 값을 추출하는 헬퍼 메서드
+         */
+        private String extractRefreshTokenFromCookie(String setCookie) {
+            String prefix = "RefreshToken=";
+            int start = setCookie.indexOf(prefix) + prefix.length();
+            int end = setCookie.indexOf(";", start);
+            if (end == -1) {
+                end = setCookie.length();
+            }
+            return setCookie.substring(start, end);
+        }
     }
 
     @Test
@@ -147,8 +178,11 @@ class TokenServiceTest extends TestContainerSupport {
         String refreshToken = jwtProvider.generateRefreshToken(guest, principalName);
 
         // Redis에 refresh token 저장
-        String key = String.valueOf(guest.getId());
-        redisRepository.setValue(key, refreshToken);
+        refreshTokenRepository.save(RefreshToken.builder()
+                                                .token(refreshToken)
+                                                .guestId(guest.getId())
+                                                .ttl(600L)
+                                                .build());
 
         // when
         tokenService.logoutProcess(accessToken, refreshToken);
@@ -159,7 +193,6 @@ class TokenServiceTest extends TestContainerSupport {
         assertThat(isBlackListed).isTrue();
 
         // 2. 리프레시 토큰이 삭제됐는지 확인
-        String savedRefreshToken = redisRepository.getValue(key);
-        assertThat(savedRefreshToken).isNull();
+        assertThat(refreshTokenRepository.existsById(refreshToken)).isFalse();
     }
 }

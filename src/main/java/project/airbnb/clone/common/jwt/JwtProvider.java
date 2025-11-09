@@ -15,6 +15,7 @@ import project.airbnb.clone.repository.jpa.GuestRepository;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.UUID;
 
 import static io.jsonwebtoken.io.Decoders.BASE64;
 import static project.airbnb.clone.common.jwt.JwtProperties.PRINCIPAL_NAME;
@@ -84,6 +85,7 @@ public class JwtProvider {
         Date now = new Date();
         Date exp = new Date(now.getTime() + expiration * 1000L);
         Claims claims = Jwts.claims()
+                            .id(UUID.randomUUID().toString())
                             .subject(String.valueOf(id))
                             .add(PRINCIPAL_NAME, principalName) //로그아웃, 연결 끊기 요청에 사용될 사용자 식별값
                             .build();

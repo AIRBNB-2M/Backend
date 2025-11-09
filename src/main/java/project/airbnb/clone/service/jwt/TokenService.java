@@ -54,10 +54,11 @@ public class TokenService {
         request.setAttribute("key", String.valueOf(id)); //예외 발생 시 Advice에서 처리할 수 있도록 저장
 
         validateSavedRefreshToken(refreshToken);
+        refreshTokenRepository.deleteById(refreshToken);
 
         String principalName = jwtProvider.getPrincipalName(refreshToken);
-
         Guest guest = guestRepository.getGuestById(id);
+
         getTokenResponse(response, guest, principalName);
     }
 
