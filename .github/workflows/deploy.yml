@@ -6,8 +6,8 @@ name: deploy
 env:
   OWNER_LC: airbnb-2m
   IMAGE_REPOSITORY: airbnb-backend         # GHCR 이미지 리포지토리명(소유자 포함 X)
-  CONTAINER_1_NAME: app_1_container_1      # 슬롯1(고정 이름)
-  CONTAINER_2_NAME: app_1_container_2      # 슬롯2(고정 이름)
+  CONTAINER_1_NAME: app-container-1        # 슬롯1(고정 이름)
+  CONTAINER_2_NAME: app-container-2        # 슬롯2(고정 이름)
   CONTAINER_PORT: 8081                     # 컨테이너 내부 포트(스프링부트)
   EC2_INSTANCE_TAG_NAME: dev-ec2-1         # 배포 대상 EC2 Name 태그
   DOCKER_NETWORK: common                   # 도커 네트워크
