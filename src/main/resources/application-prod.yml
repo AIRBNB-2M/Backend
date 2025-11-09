@@ -42,3 +42,11 @@ logging:
 app:
   frontend-url: https://www.jgy914.shop
   base-url: https://airbackend.jgy914.shop
+
+server:
+  forward-headers-strategy: native
+management:
+  prometheus:
+    metrics:
+      export:
+        enabled: true

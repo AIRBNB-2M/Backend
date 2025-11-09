@@ -258,6 +258,20 @@ jobs:
               -H "Content-Type: application/json" \
               -d "${NEW_CFG}" >/dev/null
             echo "🔁 switch upstream → ${GREEN}:${PORT_IN}"
+            
+            # ---------------------------------------------------------
+            # 6.5) Prometheus 타겟 업데이트
+            # ---------------------------------------------------------
+              cat > /home/ec2-user/targets.json <<EOF
+              [
+                {
+                  "targets": ["${SLOT1}:${PORT_IN}", "${SLOT2}:${PORT_IN}"],
+                  "labels": {}
+                }
+              ]
+              EOF
+              chown 1000:1000 /home/ec2-user/targets.json
+              echo "📊 Prometheus targets updated to monitor both slots"
 
             # ---------------------------------------------------------
             # 7) 이전 blue 종료(최초 배포면 생략)
