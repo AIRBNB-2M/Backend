@@ -46,6 +46,8 @@ app:
 server:
   forward-headers-strategy: native
 management:
+  server:
+    address: 0.0.0.0
   prometheus:
     metrics:
       export:
