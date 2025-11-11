@@ -1,4 +1,4 @@
-# 🏡 아늑한 밤 프로젝트
+# 🏡 AirL&J 프로젝트
 
 <div align="center">
   <img src="readme-images/img.png" width="400">
@@ -8,9 +8,8 @@
 <div>
 </div>
 
-<img src="https://img.shields.io/badge/프로젝트 기간-2025.07~ing-green?style=flat&logo=&logoColor=white" />
-
-<img src="https://img.shields.io/badge/마지막 리드미 수정-2025.11.3-gold?style=flat&logo=&logoColor=white" />
+<img src="https://img.shields.io/badge/프로젝트 기간-2025.07~2025.11-green?style=flat&logo=&logoColor=white" />
+<img src="https://img.shields.io/badge/마지막 리드미 수정-2025.11.11-gold?style=flat&logo=&logoColor=white" />
 
 <div>
 </div>
@@ -72,6 +71,11 @@
 <img src="https://img.shields.io/badge/Nginx Proxy Manager-F15833?style=flat&logo=nginxproxymanager&logoColor=white">
 <img src="https://img.shields.io/badge/AWS EC2-F38020?style=flat&logoColor=white" />
 <img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=flat&logo=githubactions&logoColor=white">
+
+<br>
+
+<img src="https://img.shields.io/badge/Grafana-F46800?style=flat&logo=grafana&logoColor=white">
+<img src="https://img.shields.io/badge/Prometheus-E6522C?style=flat&logo=prometheus&logoColor=white">
 </div>
 
 ### 💬 Communication
@@ -96,8 +100,3 @@
 ### 🔄 CI/CD 아키텍처
 
 ![img.png](readme-images/img_1.png)
-
-## 📌 TodoList
-- [ ] 숙소 예약 및 결제
-- [x] 여행한 숙소 리뷰 등록
-- [x] 내가 여행한 목록 & 작성한 후기 목록 조회
