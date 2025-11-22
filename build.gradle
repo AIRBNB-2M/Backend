@@ -3,7 +3,7 @@ import org.yaml.snakeyaml.DumperOptions
 
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '4.0.0'
+    id 'org.springframework.boot' version '3.5.8'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'com.epages.restdocs-api-spec' version '0.18.4'
     id 'org.hidetake.swagger.generator' version '2.19.2'
@@ -73,10 +73,13 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    implementation "tools.jackson.core:jackson-databind"
-    implementation 'tools.jackson.dataformat:jackson-dataformat-xml'
+//    implementation "tools.jackson.core:jackson-databind"
+//    implementation 'tools.jackson.dataformat:jackson-dataformat-xml'
     implementation 'org.yaml:snakeyaml:2.0'
     implementation 'org.springframework.retry:spring-retry:2.0.12'
+
+    implementation "com.fasterxml.jackson.core:jackson-databind"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-xml"
 
     // RestDocs + Swagger
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
@@ -99,8 +102,14 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-clean {
-    delete file('src/main/generated')
+def querydslSrcDir = "src/main/generated"
+
+tasks.clean {
+    delete file(querydslSrcDir)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.generatedSourceOutputDirectory = file(querydslSrcDir)
 }
 
 // OpenAPI3 설정
