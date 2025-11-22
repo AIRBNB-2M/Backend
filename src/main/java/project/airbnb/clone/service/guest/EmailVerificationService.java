@@ -30,10 +30,10 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class EmailVerificationService {
 
-    @Value("${app.frontend-url}")
+    @Value("${app.frontend-url:http://localhost:3000}")
     private String frondEndUrl;
 
-    @Value("${app.base-url}")
+    @Value("${app.base-url:http://localhost:8081}")
     private String baseUrl;
 
     private final JavaMailSender javaMailSender;

@@ -26,7 +26,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class OAuthAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    @Value("${app.frontend-url}")
+    @Value("${app.frontend-url:http://localhost:3000}")
     private String frondEndUrl;
 
     private final GuestService guestService;
