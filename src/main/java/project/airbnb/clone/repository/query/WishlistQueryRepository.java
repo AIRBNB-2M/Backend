@@ -2,19 +2,13 @@ package project.airbnb.clone.repository.query;
 
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import project.airbnb.clone.dto.wishlist.WishlistsResDto;
-import project.airbnb.clone.entity.QAccommodation;
-import project.airbnb.clone.entity.QAccommodationImage;
-import project.airbnb.clone.entity.QGuest;
-import project.airbnb.clone.entity.QReservation;
-import project.airbnb.clone.entity.QReview;
-import project.airbnb.clone.entity.QWishlist;
 import project.airbnb.clone.entity.QWishlistAccommodation;
+import project.airbnb.clone.entity.Wishlist;
 import project.airbnb.clone.repository.dto.AccAllImagesQueryDto;
 import project.airbnb.clone.repository.dto.WishlistDetailQueryDto;
+import project.airbnb.clone.repository.query.support.CustomQuerydslRepositorySupport;
 
 import java.util.List;
 
@@ -28,96 +22,80 @@ import static project.airbnb.clone.entity.QWishlist.wishlist;
 import static project.airbnb.clone.entity.QWishlistAccommodation.wishlistAccommodation;
 
 @Repository
-@RequiredArgsConstructor
-public class WishlistQueryRepository {
+public class WishlistQueryRepository extends CustomQuerydslRepositorySupport {
 
-    private final JPAQueryFactory queryFactory;
+    public WishlistQueryRepository() {
+        super(Wishlist.class);
+    }
 
     public boolean existsWishlistAccommodation(Long wishlistId, Long accommodationId, Long guestId) {
-        QWishlistAccommodation wa = wishlistAccommodation;
-        QWishlist w = wishlist;
-        return queryFactory
+        return getQueryFactory()
                 .selectOne()
-                .from(wa)
-                .join(wa.wishlist, w)
-                .where(wa.accommodation.id.eq(accommodationId),
-                        wa.wishlist.id.eq(wishlistId),
-                        w.guest.id.eq(guestId)
+                .from(wishlistAccommodation)
+                .join(wishlistAccommodation.wishlist, wishlist)
+                .where(wishlistAccommodation.accommodation.id.eq(accommodationId),
+                        wishlistAccommodation.wishlist.id.eq(wishlistId),
+                        wishlist.guest.id.eq(guestId)
                 )
                 .fetchFirst() != null;
     }
 
     public List<WishlistDetailQueryDto> findWishlistDetails(Long wishlistId, Long guestId) {
-        QWishlistAccommodation wa = wishlistAccommodation;
-        QAccommodation acc = accommodation;
-        QReservation rs = reservation;
-        QReview r = review;
-        QWishlist w = wishlist;
-
-        return queryFactory
-                .select(constructor(WishlistDetailQueryDto.class,
-                        acc.id,
-                        w.name,
-                        acc.title,
-                        acc.description,
-                        acc.mapX,
-                        acc.mapY,
-                        r.rating.avg().coalesce(0.0),
-                        wa.memo
-                ))
-                .from(wa)
-                .join(wa.wishlist, w)
-                .join(wa.accommodation, acc)
-                .leftJoin(rs).on(rs.accommodation.eq(acc))
-                .leftJoin(r).on(r.reservation.eq(rs))
-                .where(w.id.eq(wishlistId),
-                        w.guest.id.eq(guestId)
+        return select(constructor(WishlistDetailQueryDto.class,
+                accommodation.id,
+                wishlist.name,
+                accommodation.title,
+                accommodation.description,
+                accommodation.mapX,
+                accommodation.mapY,
+                review.rating.avg().coalesce(0.0),
+                wishlistAccommodation.memo
+        ))
+                .from(wishlistAccommodation)
+                .join(wishlistAccommodation.wishlist, wishlist)
+                .join(wishlistAccommodation.accommodation, accommodation)
+                .leftJoin(reservation).on(reservation.accommodation.eq(accommodation))
+                .leftJoin(review).on(review.reservation.eq(reservation))
+                .where(wishlist.id.eq(wishlistId),
+                        wishlist.guest.id.eq(guestId)
                 )
-                .groupBy(acc.id, w.name, acc.title, acc.description, acc.mapX, acc.mapY, wa.memo)
+                .groupBy(accommodation.id, wishlist.name, accommodation.title, accommodation.description, accommodation.mapX, accommodation.mapY, wishlistAccommodation.memo)
                 .fetch();
     }
 
     public List<AccAllImagesQueryDto> findAllImages(List<Long> accIds) {
-        QAccommodationImage ai = accommodationImage;
-        return queryFactory.select(constructor(AccAllImagesQueryDto.class,
-                                   ai.accommodation.id,
-                                   ai.imageUrl
-                           ))
-                           .from(ai)
-                           .where(ai.accommodation.id.in(accIds))
-                           .fetch();
+        return select(constructor(AccAllImagesQueryDto.class,
+                accommodationImage.accommodation.id,
+                accommodationImage.imageUrl))
+                .from(accommodationImage)
+                .where(accommodationImage.accommodation.id.in(accIds))
+                .fetch();
     }
 
     public List<WishlistsResDto> getAllWishlists(Long guestId) {
-        QWishlistAccommodation wa = wishlistAccommodation;
-        QAccommodation acc = accommodation;
-        QWishlist w = wishlist;
-        QGuest g = guest;
-        QAccommodationImage ai = accommodationImage;
-
         QWishlistAccommodation waSub = new QWishlistAccommodation("waSub");
         JPQLQuery<Long> recentAccIdSubquery = JPAExpressions.select(waSub.accommodation.id)
                                                             .from(waSub)
-                                                            .where(waSub.wishlist.eq(w)
+                                                            .where(waSub.wishlist.eq(wishlist)
                                                                                  .and(waSub.id.eq(
                                                                                          JPAExpressions.select(waSub.id.max())
                                                                                                        .from(waSub)
-                                                                                                       .where(waSub.wishlist.eq(w))
+                                                                                                       .where(waSub.wishlist.eq(wishlist))
                                                                                  )));
 
-        return queryFactory.select(constructor(WishlistsResDto.class,
-                                   w.id,
-                                   w.name,
-                                   ai.imageUrl,
-                                   wa.accommodation.count().intValue().coalesce(0)
-                           ))
-                           .from(w)
-                           .join(w.guest, g)
-                           .leftJoin(wa).on(wa.wishlist.eq(w))
-                           .leftJoin(acc).on(acc.id.eq(recentAccIdSubquery))
-                           .leftJoin(ai).on(ai.accommodation.eq(acc).and(ai.thumbnail.isTrue()))
-                           .where(g.id.eq(guestId))
-                           .groupBy(w.id, w.name, ai.imageUrl)
-                           .fetch();
+        return select(constructor(WishlistsResDto.class,
+                wishlist.id,
+                wishlist.name,
+                accommodationImage.imageUrl,
+                wishlistAccommodation.accommodation.count().intValue().coalesce(0)))
+                .from(wishlist)
+                .join(wishlist.guest, guest)
+                .leftJoin(wishlistAccommodation).on(wishlistAccommodation.wishlist.eq(wishlist))
+                .leftJoin(accommodation).on(accommodation.id.eq(recentAccIdSubquery))
+                .leftJoin(accommodationImage)
+                .on(accommodationImage.accommodation.eq(accommodation).and(accommodationImage.thumbnail.isTrue()))
+                .where(guest.id.eq(guestId))
+                .groupBy(wishlist.id, wishlist.name, accommodationImage.imageUrl)
+                .fetch();
     }
 }
