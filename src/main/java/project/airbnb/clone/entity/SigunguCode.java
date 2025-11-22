@@ -8,14 +8,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @Table(name = "sigungu_codes")
 public class SigunguCode extends BaseEntity {
 
@@ -29,4 +27,14 @@ public class SigunguCode extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "area_code", nullable = false)
     private AreaCode areaCode;
+
+    public static SigunguCode create(String code, String codeName, AreaCode areaCode) {
+        return new SigunguCode(code, codeName, areaCode);
+    }
+
+    private SigunguCode(String code, String codeName, AreaCode areaCode) {
+        this.code = code;
+        this.codeName = codeName;
+        this.areaCode = areaCode;
+    }
 }

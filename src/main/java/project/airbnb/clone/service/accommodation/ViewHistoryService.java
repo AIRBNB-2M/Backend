@@ -20,17 +20,13 @@ public class ViewHistoryService {
     private final AccommodationRepository accommodationRepository;
 
     public void saveRecentView(Long accommodationId, Long guestId) {
-        int updated = viewHistoryRepository.updateViewedAt(accommodationId, guestId);
+        int updated = viewHistoryRepository.updateViewedAt(accommodationId, guestId, LocalDateTime.now());
 
         if (updated == 0) {
             Accommodation accommodation = accommodationRepository.getReferenceById(accommodationId);
             Guest guest = guestRepository.getReferenceById(guestId);
 
-            viewHistoryRepository.save(ViewHistory.builder()
-                                                  .accommodation(accommodation)
-                                                  .guest(guest)
-                                                  .viewedAt(LocalDateTime.now())
-                                                  .build());
+            viewHistoryRepository.save(ViewHistory.ofNow(accommodation, guest));
         }
     }
 }

@@ -10,23 +10,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
-@Table(
-		  name = "accommodation_images"
-//        ,
-//		  uniqueConstraints = @UniqueConstraint(
-//		    name="uk_acc_image", columnNames={"accommodation_id","image_url"}
-//		  )
-		)
+@Table(name = "accommodation_images")
 public class AccommodationImage extends BaseEntity {
 
     @Id
@@ -43,6 +33,18 @@ public class AccommodationImage extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "accommodation_id", nullable = false)
     private Accommodation accommodation;
-    
-    public void setThumbnail(boolean thumbnail) { this.thumbnail = thumbnail; }
+
+    public static AccommodationImage thumbnailOf(Accommodation accommodation, String thumbnailUrl) {
+        return new AccommodationImage(thumbnailUrl, true, accommodation);
+    }
+
+    public static AccommodationImage normalOf(Accommodation accommodation, String thumbnailUrl) {
+        return new AccommodationImage(thumbnailUrl, false, accommodation);
+    }
+
+    private AccommodationImage(String imageUrl, boolean thumbnail, Accommodation accommodation) {
+        this.imageUrl = imageUrl;
+        this.thumbnail = thumbnail;
+        this.accommodation = accommodation;
+    }
 }

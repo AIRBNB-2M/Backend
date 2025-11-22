@@ -23,7 +23,6 @@ import project.airbnb.clone.entity.WishlistAccommodation;
 import project.airbnb.clone.repository.jpa.WishlistAccommodationRepository;
 import project.airbnb.clone.repository.jpa.WishlistRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,11 +39,7 @@ class WishlistServiceTest extends TestContainerSupport {
 
     @BeforeEach
     void setUp() {
-        Guest guest = Guest.builder()
-                            .name("test-user")
-                            .email(UUID.randomUUID() + "@test.com")
-                            .password(UUID.randomUUID().toString())
-                            .build();
+        Guest guest = Guest.createForTest();
         em.persist(guest);
         this.guest = guest;
     }
@@ -163,9 +158,9 @@ class WishlistServiceTest extends TestContainerSupport {
         Accommodation acc1 = saveAndGetAccommodation();
         Accommodation acc2 = saveAndGetAccommodation();
 
-        saveAccommodationImage(acc1, "https://image1.com", false);
-        saveAccommodationImage(acc1, "https://image2.com", false);
-        saveAccommodationImage(acc2, "https://image3.com", false);
+        saveAccommodationImage(AccommodationImage.normalOf(acc1, "https://image1.com"));
+        saveAccommodationImage(AccommodationImage.normalOf(acc1, "https://image2.com"));
+        saveAccommodationImage(AccommodationImage.normalOf(acc2, "https://image3.com"));
 
         saveAndGetWishlistAccommodation(wishlist, acc1);
         saveAndGetWishlistAccommodation(wishlist, acc2);
@@ -228,9 +223,9 @@ class WishlistServiceTest extends TestContainerSupport {
         Accommodation acc1 = saveAndGetAccommodation();
         Accommodation acc2 = saveAndGetAccommodation();
 
-        saveAccommodationImage(acc1, "https://image1.com", false);
-        saveAccommodationImage(acc1, "https://image2.com", true);
-        saveAccommodationImage(acc2, "https://image3.com", true);
+        saveAccommodationImage(AccommodationImage.normalOf( acc1, "https://image1.com"));
+        saveAccommodationImage(AccommodationImage.thumbnailOf(acc1, "https://image2.com"));
+        saveAccommodationImage(AccommodationImage.thumbnailOf(acc2, "https://image3.com"));
 
         saveAndGetWishlistAccommodation(wishlist1, acc1);
         saveAndGetWishlistAccommodation(wishlist2, acc2);
@@ -254,44 +249,27 @@ class WishlistServiceTest extends TestContainerSupport {
         assertThat(result.get(1).savedAccommodations()).isEqualTo(1);
     }
 
-    private void saveAccommodationImage(Accommodation acc, String url, boolean thumbnail) {
-        em.persist(AccommodationImage.builder()
-                                     .accommodation(acc)
-                                     .thumbnail(thumbnail)
-                                     .imageUrl(url)
-                                     .build());
+    private void saveAccommodationImage(AccommodationImage accommodationImage) {
+        em.persist(accommodationImage);
     }
 
     private WishlistAccommodation saveAndGetWishlistAccommodation(Wishlist wishlist, Accommodation acc) {
-        return wishlistAccommodationRepository.save(WishlistAccommodation.builder()
-                                                                  .wishlist(wishlist)
-                                                                  .accommodation(acc)
-                                                                  .build());
+        return wishlistAccommodationRepository.save(WishlistAccommodation.create(wishlist, acc));
     }
 
     private Wishlist savedAndGetWishlist() {
-        return wishlistRepository.save(Wishlist.builder()
-                                               .guest(guest)
-                                               .name("test-wishlist")
-                                               .build());
+        return wishlistRepository.save(Wishlist.create(guest, "test-wishlist"));
     }
 
     private Accommodation saveAndGetAccommodation() {
-        AreaCode areaCode = new AreaCode(UUID.randomUUID().toString(), "test-codeName");
-        SigunguCode sigunguCode = new SigunguCode(UUID.randomUUID().toString(), "test-codeName", areaCode);
+        AreaCode areaCode = AreaCode.create(UUID.randomUUID().toString(), "test-codeName");
+        SigunguCode sigunguCode = SigunguCode.create(UUID.randomUUID().toString(), "test-codeName", areaCode);
         em.persist(areaCode);
         em.persist(sigunguCode);
 
-        Accommodation accommodation = Accommodation.builder()
-                                                   .mapX(1.0)
-                                                   .mapY(1.0)
-                                                   .title("test-title")
-                                                   .address("test-address")
-                                                   .contentId(UUID.randomUUID().toString())
-                                                   .modifiedTime(LocalDateTime.now())
-                                                   .sigunguCode(sigunguCode)
-                                                   .build();
+        Accommodation accommodation = Accommodation.forTest("test-title", sigunguCode, 1.0,1.0);
         em.persist(accommodation);
+
         return accommodation;
     }
 }

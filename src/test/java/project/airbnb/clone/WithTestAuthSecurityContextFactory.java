@@ -5,6 +5,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
+import org.springframework.test.util.ReflectionTestUtils;
 import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.model.AuthProviderUser;
 import project.airbnb.clone.model.PrincipalUser;
@@ -15,7 +16,8 @@ public class WithTestAuthSecurityContextFactory implements WithSecurityContextFa
 
     @Override
     public SecurityContext createSecurityContext(WithMockGuest annotation) {
-        Guest guest = Guest.builder().id(1L).build();
+        Guest guest = Guest.createForTest();
+        ReflectionTestUtils.setField(guest, "id", 1L);
 
         PrincipalUser principalUser = new PrincipalUser(new AuthProviderUser(guest, "mock-principal"));
 

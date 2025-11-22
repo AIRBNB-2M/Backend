@@ -9,21 +9,17 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import project.airbnb.clone.consts.Role;
 import project.airbnb.clone.consts.SocialType;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Entity
-@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @Table(name = "guests")
 public class Guest extends BaseEntity {
 
@@ -44,7 +40,6 @@ public class Guest extends BaseEntity {
     @Column(name = "email", nullable = false, length = 50)
     private String email;
 
-    @Setter
     @Column(name = "profile_url")
     private String profileUrl;
 
@@ -58,18 +53,40 @@ public class Guest extends BaseEntity {
     @Column(name = "social_type")
     private SocialType socialType;
 
-    @Builder.Default
-    @Column(name = "is_deleted", nullable = false)
-    private Boolean isDeleted = false;
-
-    @Builder.Default
     @Column(name = "is_email_verified", nullable = false)
     private Boolean isEmailVerified = false;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    @Builder.Default
     private Role role = Role.GUEST;
+
+    public static Guest createAdmin(String adminEmail, String password) {
+        return new Guest("ADMIN-USER", null, null, adminEmail, password, SocialType.NONE, Role.ADMIN, true);
+    }
+
+    public static Guest createForRest(String name, String email, String number, LocalDate birthDate, String password) {
+        return new Guest(name, birthDate, number, email, password, SocialType.NONE, Role.GUEST, false);
+    }
+
+    public static Guest createForSocial(String name, String email, String number, LocalDate birthDate, String password, SocialType socialType) {
+        return new Guest(name, birthDate, number, email, password, socialType, Role.GUEST, false);
+    }
+
+    public static Guest createForTest() {
+        return new Guest("test-user", null, null, "test@email.com", UUID.randomUUID().toString(), SocialType.NONE, Role.GUEST, false);
+    }
+
+    private Guest(String name, LocalDate birthDate, String number, String email, String password,
+                  SocialType socialType, Role role, boolean isEmailVerified) {
+        this.name = name;
+        this.birthDate = birthDate;
+        this.number = number;
+        this.email = email;
+        this.password = password;
+        this.socialType = socialType;
+        this.role = role;
+        this.isEmailVerified = isEmailVerified;
+    }
 
     public void updateProfile(String name, String aboutMe) {
         this.name = name;
@@ -78,5 +95,9 @@ public class Guest extends BaseEntity {
 
     public void verifyEmail() {
         this.isEmailVerified = true;
+    }
+
+    public void updateProfileUrl(String profileUrl) {
+        this.profileUrl = profileUrl;
     }
 }

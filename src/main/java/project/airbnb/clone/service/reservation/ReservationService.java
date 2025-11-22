@@ -28,11 +28,6 @@ public class ReservationService {
         Guest guest = guestRepository.findById(guestId)
                                      .orElseThrow(() -> new EntityNotFoundException("Cannot be found Guest for id: " + guestId));
 
-        reviewRepository.save(Review.builder()
-                                    .rating(reqDto.rating().doubleValue())
-                                    .content(reqDto.content())
-                                    .reservation(reservation)
-                                    .guest(guest)
-                                    .build());
+        reviewRepository.save(Review.create(reqDto.rating().doubleValue(), reqDto.content(), reservation, guest));
     }
 }

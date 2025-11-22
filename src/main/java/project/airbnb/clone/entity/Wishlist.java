@@ -10,15 +10,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "wishlists")
 public class Wishlist extends BaseEntity {
@@ -34,6 +30,15 @@ public class Wishlist extends BaseEntity {
 
     @Column(name = "name", length = 50, nullable = false)
     private String name;
+
+    public static Wishlist create(Guest guest, String name) {
+        return new Wishlist(guest, name);
+    }
+
+    private Wishlist(Guest guest, String name) {
+        this.guest = guest;
+        this.name = name;
+    }
 
     public void updateName(String newName) {
         this.name = newName;

@@ -42,7 +42,7 @@ public class GuestProfileImageUploadService {
         String key = String.format("guests/%s", UUID.randomUUID());
 
         try {
-            guest.setProfileUrl(uploadFunction.upload(key));
+            guest.updateProfileUrl(uploadFunction.upload(key));
             log.debug("Succeed to upload image to S3: guestId={}", guest.getId());
         } catch (ImageUploadException e) {
             log.warn("Failed image upload for guestId={}. Continue without profile image.", guest.getId(), e);

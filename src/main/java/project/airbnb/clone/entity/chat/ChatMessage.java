@@ -10,8 +10,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import project.airbnb.clone.entity.BaseEntity;
@@ -19,8 +17,6 @@ import project.airbnb.clone.entity.Guest;
 
 @Entity
 @Getter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "chat_messages")
 public class ChatMessage extends BaseEntity {
@@ -40,4 +36,14 @@ public class ChatMessage extends BaseEntity {
 
     @Column(name = "content", nullable = false)
     private String content;
+
+    public static ChatMessage create(ChatRoom chatRoom, Guest writer, String content) {
+        return new ChatMessage(chatRoom, writer, content);
+    }
+
+    private ChatMessage(ChatRoom chatRoom, Guest writer, String content) {
+        this.chatRoom = chatRoom;
+        this.writer = writer;
+        this.content = content;
+    }
 }

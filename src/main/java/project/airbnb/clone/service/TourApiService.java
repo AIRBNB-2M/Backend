@@ -153,14 +153,15 @@ public class TourApiService {
 
             Optional<Accommodation> existing = accommodationRepository.findByContentId(tourApiId);
 
+/*
             if (existing.isPresent()) {
                 Accommodation acc = existing.get();
                 acc.setAddress(safeAddress);
                 acc.setMapX(mapX);
                 acc.setMapY(mapY);
                 acc.setDescription(safeDescription);
-//                acc.setMaxPeople(maxPeople);
-//                acc.setMinPrice(price);
+                acc.setMaxPeople(maxPeople);
+                acc.setMinPrice(price);
                 acc.setTitle(safeTitle);
                 acc.setCheckIn(safeCheckIn);
                 acc.setCheckOut(safeCheckOut);
@@ -173,8 +174,8 @@ public class TourApiService {
                         .mapX(mapX)
                         .mapY(mapY)
                         .description(safeDescription)
-//                        .maxPeople(maxPeople)
-//                        .minPrice(price)
+                        .maxPeople(maxPeople)
+                        .minPrice(price)
                         .title(safeTitle)
                         .checkIn(safeCheckIn)
                         .checkOut(safeCheckOut)
@@ -182,6 +183,7 @@ public class TourApiService {
                         .build();
                 toInsert.add(acc);
             }
+*/
 
             if (toInsert.size() >= BATCH) {
                 accommodationRepository.saveAll(toInsert);

@@ -1,19 +1,7 @@
 package project.airbnb.clone.entity.chat;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import project.airbnb.clone.entity.BaseEntity;
@@ -23,8 +11,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "chat_participants",
         uniqueConstraints = {
@@ -55,7 +41,6 @@ public class ChatParticipant extends BaseEntity {
     @Column(name = "custom_room_name", nullable = false)
     private String customRoomName;
 
-    @Builder.Default
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
@@ -64,6 +49,21 @@ public class ChatParticipant extends BaseEntity {
 
     @Column(name = "last_rejoined_at")
     private LocalDateTime lastRejoinedAt;
+
+    public static ChatParticipant creator(ChatRoom chatRoom, Guest sender, String roomName) {
+        return new ChatParticipant(chatRoom, sender, true, roomName);
+    }
+
+    public static ChatParticipant participant(ChatRoom chatRoom, Guest receiver, String roomName) {
+        return new ChatParticipant(chatRoom, receiver, false, roomName);
+    }
+
+    private ChatParticipant(ChatRoom chatRoom, Guest guest, Boolean isCreator, String customRoomName) {
+        this.chatRoom = chatRoom;
+        this.guest = guest;
+        this.isCreator = isCreator;
+        this.customRoomName = customRoomName;
+    }
 
     public void leave() {
         if (!this.isActive) {

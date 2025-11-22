@@ -33,7 +33,7 @@ public record AccommodationSaveWorker(
         for (AccommodationProcessorDto dto : dtoList) {
             if (!validator.test(dto)) continue;
 
-            Accommodation acc = tourRepositoryFacadeManager.findAccByContentId(dto.getContentId()).orElseGet(Accommodation::new);
+            Accommodation acc = tourRepositoryFacadeManager.findAccByContentId(dto.getContentId()).orElseGet(Accommodation::createEmpty);
             SigunguCode sigunguCode = tourRepositoryFacadeManager.findSigunguCode(dto.getSigunguCode());
 
             acc.updateOrInit(dto, sigunguCode);
@@ -56,10 +56,7 @@ public record AccommodationSaveWorker(
         amenities.forEach((amenityName, available) -> {
             if (available) {
                 Amenity amenity = tourRepositoryFacadeManager.findAmenityByName(amenityName);
-                allAmenities.add(AccommodationAmenity.builder()
-                                                     .accommodation(acc)
-                                                     .amenity(amenity)
-                                                     .build());
+                allAmenities.add(AccommodationAmenity.create(acc, amenity));
             }
         });
     }
@@ -75,11 +72,7 @@ public record AccommodationSaveWorker(
             }
         }
 
-        allImages.add(AccommodationImage.builder()
-                                        .accommodation(acc)
-                                        .imageUrl(thumbnailUrl)
-                                        .thumbnail(true)
-                                        .build());
+        allImages.add(AccommodationImage.thumbnailOf(acc, thumbnailUrl));
 
         addImageEntity(item.getOriginImgUrls(), thumbnailUrl, allImages, acc);
         addImageEntity(item.getRoomImgUrls(), thumbnailUrl, allImages, acc);
@@ -90,23 +83,14 @@ public record AccommodationSaveWorker(
             if (imageUrl.equals(thumbnail)) {
                 continue;
             }
-            allImages.add(AccommodationImage.builder()
-                                            .accommodation(acc)
-                                            .imageUrl(imageUrl)
-                                            .thumbnail(false)
-                                            .build());
+            allImages.add(AccommodationImage.normalOf(acc, imageUrl));
         }
     }
 
     private void addAccommodationPrice(AccommodationProcessorDto dto, Accommodation acc, List<AccommodationPrice> allPrices) {
         for (Season season : Season.values()) {
             for (DayType dayType : DayType.values()) {
-                allPrices.add(AccommodationPrice.builder()
-                                                .accommodation(acc)
-                                                .season(season)
-                                                .dayType(dayType)
-                                                .price(dto.getPrice(season, dayType))
-                                                .build());
+                allPrices.add(AccommodationPrice.create(acc, season, dayType, dto.getPrice(season, dayType)));
             }
         }
     }

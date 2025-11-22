@@ -36,7 +36,6 @@ import project.airbnb.clone.service.DateManager;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -65,20 +64,16 @@ class AccommodationServiceTest extends TestContainerSupport {
 
     @BeforeEach
     void setUp() {
-        guest = Guest.builder()
-                     .name("테스트 유저")
-                     .email("test@email.com")
-                     .password("password")
-                     .build();
+        guest = Guest.createForTest();
         em.persist(guest);
 
-        seoulArea = new AreaCode("11", "서울");
-        busanArea = new AreaCode("21", "부산");
+        seoulArea = AreaCode.create("11", "서울");
+        busanArea = AreaCode.create("21", "부산");
         em.persist(seoulArea);
         em.persist(busanArea);
 
-        gangnamSigungu = new SigunguCode("11680", "강남구", seoulArea);
-        haeundaeSigungu = new SigunguCode("21140", "해운대구", busanArea);
+        gangnamSigungu = SigunguCode.create("11680", "강남구", seoulArea);
+        haeundaeSigungu = SigunguCode.create("21140", "해운대구", busanArea);
         em.persist(gangnamSigungu);
         em.persist(haeundaeSigungu);
     }
@@ -332,21 +327,9 @@ class AccommodationServiceTest extends TestContainerSupport {
             LocalDateTime today = LocalDateTime.now();
             LocalDateTime yesterday = today.minusDays(1);
 
-            ViewHistory vh1 = ViewHistory.builder()
-                                         .guest(guest)
-                                         .accommodation(acc1)
-                                         .viewedAt(today)
-                                         .build();
-            ViewHistory vh2 = ViewHistory.builder()
-                                         .guest(guest)
-                                         .accommodation(acc2)
-                                         .viewedAt(today.minusHours(1))
-                                         .build();
-            ViewHistory vh3 = ViewHistory.builder()
-                                         .guest(guest)
-                                         .accommodation(acc3)
-                                         .viewedAt(yesterday)
-                                         .build();
+            ViewHistory vh1 = ViewHistory.create(guest, acc1, today);
+            ViewHistory vh2 = ViewHistory.create(guest, acc2, today.minusHours(1));
+            ViewHistory vh3 = ViewHistory.create(guest, acc3, yesterday);
             em.persist(vh1);
             em.persist(vh2);
             em.persist(vh3);
@@ -374,16 +357,8 @@ class AccommodationServiceTest extends TestContainerSupport {
             createPriceAndImage(acc1, PEAK, WEEKEND, 100000);
             createPriceAndImage(acc2, PEAK, WEEKEND, 100000);
 
-            ViewHistory recent = ViewHistory.builder()
-                                            .guest(guest)
-                                            .accommodation(acc1)
-                                            .viewedAt(LocalDateTime.now().minusDays(10))
-                                            .build();
-            ViewHistory old = ViewHistory.builder()
-                                         .guest(guest)
-                                         .accommodation(acc2)
-                                         .viewedAt(LocalDateTime.now().minusDays(31))
-                                         .build();
+            ViewHistory recent = ViewHistory.create(guest, acc1, LocalDateTime.now().minusDays(10));
+            ViewHistory old = ViewHistory.create(guest, acc2, LocalDateTime.now().minusDays(31));
             em.persist(recent);
             em.persist(old);
 
@@ -449,15 +424,7 @@ class AccommodationServiceTest extends TestContainerSupport {
     }
 
     private Accommodation createAccommodation(String title, SigunguCode sigunguCode, double mapX, double mapY) {
-        return Accommodation.builder()
-                            .contentId(UUID.randomUUID().toString())
-                            .title(title)
-                            .modifiedTime(LocalDateTime.now().minusDays(3))
-                            .address("주소")
-                            .sigunguCode(sigunguCode)
-                            .mapX(mapX)
-                            .mapY(mapY)
-                            .build();
+        return Accommodation.forTest(title, sigunguCode, mapX, mapY);
     }
 
     private void createPriceAndImage(Accommodation acc, Season season, DayType dayType, int price) {
@@ -466,21 +433,12 @@ class AccommodationServiceTest extends TestContainerSupport {
     }
 
     private void createPrice(Accommodation acc, Season season, DayType dayType, int price) {
-        AccommodationPrice accPrice = AccommodationPrice.builder()
-                                                        .accommodation(acc)
-                                                        .season(season)
-                                                        .dayType(dayType)
-                                                        .price(price)
-                                                        .build();
+        AccommodationPrice accPrice = AccommodationPrice.create(acc, season, dayType, price);
         em.persist(accPrice);
     }
 
     private void createImage(Accommodation acc) {
-        AccommodationImage image = AccommodationImage.builder()
-                                                     .accommodation(acc)
-                                                     .imageUrl("https://example.com/image.jpg")
-                                                     .thumbnail(true)
-                                                     .build();
+        AccommodationImage image = AccommodationImage.thumbnailOf(acc, "https://example.com/image.jpg");
         em.persist(image);
     }
 }

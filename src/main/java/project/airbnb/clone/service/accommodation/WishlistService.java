@@ -44,10 +44,7 @@ public class WishlistService {
     @Transactional
     public WishlistCreateResDto createWishlist(WishlistCreateReqDto reqDto, Long guestId) {
         Guest guest = guestRepository.getGuestById(guestId);
-        Wishlist savedWishlist = wishlistRepository.save(Wishlist.builder()
-                                                                 .guest(guest)
-                                                                 .name(reqDto.wishlistName())
-                                                                 .build());
+        Wishlist savedWishlist = wishlistRepository.save(Wishlist.create(guest, reqDto.wishlistName()));
         return new WishlistCreateResDto(savedWishlist.getId(), savedWishlist.getName());
     }
 
@@ -60,10 +57,7 @@ public class WishlistService {
         Wishlist wishlist = getWishlistByIdAndGuestId(wishlistId, guestId);
         Accommodation accommodation = getAccommodationById(accommodationId);
 
-        wishlistAccommodationRepository.save(WishlistAccommodation.builder()
-                                                                  .wishlist(wishlist)
-                                                                  .accommodation(accommodation)
-                                                                  .build());
+        wishlistAccommodationRepository.save(WishlistAccommodation.create(wishlist, accommodation));
     }
 
     @Transactional

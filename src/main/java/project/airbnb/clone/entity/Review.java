@@ -2,7 +2,6 @@ package project.airbnb.clone.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -31,8 +30,11 @@ public class Review extends BaseEntity {
     @JoinColumn(name = "guest_id", nullable = false)
     private Guest guest;
 
-    @Builder
-    public Review(String content, Double rating, Reservation reservation, Guest guest) {
+    public static Review create(double rating, String content, Reservation reservation, Guest guest) {
+        return new Review(content, rating, reservation, guest);
+    }
+
+    private Review(String content, Double rating, Reservation reservation, Guest guest) {
         this.content = content;
         this.rating = rating;
         this.reservation = reservation;

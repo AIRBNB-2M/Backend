@@ -7,8 +7,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import project.airbnb.clone.consts.Role;
-import project.airbnb.clone.consts.SocialType;
 import project.airbnb.clone.entity.Guest;
 import project.airbnb.clone.repository.jpa.GuestRepository;
 
@@ -32,14 +30,7 @@ public class AdminUserInitializer implements ApplicationListener<ContextRefreshe
             return;
         }
 
-        Guest admin = Guest.builder()
-                           .name("ADMIN-USER")
-                           .socialType(SocialType.NONE)
-                           .role(Role.ADMIN)
-                           .email(adminEmail)
-                           .password(passwordEncoder.encode(adminPassword))
-                           .isEmailVerified(true)
-                           .build();
+        Guest admin = Guest.createAdmin(adminEmail, passwordEncoder.encode(adminPassword));
         guestRepository.save(admin);
     }
 }

@@ -57,11 +57,8 @@ public class ChatService {
         String content = chatMessageDto.content();
 
         Guest writer = getGuestById(senderId);
-        ChatMessage message = chatRepositoryFacade.saveChatMessage(ChatMessage.builder()
-                                                                              .chatRoom(chatRoom)
-                                                                              .writer(writer)
-                                                                              .content(content)
-                                                                              .build());
+        ChatMessage message = chatRepositoryFacade.saveChatMessage(ChatMessage.create(chatRoom, writer, content));
+
         ChatParticipant chatParticipant = participants.stream()
                                                       .filter(participant -> participant.getGuest().getId().equals(writer.getId()))
                                                       .findFirst()
@@ -231,18 +228,8 @@ public class ChatService {
         ChatRoom chatRoom = chatRepositoryFacade.saveChatRoom(new ChatRoom());
 
         List<ChatParticipant> newParticipants = List.of(
-                ChatParticipant.builder()
-                               .chatRoom(chatRoom)
-                               .guest(receiver)
-                               .isCreator(false)
-                               .customRoomName(sender.getName() + "님과의 대화")
-                               .build(),
-                ChatParticipant.builder()
-                               .chatRoom(chatRoom)
-                               .guest(sender)
-                               .isCreator(true)
-                               .customRoomName(receiver.getName() + "님과의 대화")
-                               .build()
+                ChatParticipant.participant(chatRoom, receiver, sender.getName() + "님과의 대화"),
+                ChatParticipant.creator(chatRoom, sender, receiver.getName() + "님과의 대화")
         );
 
         chatRepositoryFacade.saveChatParticipants(newParticipants);

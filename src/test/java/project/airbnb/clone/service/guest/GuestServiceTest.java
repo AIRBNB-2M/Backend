@@ -134,14 +134,7 @@ class GuestServiceTest extends TestContainerSupport {
     }
 
     private Guest saveAndGetGuest() {
-        return guestRepository.save(Guest.builder()
-                                         .name("David Jin")
-                                         .birthDate(LocalDate.of(2000, 9, 14))
-                                         .profileUrl("https://example.com/a.jpg")
-                                         .aboutMe("Lectus euismod maecenas erat.")
-                                         .email("test@email.com")
-                                         .password("86e48502-0ecf-4df1-8748-998bc06b9823")
-                                         .build());
+        return guestRepository.save(Guest.createForTest());
     }
 
     private SignupRequestDto createRequestDto() {

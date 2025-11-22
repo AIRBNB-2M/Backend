@@ -208,12 +208,13 @@ public class TourImageService {
         AccommodationImage exist = existingByUrl.get(url);
         if (exist != null) {
             if (preferThumbnail && !exist.isThumbnail()) {
-                exist.setThumbnail(true);
+//                exist.setThumbnail(true);
                 toUpdate.add(exist);
             }
             return;
         }
 
+/*
         AccommodationImage img = AccommodationImage.builder()
                 .accommodation(acc)
                 .imageUrl(url)
@@ -221,6 +222,7 @@ public class TourImageService {
                 .build();
         toInsert.add(img);
         existingByUrl.put(url, img);
+*/
     }
 
     private String normalize(String s) {

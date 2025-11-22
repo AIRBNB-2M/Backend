@@ -1,18 +1,7 @@
 package project.airbnb.clone.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -20,8 +9,6 @@ import java.time.LocalDateTime;
 
 @Getter
 @Entity
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "view_histories", uniqueConstraints =
     @UniqueConstraint(name = "uk_view_histories_guest_accommodation", columnNames = {"guest_id", "accommodation_id"})
@@ -43,4 +30,18 @@ public class ViewHistory extends BaseEntity {
 
     @Column(name = "viewed_at", nullable = false)
     private LocalDateTime viewedAt;
+
+    public static ViewHistory ofNow(Accommodation accommodation, Guest guest) {
+        return new ViewHistory(accommodation, guest, LocalDateTime.now());
+    }
+
+    public static ViewHistory create(Guest guest, Accommodation accommodation, LocalDateTime viewedAt) {
+        return new ViewHistory(accommodation, guest, viewedAt);
+    }
+
+    private ViewHistory(Accommodation accommodation, Guest guest, LocalDateTime viewedAt) {
+        this.accommodation = accommodation;
+        this.guest = guest;
+        this.viewedAt = viewedAt;
+    }
 }

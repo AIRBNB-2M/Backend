@@ -40,13 +40,6 @@ public interface ProviderUser {
     default String getPrincipalName() { return null; }
 
     default Guest toEntity(String encodePassword) {
-        return Guest.builder()
-                    .name(getUsername())
-                    .email(getEmail())
-                    .number(getNumber())
-                    .birthDate(getBirthDate())
-                    .password(encodePassword)
-                    .socialType(SocialType.from(getProvider()))
-                    .build();
+        return Guest.createForSocial(getUsername(), getEmail(), getNumber(), getBirthDate(), encodePassword, SocialType.from(getProvider()));
     }
 }

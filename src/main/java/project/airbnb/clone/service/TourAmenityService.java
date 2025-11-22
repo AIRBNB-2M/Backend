@@ -91,7 +91,7 @@ public class TourAmenityService {
         List<Amenity> toCreate = new ArrayList<>();
         for (String nm : names) {
             if (!byName.containsKey(nm)) {
-                toCreate.add(Amenity.builder().name(nm).description(null).build());
+//                toCreate.add(Amenity.builder().name(nm).description(null).build());
             }
         }
         if (!toCreate.isEmpty()) {
@@ -113,10 +113,7 @@ public class TourAmenityService {
             Amenity a = byName.get(nm);
             if (a == null) continue;
             if (!linkedAmenityIds.contains(a.getId())) {
-                toLink.add(AccommodationAmenity.builder()
-                        .accommodation(acc)
-                        .amenity(a)
-                        .build());
+                toLink.add(AccommodationAmenity.create(acc, a));
             }
         }
 

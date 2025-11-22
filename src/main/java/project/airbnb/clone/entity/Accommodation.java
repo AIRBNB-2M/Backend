@@ -9,19 +9,17 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import project.airbnb.clone.dto.accommodation.AccommodationProcessorDto;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
-@Builder
 @Getter
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "accommodations")
 public class Accommodation extends BaseEntity {
 
@@ -69,17 +67,14 @@ public class Accommodation extends BaseEntity {
 
     @Column(name = "refund_regulation", columnDefinition = "TEXT")
     private String refundRegulation;
-    
-    public void setMapX(Double mapX) { this.mapX = mapX; }
-    public void setMapY(Double mapY) { this.mapY = mapY; }
-    public void setDescription(String description) { this.description = description; }
-    public void setAddress(String address) { this.address = address; }
-    public void setMaxPeople(Integer maxPeople) { this.maxPeople = maxPeople; }
-//    public void setMinPrice(Integer price) { this.minPrice = price; }
-    public void setTitle(String title) { this.title = title; }
-    public void setCheckIn(String checkIn) { this.checkIn = checkIn; }
-    public void setCheckOut(String checkOut) { this.checkOut = checkOut; }
-    public void setNumber(String number) { this.number = number; }
+
+    public static Accommodation createEmpty() {
+        return new Accommodation();
+    }
+
+    public static Accommodation forTest(String title, SigunguCode sigunguCode, double mapX, double mapY) {
+        return new Accommodation(mapX, mapY, title, "주소", UUID.randomUUID().toString(), LocalDateTime.now().minusDays(3), sigunguCode);
+    }
 
     public void updateOrInit(AccommodationProcessorDto dto, SigunguCode sigunguCode) {
         this.mapX = dto.getMapX();
@@ -94,6 +89,16 @@ public class Accommodation extends BaseEntity {
         this.refundRegulation = dto.getRefundRegulation();
         this.modifiedTime = dto.getModifiedTime();
         this.contentId = dto.getContentId();
+        this.sigunguCode = sigunguCode;
+    }
+
+    private Accommodation(Double mapX, Double mapY, String title, String address, String contentId, LocalDateTime modifiedTime, SigunguCode sigunguCode) {
+        this.mapX = mapX;
+        this.mapY = mapY;
+        this.title = title;
+        this.address = address;
+        this.contentId = contentId;
+        this.modifiedTime = modifiedTime;
         this.sigunguCode = sigunguCode;
     }
 }

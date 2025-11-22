@@ -33,11 +33,7 @@ class TokenServiceTest extends TestContainerSupport {
 
     @BeforeEach
     void setUp() {
-        guest = Guest.builder()
-                     .name("Jessica Bala")
-                     .email("test@email.com")
-                     .password("858d2781-2a13-4d26-b3c9-7b84b214f82f")
-                     .build();
+        guest = Guest.createForTest();
         guestRepository.saveAndFlush(guest);
     }
 

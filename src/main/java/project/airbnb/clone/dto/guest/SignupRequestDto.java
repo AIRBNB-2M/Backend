@@ -4,7 +4,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
-import project.airbnb.clone.consts.SocialType;
 import project.airbnb.clone.entity.Guest;
 
 import java.time.LocalDate;
@@ -18,13 +17,6 @@ public record SignupRequestDto(
                  message = "올바른 형식의 비밀번호여야 합니다.") String password)
 {
     public Guest toEntity(String encodedPassword) {
-        return Guest.builder()
-                    .name(name)
-                    .email(email)
-                    .number(number)
-                    .birthDate(birthDate)
-                    .password(encodedPassword)
-                    .socialType(SocialType.NONE)
-                    .build();
+        return Guest.createForRest(name, email, number, birthDate, encodedPassword);
     }
 }
