@@ -2,15 +2,15 @@ package project.airbnb.clone.common.batch;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.NonTransientResourceException;
-import org.springframework.batch.item.ParseException;
-import org.springframework.batch.item.UnexpectedInputException;
+import org.springframework.batch.infrastructure.item.ItemReader;
+import org.springframework.batch.infrastructure.item.NonTransientResourceException;
+import org.springframework.batch.infrastructure.item.ParseException;
+import org.springframework.batch.infrastructure.item.UnexpectedInputException;
 import org.springframework.stereotype.Component;
 import project.airbnb.clone.common.clients.TourApiClient;
 import project.airbnb.clone.dto.accommodation.AccommodationProcessorDto;
-import project.airbnb.clone.service.tour.HttpClientTemplate;
 import project.airbnb.clone.repository.facade.TourRepositoryFacadeManager;
+import project.airbnb.clone.service.tour.HttpClientTemplate;
 import project.airbnb.clone.service.tour.workers.AreaListWorker;
 
 import java.util.Iterator;

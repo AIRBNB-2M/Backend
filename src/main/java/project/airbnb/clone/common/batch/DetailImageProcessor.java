@@ -2,7 +2,7 @@ package project.airbnb.clone.common.batch;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.infrastructure.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 import project.airbnb.clone.common.clients.TourApiClient;
 import project.airbnb.clone.dto.accommodation.AccommodationProcessorDto;

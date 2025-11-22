@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
+import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
@@ -17,7 +17,6 @@ import project.airbnb.clone.common.clients.TourApiClient;
 
 import java.net.http.HttpClient;
 import java.time.Duration;
-import java.util.List;
 import java.util.Map;
 
 import static org.springframework.http.HttpHeaders.ACCEPT;
@@ -115,9 +114,10 @@ public class HttpClientConfig {
 
         return RestClient.builder()
                          .requestFactory(requestFactory)
-                         .messageConverters(List.of(
-                                 new MappingJackson2HttpMessageConverter(),
-                                 new MappingJackson2XmlHttpMessageConverter())
+                         .configureMessageConverters(clientBuilder -> clientBuilder
+                                 .addCustomConverter(new JacksonJsonHttpMessageConverter())
+                                 .addCustomConverter(new JacksonXmlHttpMessageConverter())
                          );
+
     }
 }

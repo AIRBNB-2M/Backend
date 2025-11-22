@@ -1,13 +1,13 @@
 package project.airbnb.clone.common.batch;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.support.CompositeItemProcessor;
+import org.springframework.batch.infrastructure.item.ItemProcessor;
+import org.springframework.batch.infrastructure.item.support.CompositeItemProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -37,7 +37,7 @@ public class AccommodationBatchConfig {
     @Bean
     public Step accommodationStep(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
         return new StepBuilder("accommodationStep", jobRepository)
-                .<AccommodationProcessorDto, AccommodationProcessorDto>chunk(100, transactionManager)
+                .<AccommodationProcessorDto, AccommodationProcessorDto>chunk(100)
                 .reader(reader)
                 .processor(compositeProcessor())
                 .writer(writer)

@@ -3,7 +3,7 @@ import org.yaml.snakeyaml.DumperOptions
 
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.5.3'
+    id 'org.springframework.boot' version '4.0.0'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'com.epages.restdocs-api-spec' version '0.18.4'
     id 'org.hidetake.swagger.generator' version '2.19.2'
@@ -73,8 +73,8 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.3'
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    implementation "tools.jackson.core:jackson-databind"
+    implementation 'tools.jackson.dataformat:jackson-dataformat-xml'
     implementation 'org.yaml:snakeyaml:2.0'
     implementation 'org.springframework.retry:spring-retry:2.0.12'
 
@@ -107,7 +107,7 @@ clean {
 openapi3 {
     servers = [
             { url = 'http://localhost:8081' },
-            { url = 'https://port-0-backend-mdl85cydd9f8761f.sel5.cloudtype.app'}
+            { url = 'https://airbackend.jgy914.shop'}
     ]
     title = "Airbnb-2M 백엔드 API 문서"
     description = "RestDocsWithSwagger Docs"

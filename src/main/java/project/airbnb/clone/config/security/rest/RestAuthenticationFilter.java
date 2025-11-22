@@ -1,6 +1,5 @@
 package project.airbnb.clone.config.security.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -10,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import project.airbnb.clone.dto.guest.LoginRequestDto;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.util.regex.Pattern;
@@ -20,11 +20,11 @@ public class RestAuthenticationFilter extends AbstractAuthenticationProcessingFi
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^.*(?=^.{8,15}$)(?=.*\\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&+=]).*$");
     //숫자, 문자, 특수문자 포함 8~15자리
 
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
-    public RestAuthenticationFilter(ObjectMapper objectMapper) {
+    public RestAuthenticationFilter(JsonMapper jsonMapper) {
         super("/api/auth/login");
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class RestAuthenticationFilter extends AbstractAuthenticationProcessingFi
             throw new IllegalArgumentException("Authentication method is not supported");
         }
 
-        LoginRequestDto loginRequest = objectMapper.readValue(request.getReader(), LoginRequestDto.class);
+        LoginRequestDto loginRequest = jsonMapper.readValue(request.getReader(), LoginRequestDto.class);
 
         String email = loginRequest.email();
         String password = loginRequest.password();
