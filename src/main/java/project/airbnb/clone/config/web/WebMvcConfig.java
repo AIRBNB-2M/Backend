@@ -5,7 +5,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import project.airbnb.clone.common.resolvers.CurrentGuestIdArgumentResolver;
+import project.airbnb.clone.common.resolvers.CurrentMemberIdArgumentResolver;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new CurrentGuestIdArgumentResolver());
+        resolvers.add(new CurrentMemberIdArgumentResolver());
     }
 
     @Override

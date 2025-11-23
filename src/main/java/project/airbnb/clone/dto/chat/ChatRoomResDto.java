@@ -5,10 +5,10 @@ import java.time.LocalDateTime;
 public record ChatRoomResDto(
         Long roomId,
         String customRoomName,
-        Long guestId,
-        String guestName,
-        String guestProfileImage,
-        boolean isOtherGuestActive,
+        Long memberId,
+        String memberName,
+        String memberProfileImage,
+        boolean isOtherMemberActive,
         String lastMessage,
         LocalDateTime lastMessageTime,
         int unreadCount) {

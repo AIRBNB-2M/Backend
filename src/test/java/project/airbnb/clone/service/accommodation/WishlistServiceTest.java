@@ -16,7 +16,7 @@ import project.airbnb.clone.dto.wishlist.WishlistsResDto;
 import project.airbnb.clone.entity.Accommodation;
 import project.airbnb.clone.entity.AccommodationImage;
 import project.airbnb.clone.entity.AreaCode;
-import project.airbnb.clone.entity.Guest;
+import project.airbnb.clone.entity.Member;
 import project.airbnb.clone.entity.SigunguCode;
 import project.airbnb.clone.entity.Wishlist;
 import project.airbnb.clone.entity.WishlistAccommodation;
@@ -35,13 +35,13 @@ class WishlistServiceTest extends TestContainerSupport {
     @Autowired WishlistRepository wishlistRepository;
     @Autowired WishlistAccommodationRepository wishlistAccommodationRepository;
 
-    Guest guest;
+    Member member;
 
     @BeforeEach
     void setUp() {
-        Guest guest = Guest.createForTest();
-        em.persist(guest);
-        this.guest = guest;
+        Member member = Member.createForTest();
+        em.persist(member);
+        this.member = member;
     }
 
     @Test
@@ -51,7 +51,7 @@ class WishlistServiceTest extends TestContainerSupport {
         WishlistCreateReqDto reqDto = new WishlistCreateReqDto("my-wishlist");
 
         //when
-        WishlistCreateResDto resDto = wishlistService.createWishlist(reqDto, guest.getId());
+        WishlistCreateResDto resDto = wishlistService.createWishlist(reqDto, member.getId());
 
         em.flush();
         em.clear();
@@ -61,7 +61,7 @@ class WishlistServiceTest extends TestContainerSupport {
         assertThat(wishlist).isNotNull();
         assertThat(resDto.wishlistId()).isEqualTo(wishlist.getId());
         assertThat(resDto.wishlistName()).isEqualTo(wishlist.getName());
-        assertThat(wishlist.getGuest().getId()).isEqualTo(guest.getId());
+        assertThat(wishlist.getMember().getId()).isEqualTo(member.getId());
     }
 
     @Test
@@ -73,7 +73,7 @@ class WishlistServiceTest extends TestContainerSupport {
         AddAccToWishlistReqDto reqDto = new AddAccToWishlistReqDto(accommodation.getId());
 
         //when
-        wishlistService.addAccommodationToWishlist(wishlist.getId(), reqDto, guest.getId());
+        wishlistService.addAccommodationToWishlist(wishlist.getId(), reqDto, member.getId());
         em.flush();
         em.clear();
 
@@ -95,7 +95,7 @@ class WishlistServiceTest extends TestContainerSupport {
         Accommodation accommodation = saveAndGetAccommodation();
 
         //when
-        wishlistService.removeAccommodationFromWishlist(wishlist.getId(), accommodation.getId(), guest.getId());
+        wishlistService.removeAccommodationFromWishlist(wishlist.getId(), accommodation.getId(), member.getId());
         em.flush();
         em.clear();
 
@@ -115,7 +115,7 @@ class WishlistServiceTest extends TestContainerSupport {
         WishlistUpdateReqDto reqDto = new WishlistUpdateReqDto("test-new-wishlist-name");
 
         //when
-        wishlistService.updateWishlistName(wishlist.getId(), reqDto, guest.getId());
+        wishlistService.updateWishlistName(wishlist.getId(), reqDto, member.getId());
         em.flush();
         em.clear();
 
@@ -136,7 +136,7 @@ class WishlistServiceTest extends TestContainerSupport {
         WishlistAccommodation wa2 = saveAndGetWishlistAccommodation(wishlist, acc2);
 
         //when
-        wishlistService.removeWishlist(wishlist.getId(), guest.getId());
+        wishlistService.removeWishlist(wishlist.getId(), member.getId());
         em.flush();
         em.clear();
 
@@ -166,7 +166,7 @@ class WishlistServiceTest extends TestContainerSupport {
         saveAndGetWishlistAccommodation(wishlist, acc2);
 
         //when
-        List<WishlistDetailResDto> result = wishlistService.getAccommodationsFromWishlist(wishlist.getId(), guest.getId());
+        List<WishlistDetailResDto> result = wishlistService.getAccommodationsFromWishlist(wishlist.getId(), member.getId());
         em.flush();
         em.clear();
 
@@ -204,12 +204,12 @@ class WishlistServiceTest extends TestContainerSupport {
         MemoUpdateReqDto reqDto = new MemoUpdateReqDto("new-memo");
 
         //when
-        wishlistService.updateMemo(wishlist.getId(), acc.getId(), guest.getId(), reqDto);
+        wishlistService.updateMemo(wishlist.getId(), acc.getId(), member.getId(), reqDto);
         em.flush();
         em.clear();
 
         //then
-        WishlistAccommodation result = wishlistAccommodationRepository.findByAllIds(wishlist.getId(), acc.getId(), guest.getId()).get();
+        WishlistAccommodation result = wishlistAccommodationRepository.findByAllIds(wishlist.getId(), acc.getId(), member.getId()).get();
         assertThat(result.getMemo()).isEqualTo(reqDto.memo());
     }
 
@@ -231,7 +231,7 @@ class WishlistServiceTest extends TestContainerSupport {
         saveAndGetWishlistAccommodation(wishlist2, acc2);
 
         //when
-        List<WishlistsResDto> result = wishlistService.getAllWishlists(guest.getId());
+        List<WishlistsResDto> result = wishlistService.getAllWishlists(member.getId());
         em.flush();
         em.clear();
 
@@ -258,7 +258,7 @@ class WishlistServiceTest extends TestContainerSupport {
     }
 
     private Wishlist savedAndGetWishlist() {
-        return wishlistRepository.save(Wishlist.create(guest, "test-wishlist"));
+        return wishlistRepository.save(Wishlist.create(member, "test-wishlist"));
     }
 
     private Accommodation saveAndGetAccommodation() {

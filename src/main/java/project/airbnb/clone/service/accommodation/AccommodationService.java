@@ -11,15 +11,9 @@ import project.airbnb.clone.common.events.view.ViewHistoryEvent;
 import project.airbnb.clone.consts.DayType;
 import project.airbnb.clone.consts.Season;
 import project.airbnb.clone.dto.PageResponseDto;
-import project.airbnb.clone.dto.accommodation.AccSearchCondDto;
-import project.airbnb.clone.dto.accommodation.AccommodationPriceResDto;
-import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto;
+import project.airbnb.clone.dto.accommodation.*;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailImageDto;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailReviewDto;
-import project.airbnb.clone.dto.accommodation.FilteredAccListResDto;
-import project.airbnb.clone.dto.accommodation.MainAccListResDto;
-import project.airbnb.clone.dto.accommodation.MainAccResDto;
-import project.airbnb.clone.dto.accommodation.ViewHistoryResDto;
 import project.airbnb.clone.repository.dto.DetailAccommodationQueryDto;
 import project.airbnb.clone.repository.dto.ImageDataQueryDto;
 import project.airbnb.clone.repository.dto.MainAccListQueryDto;
@@ -44,13 +38,13 @@ public class AccommodationService {
     private final ApplicationEventPublisher eventPublisher;
     private final AccommodationQueryRepository accommodationQueryRepository;
 
-    public List<MainAccResDto> getAccommodations(Long guestId) {
+    public List<MainAccResDto> getAccommodations(Long memberId) {
         //TODO : 데이터 많아지면 네이티브 쿼리 고려
         LocalDate now = LocalDate.now();
         Season season = dateManager.getSeason(now);
         DayType dayType = dateManager.getDayType(now);
 
-        List<MainAccListQueryDto> accommodations = accommodationQueryRepository.getAreaAccommodations(season, dayType, guestId);
+        List<MainAccListQueryDto> accommodations = accommodationQueryRepository.getAreaAccommodations(season, dayType, memberId);
 
         return accommodations
                 .stream()
@@ -73,12 +67,12 @@ public class AccommodationService {
                 .toList();
     }
 
-    public PageResponseDto<FilteredAccListResDto> getFilteredPagingAccommodations(AccSearchCondDto searchDto, Long guestId, Pageable pageable) {
+    public PageResponseDto<FilteredAccListResDto> getFilteredPagingAccommodations(AccSearchCondDto searchDto, Long memberId, Pageable pageable) {
         LocalDate now = LocalDate.now();
         Season season = dateManager.getSeason(now);
         DayType dayType = dateManager.getDayType(now);
 
-        Page<FilteredAccListResDto> result = accommodationQueryRepository.getFilteredPagingAccommodations(searchDto, guestId, pageable, season, dayType);
+        Page<FilteredAccListResDto> result = accommodationQueryRepository.getFilteredPagingAccommodations(searchDto, memberId, pageable, season, dayType);
 
         return PageResponseDto.<FilteredAccListResDto>builder()
                               .contents(result.getContent())
@@ -88,19 +82,19 @@ public class AccommodationService {
                               .build();
     }
 
-    public DetailAccommodationResDto getDetailAccommodation(Long accId, Long guestId) {
+    public DetailAccommodationResDto getDetailAccommodation(Long accId, Long memberId) {
         LocalDate now = LocalDate.now();
         Season season = dateManager.getSeason(now);
         DayType dayType = dateManager.getDayType(now);
 
-        DetailAccommodationQueryDto detailAccQueryDto = accommodationQueryRepository.findAccommodation(accId, guestId, season, dayType)
+        DetailAccommodationQueryDto detailAccQueryDto = accommodationQueryRepository.findAccommodation(accId, memberId, season, dayType)
                                                                                     .orElseThrow(() -> new EntityNotFoundException("Accommodation with id " + accId + "cannot be found"));
         List<ImageDataQueryDto> images = accommodationQueryRepository.findImages(accId);
         List<String> amenities = accommodationQueryRepository.findAmenities(accId);
         List<DetailReviewDto> reviews = accommodationQueryRepository.findReviews(accId);
 
-        if (guestId != null) {
-            eventPublisher.publishEvent(new ViewHistoryEvent(accId, guestId));
+        if (memberId != null) {
+            eventPublisher.publishEvent(new ViewHistoryEvent(accId, memberId));
         }
 
         String thumbnail = images.stream()
@@ -117,8 +111,8 @@ public class AccommodationService {
         return DetailAccommodationResDto.from(detailAccQueryDto, detailImageDto, amenities, reviews);
     }
 
-    public List<ViewHistoryResDto> getRecentViewAccommodations(Long guestId) {
-        return accommodationQueryRepository.findViewHistories(guestId)
+    public List<ViewHistoryResDto> getRecentViewAccommodations(Long memberId) {
+        return accommodationQueryRepository.findViewHistories(memberId)
                                            .stream()
                                            .collect(Collectors.groupingBy(
                                                    dto -> dto.viewDate().toLocalDate(),

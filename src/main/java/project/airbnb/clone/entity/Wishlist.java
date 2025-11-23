@@ -1,14 +1,6 @@
 package project.airbnb.clone.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,18 +17,18 @@ public class Wishlist extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "guest_id", nullable = false)
-    private Guest guest;
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @Column(name = "name", length = 50, nullable = false)
     private String name;
 
-    public static Wishlist create(Guest guest, String name) {
-        return new Wishlist(guest, name);
+    public static Wishlist create(Member member, String name) {
+        return new Wishlist(member, name);
     }
 
-    private Wishlist(Guest guest, String name) {
-        this.guest = guest;
+    private Wishlist(Member member, String name) {
+        this.member = member;
         this.name = name;
     }
 

@@ -3,20 +3,10 @@ package project.airbnb.clone.controller.accommodation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import project.airbnb.clone.common.annotations.CurrentGuestId;
+import org.springframework.web.bind.annotation.*;
+import project.airbnb.clone.common.annotations.CurrentMemberId;
 import project.airbnb.clone.dto.PageResponseDto;
-import project.airbnb.clone.dto.accommodation.AccSearchCondDto;
-import project.airbnb.clone.dto.accommodation.AccommodationPriceResDto;
-import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto;
-import project.airbnb.clone.dto.accommodation.FilteredAccListResDto;
-import project.airbnb.clone.dto.accommodation.MainAccResDto;
-import project.airbnb.clone.dto.accommodation.ViewHistoryResDto;
+import project.airbnb.clone.dto.accommodation.*;
 import project.airbnb.clone.service.accommodation.AccommodationService;
 
 import java.time.LocalDate;
@@ -30,23 +20,23 @@ public class AccommodationController {
     private final AccommodationService accommodationService;
 
     @GetMapping
-    public ResponseEntity<List<MainAccResDto>> getAccommodations(@CurrentGuestId(required = false) Long id) {
-        List<MainAccResDto> result = accommodationService.getAccommodations(id);
+    public ResponseEntity<List<MainAccResDto>> getAccommodations(@CurrentMemberId(required = false) Long memberId) {
+        List<MainAccResDto> result = accommodationService.getAccommodations(memberId);
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/search")
     public ResponseEntity<PageResponseDto<FilteredAccListResDto>> getFilteredPagingAccommodations(@ModelAttribute AccSearchCondDto searchDto,
-                                                                                                  @CurrentGuestId(required = false) Long id,
+                                                                                                  @CurrentMemberId(required = false) Long memberId,
                                                                                                   Pageable pageable) {
-        PageResponseDto<FilteredAccListResDto> result = accommodationService.getFilteredPagingAccommodations(searchDto, id, pageable);
+        PageResponseDto<FilteredAccListResDto> result = accommodationService.getFilteredPagingAccommodations(searchDto, memberId, pageable);
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<DetailAccommodationResDto> getAccommodation(@PathVariable("id") Long accId,
-                                                                      @CurrentGuestId(required = false) Long guestId) {
-        DetailAccommodationResDto result = accommodationService.getDetailAccommodation(accId, guestId);
+                                                                      @CurrentMemberId(required = false) Long memberId) {
+        DetailAccommodationResDto result = accommodationService.getDetailAccommodation(accId, memberId);
         return ResponseEntity.ok(result);
     }
 
@@ -58,8 +48,8 @@ public class AccommodationController {
     }
 
     @GetMapping("/recent")
-    public ResponseEntity<List<ViewHistoryResDto>> getRecentViewAccommodations(@CurrentGuestId Long guestId) {
-        List<ViewHistoryResDto> result = accommodationService.getRecentViewAccommodations(guestId);
+    public ResponseEntity<List<ViewHistoryResDto>> getRecentViewAccommodations(@CurrentMemberId Long memberId) {
+        List<ViewHistoryResDto> result = accommodationService.getRecentViewAccommodations(memberId);
         return ResponseEntity.ok(result);
     }
 }

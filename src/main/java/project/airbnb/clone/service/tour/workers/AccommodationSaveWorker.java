@@ -3,12 +3,7 @@ package project.airbnb.clone.service.tour.workers;
 import project.airbnb.clone.consts.DayType;
 import project.airbnb.clone.consts.Season;
 import project.airbnb.clone.dto.accommodation.AccommodationProcessorDto;
-import project.airbnb.clone.entity.Accommodation;
-import project.airbnb.clone.entity.AccommodationAmenity;
-import project.airbnb.clone.entity.AccommodationImage;
-import project.airbnb.clone.entity.AccommodationPrice;
-import project.airbnb.clone.entity.Amenity;
-import project.airbnb.clone.entity.SigunguCode;
+import project.airbnb.clone.entity.*;
 import project.airbnb.clone.repository.facade.TourRepositoryFacadeManager;
 
 import java.util.ArrayList;

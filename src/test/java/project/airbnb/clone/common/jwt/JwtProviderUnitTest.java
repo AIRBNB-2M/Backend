@@ -19,10 +19,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 import project.airbnb.clone.common.jwt.JwtProperties.TokenProperties;
 import project.airbnb.clone.config.security.jwt.JwtAuthenticationToken;
 import project.airbnb.clone.consts.Role;
-import project.airbnb.clone.entity.Guest;
+import project.airbnb.clone.entity.Member;
 import project.airbnb.clone.model.AuthProviderUser;
 import project.airbnb.clone.model.PrincipalUser;
-import project.airbnb.clone.repository.jpa.GuestRepository;
+import project.airbnb.clone.repository.jpa.MemberRepository;
 
 import javax.crypto.SecretKey;
 import java.util.Base64;
@@ -38,7 +38,7 @@ import static org.mockito.Mockito.mock;
 class JwtProviderUnitTest {
 
     @Mock
-    GuestRepository guestRepository;
+    MemberRepository memberRepository;
 
     JwtProvider jwtProvider;
 
@@ -55,7 +55,7 @@ class JwtProviderUnitTest {
         refreshToken.setExpiration(1000);
         jwtProperties.setRefreshToken(refreshToken);
 
-        this.jwtProvider = new JwtProvider(guestRepository, jwtProperties);
+        this.jwtProvider = new JwtProvider(memberRepository, jwtProperties);
     }
 
     @Nested
@@ -66,13 +66,13 @@ class JwtProviderUnitTest {
         @DisplayName("액세스 토큰 생성")
         void generateAccessToken() {
             //given
-            Guest guest = mock(Guest.class);
+            Member member = mock(Member.class);
             String principalName = "principal";
 
-            given(guest.getId()).willReturn(1L);
+            given(member.getId()).willReturn(1L);
 
             //when
-            String result = jwtProvider.generateAccessToken(guest, principalName);
+            String result = jwtProvider.generateAccessToken(member, principalName);
 
             //then
             assertThat(result).isNotBlank();
@@ -83,13 +83,13 @@ class JwtProviderUnitTest {
         @DisplayName("리프레시 토큰 생성")
         void generateRefreshToken() {
             //given
-            Guest guest = mock(Guest.class);
+            Member member = mock(Member.class);
             String principalName = "principal";
 
-            given(guest.getId()).willReturn(1L);
+            given(member.getId()).willReturn(1L);
 
             //when
-            String result = jwtProvider.generateRefreshToken(guest, principalName);
+            String result = jwtProvider.generateRefreshToken(member, principalName);
 
             //then
             assertThat(result).isNotBlank();
@@ -170,13 +170,13 @@ class JwtProviderUnitTest {
     @DisplayName("생성된 토큰에서 Id와 PrincipalName을 추출할 수 있다.")
     void parseClaims() {
         //given
-        Guest guest = mock(Guest.class);
+        Member member = mock(Member.class);
         String inputPrincipalName = "principal";
         Long inputId = 1L;
 
-        given(guest.getId()).willReturn(inputId);
+        given(member.getId()).willReturn(inputId);
 
-        String token = jwtProvider.generateAccessToken(guest, inputPrincipalName);
+        String token = jwtProvider.generateAccessToken(member, inputPrincipalName);
 
         //when
         Long outputId = jwtProvider.getId(token);
@@ -195,12 +195,12 @@ class JwtProviderUnitTest {
         @DisplayName("성공 케이스")
         void success() {
             //given
-            Guest guest = mock(Guest.class);
-            given(guest.getId()).willReturn(1L);
-            given(guest.getRole()).willReturn(Role.GUEST);
-            given(guestRepository.getGuestById(1L)).willReturn(guest);
+            Member member = mock(Member.class);
+            given(member.getId()).willReturn(1L);
+            given(member.getRole()).willReturn(Role.GUEST);
+            given(memberRepository.getMemberById(1L)).willReturn(member);
 
-            String token = jwtProvider.generateAccessToken(guest, "principal");
+            String token = jwtProvider.generateAccessToken(member, "principal");
 
             //when
             Authentication authentication = jwtProvider.getAuthentication(token);
@@ -217,11 +217,11 @@ class JwtProviderUnitTest {
         @DisplayName("실패 케이스")
         void fail() {
             //given
-            Guest guest = mock(Guest.class);
-            given(guest.getId()).willReturn(1L);
-            given(guestRepository.getGuestById(1L)).willThrow(EntityNotFoundException.class);
+            Member member = mock(Member.class);
+            given(member.getId()).willReturn(1L);
+            given(memberRepository.getMemberById(1L)).willThrow(EntityNotFoundException.class);
 
-            String token = jwtProvider.generateAccessToken(guest, "principal");
+            String token = jwtProvider.generateAccessToken(member, "principal");
 
             //when
             //then

@@ -18,19 +18,8 @@ import project.airbnb.clone.common.events.view.ViewHistoryEvent;
 import project.airbnb.clone.consts.DayType;
 import project.airbnb.clone.consts.Season;
 import project.airbnb.clone.dto.PageResponseDto;
-import project.airbnb.clone.dto.accommodation.AccSearchCondDto;
-import project.airbnb.clone.dto.accommodation.AccommodationPriceResDto;
-import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto;
-import project.airbnb.clone.dto.accommodation.FilteredAccListResDto;
-import project.airbnb.clone.dto.accommodation.MainAccResDto;
-import project.airbnb.clone.dto.accommodation.ViewHistoryResDto;
-import project.airbnb.clone.entity.Accommodation;
-import project.airbnb.clone.entity.AccommodationImage;
-import project.airbnb.clone.entity.AccommodationPrice;
-import project.airbnb.clone.entity.AreaCode;
-import project.airbnb.clone.entity.Guest;
-import project.airbnb.clone.entity.SigunguCode;
-import project.airbnb.clone.entity.ViewHistory;
+import project.airbnb.clone.dto.accommodation.*;
+import project.airbnb.clone.entity.*;
 import project.airbnb.clone.service.DateManager;
 
 import java.time.LocalDate;
@@ -56,7 +45,7 @@ class AccommodationServiceTest extends TestContainerSupport {
 
     @MockitoBean DateManager dateManager;
 
-    Guest guest;
+    Member member;
     AreaCode seoulArea;
     AreaCode busanArea;
     SigunguCode gangnamSigungu;
@@ -64,8 +53,8 @@ class AccommodationServiceTest extends TestContainerSupport {
 
     @BeforeEach
     void setUp() {
-        guest = Guest.createForTest();
-        em.persist(guest);
+        member = Member.createForTest();
+        em.persist(member);
 
         seoulArea = AreaCode.create("11", "서울");
         busanArea = AreaCode.create("21", "부산");
@@ -101,7 +90,7 @@ class AccommodationServiceTest extends TestContainerSupport {
             given(dateManager.getDayType(any(LocalDate.class))).willReturn(WEEKEND);
 
             // when
-            List<MainAccResDto> result = accommodationService.getAccommodations(guest.getId());
+            List<MainAccResDto> result = accommodationService.getAccommodations(member.getId());
 
             // then
             assertThat(result).hasSize(2);
@@ -164,7 +153,7 @@ class AccommodationServiceTest extends TestContainerSupport {
             Pageable pageable = PageRequest.of(0, 10);
 
             // when
-            PageResponseDto<FilteredAccListResDto> result = accommodationService.getFilteredPagingAccommodations(searchDto, guest.getId(), pageable);
+            PageResponseDto<FilteredAccListResDto> result = accommodationService.getFilteredPagingAccommodations(searchDto, member.getId(), pageable);
 
             // then
             assertThat(result.getContents()).hasSize(1);
@@ -236,7 +225,7 @@ class AccommodationServiceTest extends TestContainerSupport {
 
         @Test
         @DisplayName("성공 - 상세 숙소 조회 (회원)")
-        void getDetailAccommodation_with_guest() {
+        void getDetailAccommodation_with_member() {
             // given
             Accommodation acc = createAccommodation("럭셔리 숙소", gangnamSigungu, 127.0, 37.5);
             em.persist(acc);
@@ -248,7 +237,7 @@ class AccommodationServiceTest extends TestContainerSupport {
             given(dateManager.getDayType(any(LocalDate.class))).willReturn(WEEKEND);
 
             // when
-            DetailAccommodationResDto result = accommodationService.getDetailAccommodation(acc.getId(), guest.getId());
+            DetailAccommodationResDto result = accommodationService.getDetailAccommodation(acc.getId(), member.getId());
 
             // then
             assertThat(result.accommodationId()).isEqualTo(acc.getId());
@@ -264,12 +253,12 @@ class AccommodationServiceTest extends TestContainerSupport {
                                                       .findFirst()
                                                       .orElseThrow();
             assertThat(event.accommodationId()).isEqualTo(acc.getId());
-            assertThat(event.guestId()).isEqualTo(guest.getId());
+            assertThat(event.memberId()).isEqualTo(member.getId());
         }
 
         @Test
         @DisplayName("성공 - 상세 숙소 조회 (비회원, 이벤트 발행 안함)")
-        void getDetailAccommodation_without_guest() {
+        void getDetailAccommodation_without_member() {
             // given
             Accommodation acc = createAccommodation("숙소", gangnamSigungu, 127.0, 37.5);
             em.persist(acc);
@@ -299,7 +288,7 @@ class AccommodationServiceTest extends TestContainerSupport {
             given(dateManager.getDayType(any(LocalDate.class))).willReturn(WEEKEND);
 
             // when & then
-            assertThatThrownBy(() -> accommodationService.getDetailAccommodation(nonExistentId, guest.getId()))
+            assertThatThrownBy(() -> accommodationService.getDetailAccommodation(nonExistentId, member.getId()))
                     .isInstanceOf(EntityNotFoundException.class)
                     .hasMessageContaining("Accommodation with id " + nonExistentId);
         }
@@ -327,15 +316,15 @@ class AccommodationServiceTest extends TestContainerSupport {
             LocalDateTime today = LocalDateTime.now();
             LocalDateTime yesterday = today.minusDays(1);
 
-            ViewHistory vh1 = ViewHistory.create(guest, acc1, today);
-            ViewHistory vh2 = ViewHistory.create(guest, acc2, today.minusHours(1));
-            ViewHistory vh3 = ViewHistory.create(guest, acc3, yesterday);
+            ViewHistory vh1 = ViewHistory.create(member, acc1, today);
+            ViewHistory vh2 = ViewHistory.create(member, acc2, today.minusHours(1));
+            ViewHistory vh3 = ViewHistory.create(member, acc3, yesterday);
             em.persist(vh1);
             em.persist(vh2);
             em.persist(vh3);
 
             // when
-            List<ViewHistoryResDto> result = accommodationService.getRecentViewAccommodations(guest.getId());
+            List<ViewHistoryResDto> result = accommodationService.getRecentViewAccommodations(member.getId());
 
             // then
             assertThat(result).hasSize(2);
@@ -357,13 +346,13 @@ class AccommodationServiceTest extends TestContainerSupport {
             createPriceAndImage(acc1, PEAK, WEEKEND, 100000);
             createPriceAndImage(acc2, PEAK, WEEKEND, 100000);
 
-            ViewHistory recent = ViewHistory.create(guest, acc1, LocalDateTime.now().minusDays(10));
-            ViewHistory old = ViewHistory.create(guest, acc2, LocalDateTime.now().minusDays(31));
+            ViewHistory recent = ViewHistory.create(member, acc1, LocalDateTime.now().minusDays(10));
+            ViewHistory old = ViewHistory.create(member, acc2, LocalDateTime.now().minusDays(31));
             em.persist(recent);
             em.persist(old);
 
             // when
-            List<ViewHistoryResDto> result = accommodationService.getRecentViewAccommodations(guest.getId());
+            List<ViewHistoryResDto> result = accommodationService.getRecentViewAccommodations(member.getId());
 
             // then
             assertThat(result).hasSize(1);

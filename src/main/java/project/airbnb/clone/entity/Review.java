@@ -27,18 +27,18 @@ public class Review extends BaseEntity {
     private Reservation reservation;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "guest_id", nullable = false)
-    private Guest guest;
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
-    public static Review create(double rating, String content, Reservation reservation, Guest guest) {
-        return new Review(content, rating, reservation, guest);
+    public static Review create(double rating, String content, Reservation reservation, Member member) {
+        return new Review(content, rating, reservation, member);
     }
 
-    private Review(String content, Double rating, Reservation reservation, Guest guest) {
+    private Review(String content, Double rating, Reservation reservation, Member member) {
         this.content = content;
         this.rating = rating;
         this.reservation = reservation;
-        this.guest = guest;
+        this.member = member;
     }
 
     public void update(Double rating, String content) {

@@ -6,5 +6,5 @@ import project.airbnb.clone.entity.Review;
 import java.util.Optional;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    Optional<Review> findByIdAndGuestId(Long id, Long guestId);
+    Optional<Review> findByIdAndMemberId(Long id, Long memberId);
 }

@@ -15,7 +15,7 @@ import java.util.List;
 import static com.querydsl.core.types.Projections.constructor;
 import static project.airbnb.clone.entity.QAccommodation.accommodation;
 import static project.airbnb.clone.entity.QAccommodationImage.accommodationImage;
-import static project.airbnb.clone.entity.QGuest.guest;
+import static project.airbnb.clone.entity.QMember.member;
 import static project.airbnb.clone.entity.QReservation.reservation;
 import static project.airbnb.clone.entity.QReview.review;
 import static project.airbnb.clone.entity.QWishlist.wishlist;
@@ -28,19 +28,19 @@ public class WishlistQueryRepository extends CustomQuerydslRepositorySupport {
         super(Wishlist.class);
     }
 
-    public boolean existsWishlistAccommodation(Long wishlistId, Long accommodationId, Long guestId) {
+    public boolean existsWishlistAccommodation(Long wishlistId, Long accommodationId, Long memberId) {
         return getQueryFactory()
                 .selectOne()
                 .from(wishlistAccommodation)
                 .join(wishlistAccommodation.wishlist, wishlist)
                 .where(wishlistAccommodation.accommodation.id.eq(accommodationId),
                         wishlistAccommodation.wishlist.id.eq(wishlistId),
-                        wishlist.guest.id.eq(guestId)
+                        wishlist.member.id.eq(memberId)
                 )
                 .fetchFirst() != null;
     }
 
-    public List<WishlistDetailQueryDto> findWishlistDetails(Long wishlistId, Long guestId) {
+    public List<WishlistDetailQueryDto> findWishlistDetails(Long wishlistId, Long memberId) {
         return select(constructor(WishlistDetailQueryDto.class,
                 accommodation.id,
                 wishlist.name,
@@ -57,7 +57,7 @@ public class WishlistQueryRepository extends CustomQuerydslRepositorySupport {
                 .leftJoin(reservation).on(reservation.accommodation.eq(accommodation))
                 .leftJoin(review).on(review.reservation.eq(reservation))
                 .where(wishlist.id.eq(wishlistId),
-                        wishlist.guest.id.eq(guestId)
+                        wishlist.member.id.eq(memberId)
                 )
                 .groupBy(accommodation.id, wishlist.name, accommodation.title, accommodation.description, accommodation.mapX, accommodation.mapY, wishlistAccommodation.memo)
                 .fetch();
@@ -72,7 +72,7 @@ public class WishlistQueryRepository extends CustomQuerydslRepositorySupport {
                 .fetch();
     }
 
-    public List<WishlistsResDto> getAllWishlists(Long guestId) {
+    public List<WishlistsResDto> getAllWishlists(Long memberId) {
         QWishlistAccommodation waSub = new QWishlistAccommodation("waSub");
         JPQLQuery<Long> recentAccIdSubquery = JPAExpressions.select(waSub.accommodation.id)
                                                             .from(waSub)
@@ -89,12 +89,12 @@ public class WishlistQueryRepository extends CustomQuerydslRepositorySupport {
                 accommodationImage.imageUrl,
                 wishlistAccommodation.accommodation.count().intValue().coalesce(0)))
                 .from(wishlist)
-                .join(wishlist.guest, guest)
+                .join(wishlist.member, member)
                 .leftJoin(wishlistAccommodation).on(wishlistAccommodation.wishlist.eq(wishlist))
                 .leftJoin(accommodation).on(accommodation.id.eq(recentAccIdSubquery))
                 .leftJoin(accommodationImage)
                 .on(accommodationImage.accommodation.eq(accommodation).and(accommodationImage.thumbnail.isTrue()))
-                .where(guest.id.eq(guestId))
+                .where(member.id.eq(memberId))
                 .groupBy(wishlist.id, wishlist.name, accommodationImage.imageUrl)
                 .fetch();
     }

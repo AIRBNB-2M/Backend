@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import project.airbnb.clone.WithMockGuest;
+import project.airbnb.clone.WithMockMember;
 import project.airbnb.clone.controller.RestDocsTestSupport;
 import project.airbnb.clone.dto.chat.ChatMessageResDto;
 import project.airbnb.clone.dto.chat.ChatMessagesResDto;
@@ -51,7 +51,7 @@ class ChatControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("받은 대화 요청 목록 조회")
-    @WithMockGuest
+    @WithMockMember
     void getReceivedChatRequests() throws Exception {
         //given
         List<RequestChatResDto> response = List.of(
@@ -117,7 +117,7 @@ class ChatControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("보낸 대화 요청 목록 조회")
-    @WithMockGuest
+    @WithMockMember
     void getSentChatRequests() throws Exception {
         //given
         List<RequestChatResDto> response = List.of(
@@ -183,7 +183,7 @@ class ChatControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("대화 요청")
-    @WithMockGuest
+    @WithMockMember
     void requestChat() throws Exception {
         //given
         RequestChatReqDto request = new RequestChatReqDto(1L);
@@ -258,7 +258,7 @@ class ChatControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("대화 요청 수락")
-    @WithMockGuest
+    @WithMockMember
     void acceptRequestChat() throws Exception {
         //given
         ChatRoomResDto response = new ChatRoomResDto(1L, "custom-room-name", 1L, "Ahmad Gul", "https://example.com", true,
@@ -277,10 +277,10 @@ class ChatControllerTest extends RestDocsTestSupport {
                        status().isOk(),
                        jsonPath("$.roomId").value(response.roomId()),
                        jsonPath("$.customRoomName").value(response.customRoomName()),
-                       jsonPath("$.guestId").value(response.guestId()),
-                       jsonPath("$.guestName").value(response.guestName()),
-                       jsonPath("$.guestProfileImage").value(response.guestProfileImage()),
-                       jsonPath("$.isOtherGuestActive").value(response.isOtherGuestActive()),
+                       jsonPath("$.memberId").value(response.memberId()),
+                       jsonPath("$.memberName").value(response.memberName()),
+                       jsonPath("$.memberProfileImage").value(response.memberProfileImage()),
+                       jsonPath("$.isOtherMemberActive").value(response.isOtherMemberActive()),
                        jsonPath("$.lastMessage").value(response.lastMessage()),
                        jsonPath("$.lastMessageTime").exists(),
                        jsonPath("$.unreadCount").value(response.unreadCount())
@@ -299,16 +299,16 @@ class ChatControllerTest extends RestDocsTestSupport {
                                                fieldWithPath("customRoomName")
                                                        .type(STRING)
                                                        .description("채팅방 이름"),
-                                               fieldWithPath("guestId")
+                                               fieldWithPath("memberId")
                                                        .type(NUMBER)
                                                        .description("상대방 ID"),
-                                               fieldWithPath("guestName")
+                                               fieldWithPath("memberName")
                                                        .type(STRING)
                                                        .description("상대방 이름"),
-                                               fieldWithPath("guestProfileImage")
+                                               fieldWithPath("memberProfileImage")
                                                        .type(STRING)
                                                        .description("상대방 프로필 이미지 URL"),
-                                               fieldWithPath("isOtherGuestActive")
+                                               fieldWithPath("isOtherMemberActive")
                                                        .type(BOOLEAN)
                                                        .description("상대방 채팅방 나감 여부"),
                                                fieldWithPath("lastMessage")
@@ -331,7 +331,7 @@ class ChatControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("대화 요청 거절")
-    @WithMockGuest
+    @WithMockMember
     void rejectRequestChat() throws Exception {
         //given
 
@@ -359,7 +359,7 @@ class ChatControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("참여중인 전체 채팅방 조회")
-    @WithMockGuest
+    @WithMockMember
     void getChatRooms() throws Exception {
         //given
         List<ChatRoomResDto> response = List.of(
@@ -398,16 +398,16 @@ class ChatControllerTest extends RestDocsTestSupport {
                                                fieldWithPath("[].customRoomName")
                                                        .type(STRING)
                                                        .description("채팅방 이름"),
-                                               fieldWithPath("[].guestId")
+                                               fieldWithPath("[].memberId")
                                                        .type(NUMBER)
                                                        .description("상대방 ID"),
-                                               fieldWithPath("[].guestName")
+                                               fieldWithPath("[].memberName")
                                                        .type(STRING)
                                                        .description("상대방 이름"),
-                                               fieldWithPath("[].guestProfileImage")
+                                               fieldWithPath("[].memberProfileImage")
                                                        .type(STRING)
                                                        .description("상대방 프로필 이미지 URL"),
-                                               fieldWithPath("[].isOtherGuestActive")
+                                               fieldWithPath("[].isOtherMemberActive")
                                                        .type(BOOLEAN)
                                                        .description("상대방 채팅방 나감 여부"),
                                                fieldWithPath("[].lastMessage")
@@ -430,7 +430,7 @@ class ChatControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("채팅방 메시지 기록 조회")
-    @WithMockGuest
+    @WithMockMember
     void getMessageHistories() throws Exception {
         //given
         List<ChatMessageResDto> messages = List.of(
@@ -505,7 +505,7 @@ class ChatControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("채팅방 이름 설정")
-    @WithMockGuest
+    @WithMockMember
     void updateChatRoomName() throws Exception {
         //given
         UpdateChatRoomNameReqDto request = new UpdateChatRoomNameReqDto("custom-room-name", 1L);
@@ -527,10 +527,10 @@ class ChatControllerTest extends RestDocsTestSupport {
                        status().isOk(),
                        jsonPath("$.roomId").value(response.roomId()),
                        jsonPath("$.customRoomName").value(response.customRoomName()),
-                       jsonPath("$.guestId").value(response.guestId()),
-                       jsonPath("$.guestName").value(response.guestName()),
-                       jsonPath("$.guestProfileImage").value(response.guestProfileImage()),
-                       jsonPath("$.isOtherGuestActive").value(response.isOtherGuestActive()),
+                       jsonPath("$.memberId").value(response.memberId()),
+                       jsonPath("$.memberName").value(response.memberName()),
+                       jsonPath("$.memberProfileImage").value(response.memberProfileImage()),
+                       jsonPath("$.isOtherMemberActive").value(response.isOtherMemberActive()),
                        jsonPath("$.lastMessage").value(response.lastMessage()),
                        jsonPath("$.lastMessageTime").exists(),
                        jsonPath("$.unreadCount").value(response.unreadCount())
@@ -546,7 +546,7 @@ class ChatControllerTest extends RestDocsTestSupport {
                                                fieldWithPath("customName")
                                                        .description("원하는 채팅방 이름")
                                                        .type(STRING),
-                                               fieldWithPath("otherGuestId")
+                                               fieldWithPath("otherMemberId")
                                                .description("상대방 사용자 ID")
                                                .type(NUMBER)
                                        )
@@ -557,16 +557,16 @@ class ChatControllerTest extends RestDocsTestSupport {
                                                fieldWithPath("customRoomName")
                                                        .type(STRING)
                                                        .description("채팅방 이름"),
-                                               fieldWithPath("guestId")
+                                               fieldWithPath("memberId")
                                                        .type(NUMBER)
                                                        .description("상대방 ID"),
-                                               fieldWithPath("guestName")
+                                               fieldWithPath("memberName")
                                                        .type(STRING)
                                                        .description("상대방 이름"),
-                                               fieldWithPath("guestProfileImage")
+                                               fieldWithPath("memberProfileImage")
                                                        .type(STRING)
                                                        .description("상대방 프로필 이미지 URL"),
-                                               fieldWithPath("isOtherGuestActive")
+                                               fieldWithPath("isOtherMemberActive")
                                                        .type(BOOLEAN)
                                                        .description("상대방 채팅방 나감 여부"),
                                                fieldWithPath("lastMessage")
@@ -590,7 +590,7 @@ class ChatControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("채팅방 나가기")
-    @WithMockGuest
+    @WithMockMember
     void leaveChatRoom() throws Exception {
         //given
         LeaveChatRoomReqDto request = new LeaveChatRoomReqDto(true);

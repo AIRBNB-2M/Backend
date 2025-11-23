@@ -19,7 +19,7 @@ public class OAuthSecurityConfigurer extends AbstractHttpConfigurer<OAuthSecurit
     private final OAuthAuthenticationFailureHandler OAuthAuthenticationFailureHandler;
 
     @Override
-    public void init(HttpSecurity http) {
+    public void init(HttpSecurity http) throws Exception {
         http
                 .oauth2Login(oauth -> oauth
                         .userInfoEndpoint(userInfo -> userInfo

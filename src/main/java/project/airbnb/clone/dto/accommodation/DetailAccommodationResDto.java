@@ -33,10 +33,10 @@ public record DetailAccommodationResDto(
     }
 
     public record DetailReviewDto(
-            Long guestId,
-            String guestName,
+            Long memberId,
+            String memberName,
             String profileUrl,
-            LocalDateTime guestCreatedDate,
+            LocalDateTime memberCreatedDate,
             LocalDateTime reviewCreatedDate,
             double rating,
             String content) {

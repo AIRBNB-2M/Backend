@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import project.airbnb.clone.WithMockGuest;
+import project.airbnb.clone.WithMockMember;
 import project.airbnb.clone.controller.RestDocsTestSupport;
 import project.airbnb.clone.dto.wishlist.AddAccToWishlistReqDto;
 import project.airbnb.clone.dto.wishlist.MemoUpdateReqDto;
@@ -50,7 +50,7 @@ class WishlistControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("숙소 위시리스트 등록")
-    @WithMockGuest
+    @WithMockMember
     void createWishlist() throws Exception {
         //given
         WishlistCreateReqDto requestDto = new WishlistCreateReqDto("my-wishlist");
@@ -93,7 +93,7 @@ class WishlistControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("위시리스트에 숙소 추가")
-    @WithMockGuest
+    @WithMockMember
     void addAccommodation() throws Exception {
         //given
         AddAccToWishlistReqDto requestDto = new AddAccToWishlistReqDto(1L);
@@ -127,7 +127,7 @@ class WishlistControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("위시리스트에서 숙소 제거")
-    @WithMockGuest
+    @WithMockMember
     void removeAccommodation() throws Exception {
         //given
 
@@ -158,7 +158,7 @@ class WishlistControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("위시리스트의 이름 변경")
-    @WithMockGuest
+    @WithMockMember
     void updateWishlistName() throws Exception {
         //given
         WishlistUpdateReqDto requestDto = new WishlistUpdateReqDto("new-wishlist-name");
@@ -194,7 +194,7 @@ class WishlistControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("위시리스트 제거")
-    @WithMockGuest
+    @WithMockMember
     void removeWishlist() throws Exception {
         //given
 
@@ -222,7 +222,7 @@ class WishlistControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("위시리스트 조회")
-    @WithMockGuest
+    @WithMockMember
     void getAccommodationsFromWishlist() throws Exception {
         //given
         List<WishlistDetailResDto> response = List.of(
@@ -293,7 +293,7 @@ class WishlistControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("위시리스트 내에 있는 숙소에 메모 수정(저장)")
-    @WithMockGuest
+    @WithMockMember
     void updateMemo() throws Exception {
         //given
         MemoUpdateReqDto requestDto = new MemoUpdateReqDto("new-memo");
@@ -332,7 +332,7 @@ class WishlistControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("위시리스트 목록 조회")
-    @WithMockGuest
+    @WithMockMember
     void getAllWishlists() throws Exception {
         //given
         List<WishlistsResDto> response = List.of(

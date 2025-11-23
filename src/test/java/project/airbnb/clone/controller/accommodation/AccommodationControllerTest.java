@@ -4,18 +4,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import project.airbnb.clone.WithMockGuest;
+import project.airbnb.clone.WithMockMember;
 import project.airbnb.clone.controller.RestDocsTestSupport;
 import project.airbnb.clone.dto.PageResponseDto;
-import project.airbnb.clone.dto.accommodation.AccommodationPriceResDto;
-import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto;
+import project.airbnb.clone.dto.accommodation.*;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailImageDto;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailReviewDto;
-import project.airbnb.clone.dto.accommodation.FilteredAccListResDto;
-import project.airbnb.clone.dto.accommodation.MainAccListResDto;
-import project.airbnb.clone.dto.accommodation.MainAccResDto;
-import project.airbnb.clone.dto.accommodation.ViewHistoryDto;
-import project.airbnb.clone.dto.accommodation.ViewHistoryResDto;
 import project.airbnb.clone.service.accommodation.AccommodationService;
 
 import java.time.LocalDate;
@@ -260,8 +254,8 @@ class AccommodationControllerTest extends RestDocsTestSupport {
 
         LocalDateTime now = LocalDateTime.now();
         List<DetailReviewDto> reviewDtos = List.of(
-                new DetailReviewDto(1L, "guest-A", "https://example.com/profile-A.jpg", now, now, 4.5, "review-content-1"),
-                new DetailReviewDto(2L, "guest-B", "https://example.com/profile-B.jpg", now, now, 4.7, "review-content-2")
+                new DetailReviewDto(1L, "member-A", "https://example.com/profile-A.jpg", now, now, 4.5, "review-content-1"),
+                new DetailReviewDto(2L, "member-B", "https://example.com/profile-B.jpg", now, now, 4.7, "review-content-2")
         );
         DetailAccommodationResDto response = new DetailAccommodationResDto(accommodationId, "acc-title", 5, "경기도 부천시...", 35.3, 40.1,
                 "10:00", "14:00", "acc-overview", "054-855-8552", "7일 이내 100%",
@@ -372,16 +366,16 @@ class AccommodationControllerTest extends RestDocsTestSupport {
                                                        .type(ARRAY)
                                                        .attributes(key("itemsType").value("string"))
                                                        .description("숙소 보유 편의시설 목록"),
-                                               fieldWithPath("reviews[].guestId")
+                                               fieldWithPath("reviews[].memberId")
                                                        .type(NUMBER)
                                                        .description("리뷰 작성자 ID"),
-                                               fieldWithPath("reviews[].guestName")
+                                               fieldWithPath("reviews[].memberName")
                                                        .type(STRING)
                                                        .description("리뷰 작성자명"),
                                                fieldWithPath("reviews[].profileUrl")
                                                        .type(STRING)
                                                        .description("리뷰 작성자 프로필 이미지"),
-                                               fieldWithPath("reviews[].guestCreatedDate")
+                                               fieldWithPath("reviews[].memberCreatedDate")
                                                        .type(STRING)
                                                        .description("리뷰 작성자 가입일"),
                                                fieldWithPath("reviews[].reviewCreatedDate")
@@ -401,7 +395,7 @@ class AccommodationControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("최근 조회 숙소 이력")
-    @WithMockGuest
+    @WithMockMember
     void getRecentViewAccommodations() throws Exception {
         //given
         LocalDateTime today = LocalDateTime.now();

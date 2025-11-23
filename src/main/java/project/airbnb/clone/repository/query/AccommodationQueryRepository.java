@@ -14,11 +14,7 @@ import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailRe
 import project.airbnb.clone.dto.accommodation.FilteredAccListResDto;
 import project.airbnb.clone.dto.accommodation.ViewHistoryDto;
 import project.airbnb.clone.entity.Accommodation;
-import project.airbnb.clone.repository.dto.AccAllImagesQueryDto;
-import project.airbnb.clone.repository.dto.DetailAccommodationQueryDto;
-import project.airbnb.clone.repository.dto.FilteredAccListQueryDto;
-import project.airbnb.clone.repository.dto.ImageDataQueryDto;
-import project.airbnb.clone.repository.dto.MainAccListQueryDto;
+import project.airbnb.clone.repository.dto.*;
 import project.airbnb.clone.repository.query.support.CustomQuerydslRepositorySupport;
 
 import java.time.LocalDateTime;
@@ -38,7 +34,7 @@ import static project.airbnb.clone.entity.QAccommodationImage.accommodationImage
 import static project.airbnb.clone.entity.QAccommodationPrice.accommodationPrice;
 import static project.airbnb.clone.entity.QAmenity.amenity;
 import static project.airbnb.clone.entity.QAreaCode.areaCode;
-import static project.airbnb.clone.entity.QGuest.guest;
+import static project.airbnb.clone.entity.QMember.member;
 import static project.airbnb.clone.entity.QReservation.reservation;
 import static project.airbnb.clone.entity.QReview.review;
 import static project.airbnb.clone.entity.QSigunguCode.sigunguCode;
@@ -53,16 +49,16 @@ public class AccommodationQueryRepository extends CustomQuerydslRepositorySuppor
         super(Accommodation.class);
     }
 
-    public List<MainAccListQueryDto> getAreaAccommodations(Season season, DayType dayType, Long guestId) {
-        return new AccommodationQueryBuilder(getQueryFactory(), dayType, season, guestId)
+    public List<MainAccListQueryDto> getAreaAccommodations(Season season, DayType dayType, Long memberId) {
+        return new AccommodationQueryBuilder(getQueryFactory(), dayType, season, memberId)
                 .fetchMainAccList();
     }
 
     public Page<FilteredAccListResDto> getFilteredPagingAccommodations(AccSearchCondDto searchDto,
-                                                                       Long guestId, Pageable pageable,
+                                                                       Long memberId, Pageable pageable,
                                                                        Season season, DayType dayType) {
         //이미지 목록 제외 필드 조회
-        List<FilteredAccListQueryDto> queryDtos = new AccommodationQueryBuilder(getQueryFactory(), dayType, season, guestId)
+        List<FilteredAccListQueryDto> queryDtos = new AccommodationQueryBuilder(getQueryFactory(), dayType, season, memberId)
                 .fetchFilteredAccList(pageable,
                         eqAreaCode(searchDto.areaCode()),
                         goePrice(searchDto.priceGoe()),
@@ -114,8 +110,8 @@ public class AccommodationQueryRepository extends CustomQuerydslRepositorySuppor
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
 
-    public Optional<DetailAccommodationQueryDto> findAccommodation(Long accId, Long guestId, Season season, DayType dayType) {
-        return new AccommodationQueryBuilder(getQueryFactory(), dayType, season, guestId)
+    public Optional<DetailAccommodationQueryDto> findAccommodation(Long accId, Long memberId, Season season, DayType dayType) {
+        return new AccommodationQueryBuilder(getQueryFactory(), dayType, season, memberId)
                 .fetchDetailAcc(accId);
     }
 
@@ -140,22 +136,22 @@ public class AccommodationQueryRepository extends CustomQuerydslRepositorySuppor
     public List<DetailReviewDto> findReviews(Long accId) {
         return select(constructor(
                 DetailReviewDto.class,
-                guest.id,
-                guest.name,
-                guest.profileUrl,
-                guest.createdAt,
+                member.id,
+                member.name,
+                member.profileUrl,
+                member.createdAt,
                 review.createdAt,
                 review.rating,
                 review.content))
                 .from(reservation)
                 .join(review).on(review.reservation.eq(reservation))
-                .join(review.guest, guest)
+                .join(review.member, member)
                 .where(reservation.accommodation.id.eq(accId))
                 .orderBy(review.createdAt.desc())
                 .fetch();
     }
 
-    public List<ViewHistoryDto> findViewHistories(Long guestId) {
+    public List<ViewHistoryDto> findViewHistories(Long memberId) {
         return select(constructor(
                 ViewHistoryDto.class,
                 viewHistory.viewedAt,
@@ -173,12 +169,12 @@ public class AccommodationQueryRepository extends CustomQuerydslRepositorySuppor
                                                                              .and(accommodationImage.thumbnail.isTrue()))
 
                 .leftJoin(wishlistAccommodation).on(wishlistAccommodation.accommodation.eq(accommodation))
-                .leftJoin(wishlistAccommodation.wishlist, wishlist).on(wishlist.guest.id.eq(guestId))
+                .leftJoin(wishlistAccommodation.wishlist, wishlist).on(wishlist.member.id.eq(memberId))
 
                 .leftJoin(reservation).on(reservation.accommodation.eq(accommodation))
                 .leftJoin(review).on(review.reservation.eq(reservation))
 
-                .where(viewHistory.guest.id.eq(guestId)
+                .where(viewHistory.member.id.eq(memberId)
                                            .and(viewHistory.viewedAt.after(LocalDateTime.now().minusDays(30))))
 
                 .groupBy(viewHistory.viewedAt, accommodation.id, accommodation.title, accommodationImage.imageUrl, wishlist.id, wishlist.name)

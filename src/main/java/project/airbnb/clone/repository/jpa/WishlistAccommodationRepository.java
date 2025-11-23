@@ -25,9 +25,9 @@ public interface WishlistAccommodationRepository extends JpaRepository<WishlistA
                 JOIN wa.wishlist w
                 WHERE wa.accommodation.id = :accommodationId
                 AND w.id = :wishlistId
-                AND w.guest.id = :guestId
+                AND w.member.id = :memberId
             """)
     Optional<WishlistAccommodation> findByAllIds(@Param("wishlistId") Long wishlistId,
                                                  @Param("accommodationId") Long accommodationId,
-                                                 @Param("guestId") Long guestId);
+                                                 @Param("memberId") Long memberId);
 }

@@ -1,5 +1,6 @@
 package project.airbnb.clone.config.security.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
@@ -9,7 +10,6 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import tools.jackson.databind.json.JsonMapper;
 
 public class RestApiDsl<H extends HttpSecurityBuilder<H>> extends
         AbstractAuthenticationFilterConfigurer<H, RestApiDsl<H>, RestAuthenticationFilter> {
@@ -17,12 +17,12 @@ public class RestApiDsl<H extends HttpSecurityBuilder<H>> extends
     private AuthenticationSuccessHandler successHandler;
     private AuthenticationFailureHandler failureHandler;
 
-    public RestApiDsl(JsonMapper jsonMapper) {
-        super(new RestAuthenticationFilter(jsonMapper), null);
+    public RestApiDsl(ObjectMapper objectMapper) {
+        super(new RestAuthenticationFilter(objectMapper), null);
     }
 
     @Override
-    public void init(H http) {
+    public void init(H http) throws Exception {
         super.init(http);
     }
 

@@ -16,7 +16,7 @@ import project.airbnb.clone.common.exceptions.EmailAlreadyExistsException;
 import project.airbnb.clone.dto.jwt.TokenResponse;
 import project.airbnb.clone.model.PrincipalUser;
 import project.airbnb.clone.model.ProviderUser;
-import project.airbnb.clone.service.guest.GuestService;
+import project.airbnb.clone.service.member.MemberService;
 import project.airbnb.clone.service.jwt.TokenService;
 
 import java.io.IOException;
@@ -29,7 +29,7 @@ public class OAuthAuthenticationSuccessHandler extends SimpleUrlAuthenticationSu
     @Value("${app.frontend-url:http://localhost:3000}")
     private String frondEndUrl;
 
-    private final GuestService guestService;
+    private final MemberService memberService;
     private final TokenService tokenService;
     private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
@@ -39,7 +39,7 @@ public class OAuthAuthenticationSuccessHandler extends SimpleUrlAuthenticationSu
             PrincipalUser principal = (PrincipalUser) authentication.getPrincipal();
             ProviderUser providerUser = principal.providerUser();
 
-            guestService.register(providerUser);
+            memberService.register(providerUser);
             TokenResponse tokenResponse = tokenService.generateAndSendToken(providerUser.getEmail(), providerUser.getPrincipalName(), response);
 
             log.debug("OAuth 인증 성공, 토큰 발급");

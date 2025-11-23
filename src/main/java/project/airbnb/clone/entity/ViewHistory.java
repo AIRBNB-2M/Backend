@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "view_histories", uniqueConstraints =
-    @UniqueConstraint(name = "uk_view_histories_guest_accommodation", columnNames = {"guest_id", "accommodation_id"})
+    @UniqueConstraint(name = "uk_view_histories_member_accommodation", columnNames = {"member_id", "accommodation_id"})
 )
 public class ViewHistory extends BaseEntity {
 
@@ -25,23 +25,23 @@ public class ViewHistory extends BaseEntity {
     private Accommodation accommodation;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "guest_id", nullable = false)
-    private Guest guest;
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @Column(name = "viewed_at", nullable = false)
     private LocalDateTime viewedAt;
 
-    public static ViewHistory ofNow(Accommodation accommodation, Guest guest) {
-        return new ViewHistory(accommodation, guest, LocalDateTime.now());
+    public static ViewHistory ofNow(Accommodation accommodation, Member member) {
+        return new ViewHistory(accommodation, member, LocalDateTime.now());
     }
 
-    public static ViewHistory create(Guest guest, Accommodation accommodation, LocalDateTime viewedAt) {
-        return new ViewHistory(accommodation, guest, viewedAt);
+    public static ViewHistory create(Member member, Accommodation accommodation, LocalDateTime viewedAt) {
+        return new ViewHistory(accommodation, member, viewedAt);
     }
 
-    private ViewHistory(Accommodation accommodation, Guest guest, LocalDateTime viewedAt) {
+    private ViewHistory(Accommodation accommodation, Member member, LocalDateTime viewedAt) {
         this.accommodation = accommodation;
-        this.guest = guest;
+        this.member = member;
         this.viewedAt = viewedAt;
     }
 }

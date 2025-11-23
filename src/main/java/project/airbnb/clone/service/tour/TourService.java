@@ -7,12 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import project.airbnb.clone.common.clients.TourApiClient;
 import project.airbnb.clone.dto.accommodation.AccommodationProcessorDto;
 import project.airbnb.clone.repository.facade.TourRepositoryFacadeManager;
-import project.airbnb.clone.service.tour.workers.AccommodationSaveWorker;
-import project.airbnb.clone.service.tour.workers.AreaListWorker;
-import project.airbnb.clone.service.tour.workers.DetailCommonWorker;
-import project.airbnb.clone.service.tour.workers.DetailImageWorker;
-import project.airbnb.clone.service.tour.workers.DetailInfoWorker;
-import project.airbnb.clone.service.tour.workers.DetailIntroWorker;
+import project.airbnb.clone.service.tour.workers.*;
 
 import java.util.List;
 

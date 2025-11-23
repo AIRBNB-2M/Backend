@@ -4,22 +4,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import project.airbnb.clone.common.annotations.CurrentGuestId;
-import project.airbnb.clone.dto.wishlist.AddAccToWishlistReqDto;
-import project.airbnb.clone.dto.wishlist.MemoUpdateReqDto;
-import project.airbnb.clone.dto.wishlist.WishlistCreateReqDto;
-import project.airbnb.clone.dto.wishlist.WishlistCreateResDto;
-import project.airbnb.clone.dto.wishlist.WishlistDetailResDto;
-import project.airbnb.clone.dto.wishlist.WishlistUpdateReqDto;
-import project.airbnb.clone.dto.wishlist.WishlistsResDto;
+import org.springframework.web.bind.annotation.*;
+import project.airbnb.clone.common.annotations.CurrentMemberId;
+import project.airbnb.clone.dto.wishlist.*;
 import project.airbnb.clone.service.accommodation.WishlistService;
 
 import java.util.List;
@@ -33,16 +20,16 @@ public class WishlistController {
 
     @PostMapping
     public ResponseEntity<WishlistCreateResDto> createWishlist(@Valid @RequestBody WishlistCreateReqDto reqDto,
-                                                               @CurrentGuestId Long guestId) {
-        WishlistCreateResDto resDto = wishlistService.createWishlist(reqDto, guestId);
+                                                               @CurrentMemberId Long memberId) {
+        WishlistCreateResDto resDto = wishlistService.createWishlist(reqDto, memberId);
         return new ResponseEntity<>(resDto, HttpStatus.CREATED);
     }
 
     @PostMapping("/{wishlistId}/accommodations")
     public ResponseEntity<?> addAccommodation(@PathVariable("wishlistId") Long wishlistId,
                                               @RequestBody AddAccToWishlistReqDto reqDto,
-                                              @CurrentGuestId Long guestId) {
-        wishlistService.addAccommodationToWishlist(wishlistId, reqDto, guestId);
+                                              @CurrentMemberId Long memberId) {
+        wishlistService.addAccommodationToWishlist(wishlistId, reqDto, memberId);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -50,44 +37,44 @@ public class WishlistController {
     public ResponseEntity<?> updateMemo(@PathVariable("wishlistId") Long wishlistId,
                                         @PathVariable("accommodationId") Long accommodationId,
                                         @Valid @RequestBody MemoUpdateReqDto reqDto,
-                                        @CurrentGuestId Long guestId) {
-        wishlistService.updateMemo(wishlistId, accommodationId, guestId, reqDto);
+                                        @CurrentMemberId Long memberId) {
+        wishlistService.updateMemo(wishlistId, accommodationId, memberId, reqDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping("/{wishlistId}/accommodations/{accommodationId}")
     public ResponseEntity<?> removeAccommodation(@PathVariable("wishlistId") Long wishlistId,
                                                  @PathVariable("accommodationId") Long accommodationId,
-                                                 @CurrentGuestId Long guestId) {
-        wishlistService.removeAccommodationFromWishlist(wishlistId, accommodationId, guestId);
+                                                 @CurrentMemberId Long memberId) {
+        wishlistService.removeAccommodationFromWishlist(wishlistId, accommodationId, memberId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PutMapping("/{wishlistId}")
     public ResponseEntity<?> updateWishlistName(@PathVariable("wishlistId") Long wishlistId,
                                                 @Valid @RequestBody WishlistUpdateReqDto reqDto,
-                                                @CurrentGuestId Long guestId) {
-        wishlistService.updateWishlistName(wishlistId, reqDto, guestId);
+                                                @CurrentMemberId Long memberId) {
+        wishlistService.updateWishlistName(wishlistId, reqDto, memberId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping("/{wishlistId}")
     public ResponseEntity<?> removeWishlist(@PathVariable("wishlistId") Long wishlistId,
-                                            @CurrentGuestId Long guestId) {
-        wishlistService.removeWishlist(wishlistId, guestId);
+                                            @CurrentMemberId Long memberId) {
+        wishlistService.removeWishlist(wishlistId, memberId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/{wishlistId}")
     public ResponseEntity<List<WishlistDetailResDto>> getAccommodationsFromWishlist(@PathVariable("wishlistId") Long wishlistId,
-                                                                                    @CurrentGuestId Long guestId) {
-        List<WishlistDetailResDto> result = wishlistService.getAccommodationsFromWishlist(wishlistId, guestId);
+                                                                                    @CurrentMemberId Long memberId) {
+        List<WishlistDetailResDto> result = wishlistService.getAccommodationsFromWishlist(wishlistId, memberId);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @GetMapping
-    public ResponseEntity<List<WishlistsResDto>> getAllWishlists(@CurrentGuestId Long guestId) {
-        List<WishlistsResDto> result = wishlistService.getAllWishlists(guestId);
+    public ResponseEntity<List<WishlistsResDto>> getAllWishlists(@CurrentMemberId Long memberId) {
+        List<WishlistsResDto> result = wishlistService.getAllWishlists(memberId);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

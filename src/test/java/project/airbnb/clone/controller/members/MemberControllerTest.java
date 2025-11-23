@@ -1,4 +1,4 @@
-package project.airbnb.clone.controller.guests;
+package project.airbnb.clone.controller.members;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -6,16 +6,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import project.airbnb.clone.WithMockGuest;
+import project.airbnb.clone.WithMockMember;
 import project.airbnb.clone.controller.RestDocsTestSupport;
 import project.airbnb.clone.dto.PageResponseDto;
-import project.airbnb.clone.dto.guest.ChatGuestSearchDto;
-import project.airbnb.clone.dto.guest.ChatGuestsSearchResDto;
-import project.airbnb.clone.dto.guest.DefaultProfileResDto;
-import project.airbnb.clone.dto.guest.EditProfileReqDto;
-import project.airbnb.clone.dto.guest.EditProfileResDto;
-import project.airbnb.clone.dto.guest.TripHistoryResDto;
-import project.airbnb.clone.service.guest.GuestService;
+import project.airbnb.clone.dto.member.*;
+import project.airbnb.clone.dto.member.ChatMembersSearchResDto;
+import project.airbnb.clone.service.member.MemberService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -46,29 +42,29 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(GuestController.class)
-class GuestControllerTest extends RestDocsTestSupport {
+@WebMvcTest(MemberController.class)
+class MemberControllerTest extends RestDocsTestSupport {
 
-    private static final String GUEST_API_TAG = "Guest API";
+    private static final String MEMBER_API_TAG = "Member API";
 
     @MockitoBean
-    GuestService guestService;
+    MemberService memberService;
 
     @Test
     @DisplayName("내 기본 정보 조회")
-    @WithMockGuest
+    @WithMockMember
     void getDefaultProfile() throws Exception {
         //given
         DefaultProfileResDto response = new DefaultProfileResDto("Antonio Cui", "https://example.com/a.jpg", LocalDate.of(2024, 8, 15), "Accumsan luctus fringilla cubilia tempor auctor ullamcorper.", true);
-        given(guestService.getDefaultProfile(anyLong())).willReturn(response);
+        given(memberService.getDefaultProfile(anyLong())).willReturn(response);
 
         //when
         //then
-        mockMvc.perform(get("/api/guests/me")
+        mockMvc.perform(get("/api/members/me")
                        .header(AUTHORIZATION, "Bearer {access-token}")
                )
                .andExpectAll(
-                       handler().handlerType(GuestController.class),
+                       handler().handlerType(MemberController.class),
                        handler().methodName("getMyProfile"),
                        status().isOk(),
                        jsonPath("$.name").value(response.name()),
@@ -80,7 +76,7 @@ class GuestControllerTest extends RestDocsTestSupport {
                .andDo(document("get-my-profile",
                        resource(
                                builder()
-                                       .tag(GUEST_API_TAG)
+                                       .tag(MEMBER_API_TAG)
                                        .summary("내 프로필 정보 조회")
                                        .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
                                        .responseFields(
@@ -110,7 +106,7 @@ class GuestControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("내 기본 정보 수정")
-    @WithMockGuest
+    @WithMockMember
     void editMyProfile() throws Exception {
         //given
         EditProfileReqDto reqDto = new EditProfileReqDto("Antonio Cui", "Accumsan luctus fringilla cubilia tempor auctor ullamcorper.", true);
@@ -119,11 +115,11 @@ class GuestControllerTest extends RestDocsTestSupport {
         MockMultipartFile editProfileRequest = new MockMultipartFile("editProfileRequest", "test-request", MediaType.APPLICATION_JSON_VALUE, creatJson(reqDto).getBytes());
 
         EditProfileResDto response = new EditProfileResDto("Antonio Cui", "https://example.com/a.jpg", "Accumsan luctus fringilla cubilia tempor auctor ullamcorper.");
-        given(guestService.editMyProfile(anyLong(), any(), any())).willReturn(response);
+        given(memberService.editMyProfile(anyLong(), any(), any())).willReturn(response);
 
         //when
         //then
-        mockMvc.perform(multipart("/api/guests/me")
+        mockMvc.perform(multipart("/api/members/me")
                        .file(imageFile)
                        .file(editProfileRequest)
                        .accept(MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -135,7 +131,7 @@ class GuestControllerTest extends RestDocsTestSupport {
                        .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
                )
                .andExpectAll(
-                       handler().handlerType(GuestController.class),
+                       handler().handlerType(MemberController.class),
                        handler().methodName("editMyProfile"),
                        status().isOk(),
                        jsonPath("$.name").value(response.name()),
@@ -160,7 +156,7 @@ class GuestControllerTest extends RestDocsTestSupport {
                        ),
                        resource(
                                builder()
-                                       .tag(GUEST_API_TAG)
+                                       .tag(MEMBER_API_TAG)
                                        .summary("내 프로필 정보 수정")
                                        .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
                                        .responseFields(
@@ -183,50 +179,50 @@ class GuestControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("이름으로 사용자 조회")
-    void findGuestsByName() throws Exception {
+    void findMembersByName() throws Exception {
         //given
         LocalDateTime now = LocalDateTime.now();
-        List<ChatGuestSearchDto> guestSearchDtos = List.of(
-                new ChatGuestSearchDto(1L, "kim-1", now.minusDays(5), "https://example-a.com"),
-                new ChatGuestSearchDto(2L, "kim-2", now.minusDays(6), "https://example-b.com"),
-                new ChatGuestSearchDto(3L, "kim-3", now.minusDays(7), "https://example-c.com")
+        List<ChatMemberSearchDto> memberSearchDtos = List.of(
+                new ChatMemberSearchDto(1L, "kim-1", now.minusDays(5), "https://example-a.com"),
+                new ChatMemberSearchDto(2L, "kim-2", now.minusDays(6), "https://example-b.com"),
+                new ChatMemberSearchDto(3L, "kim-3", now.minusDays(7), "https://example-c.com")
         );
-        ChatGuestsSearchResDto response = new ChatGuestsSearchResDto(guestSearchDtos);
-        given(guestService.findGuestsByName(anyString())).willReturn(response);
+        ChatMembersSearchResDto response = new ChatMembersSearchResDto(memberSearchDtos);
+        given(memberService.findMembersByName(anyString())).willReturn(response);
 
         //when
         //then
-        mockMvc.perform(get("/api/guests/search")
+        mockMvc.perform(get("/api/members/search")
                        .param("name", "kim"))
                .andExpectAll(
-                       handler().handlerType(GuestController.class),
-                       handler().methodName("findGuestsByName"),
+                       handler().handlerType(MemberController.class),
+                       handler().methodName("findMembersByName"),
                        status().isOk(),
-                       jsonPath("$.guests.length()").value(guestSearchDtos.size())
+                       jsonPath("$.members.length()").value(memberSearchDtos.size())
                )
-               .andDo(document("find-guest-by-name",
+               .andDo(document("find-member-by-name",
                        resource(
                                builder()
-                                       .tag(GUEST_API_TAG)
+                                       .tag(MEMBER_API_TAG)
                                        .summary("이름으로 사용자 조회")
                                        .description("name 파라미터 값이 포함된 모든 사용자를 응답합니다.")
                                        .queryParameters(parameterWithName("name").description("검색 이름"))
                                        .responseFields(
-                                               fieldWithPath("guests[].id")
+                                               fieldWithPath("members[].id")
                                                        .type(NUMBER)
                                                        .description("ID"),
-                                               fieldWithPath("guests[].name")
+                                               fieldWithPath("members[].name")
                                                        .type(STRING)
                                                        .description("이름"),
-                                               fieldWithPath("guests[].createdDateTime")
+                                               fieldWithPath("members[].createdDateTime")
                                                        .type(STRING)
                                                        .description("가입일"),
-                                               fieldWithPath("guests[].profileImageUrl")
+                                               fieldWithPath("members[].profileImageUrl")
                                                        .type(STRING)
                                                        .optional()
                                                        .description("프로필 이미지 URL")
                                        )
-                                       .responseSchema(schema("GuestSearchResponse"))
+                                       .responseSchema(schema("MemberSearchResponse"))
                                        .build()
                        ))
                );
@@ -234,7 +230,7 @@ class GuestControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("여행한 숙소 목록 조회")
-    @WithMockGuest
+    @WithMockMember
     void getTripsHistory() throws Exception {
         //given
         LocalDate now = LocalDate.now();
@@ -249,18 +245,18 @@ class GuestControllerTest extends RestDocsTestSupport {
                                                                          .pageSize(10)
                                                                          .total(dtos.size())
                                                                          .build();
-        given(guestService.getTripsHistory(anyLong(), any()))
+        given(memberService.getTripsHistory(anyLong(), any()))
                 .willReturn(response);
 
         //when
         //then
-        mockMvc.perform(get("/api/guests/me/trips/past")
+        mockMvc.perform(get("/api/members/me/trips/past")
                        .header(AUTHORIZATION, "Bearer {access-token}")
                        .param("page", "0")
                        .param("size", "10")
                )
                .andExpectAll(
-                       handler().handlerType(GuestController.class),
+                       handler().handlerType(MemberController.class),
                        handler().methodName("getTripsHistory"),
                        status().isOk(),
                        jsonPath("$.contents.length()").value(dtos.size())
@@ -268,7 +264,7 @@ class GuestControllerTest extends RestDocsTestSupport {
                .andDo(document("get-trips-past",
                        resource(
                                builder()
-                                       .tag(GUEST_API_TAG)
+                                       .tag(MEMBER_API_TAG)
                                        .summary("여행한 숙소 목록 조회")
                                        .requestHeaders(headerWithName(AUTHORIZATION).description("Bearer {액세스 토큰}"))
                                        .queryParameters(

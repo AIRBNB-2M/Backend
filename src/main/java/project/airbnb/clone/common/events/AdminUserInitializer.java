@@ -7,15 +7,15 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import project.airbnb.clone.entity.Guest;
-import project.airbnb.clone.repository.jpa.GuestRepository;
+import project.airbnb.clone.entity.Member;
+import project.airbnb.clone.repository.jpa.MemberRepository;
 
 @Profile("!test")
 @Component
 @RequiredArgsConstructor
 public class AdminUserInitializer implements ApplicationListener<ContextRefreshedEvent> {
 
-    private final GuestRepository guestRepository;
+    private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${app.admin.email}")
@@ -26,11 +26,11 @@ public class AdminUserInitializer implements ApplicationListener<ContextRefreshe
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (guestRepository.existsByEmail(adminEmail)) {
+        if (memberRepository.existsByEmail(adminEmail)) {
             return;
         }
 
-        Guest admin = Guest.createAdmin(adminEmail, passwordEncoder.encode(adminPassword));
-        guestRepository.save(admin);
+        Member admin = Member.createAdmin(adminEmail, passwordEncoder.encode(adminPassword));
+        memberRepository.save(admin);
     }
 }

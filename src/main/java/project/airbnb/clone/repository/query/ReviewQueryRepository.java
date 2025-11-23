@@ -20,7 +20,7 @@ public class ReviewQueryRepository extends CustomQuerydslRepositorySupport {
         super(Review.class);
     }
 
-    public Page<MyReviewResDto> getMyReviews(Long guestId, Pageable pageable) {
+    public Page<MyReviewResDto> getMyReviews(Long memberId, Pageable pageable) {
         return applyPagination(pageable,
                 contentQuery -> contentQuery
                         .select(Projections.constructor(MyReviewResDto.class,
@@ -38,11 +38,11 @@ public class ReviewQueryRepository extends CustomQuerydslRepositorySupport {
                         .join(accommodationImage)
                         .on(accommodationImage.accommodation.eq(accommodation)
                                                             .and(accommodationImage.thumbnail.isTrue()))
-                        .where(review.guest.id.eq(guestId))
+                        .where(review.member.id.eq(memberId))
                 ,
                 countQuery -> countQuery.select(review.count())
                                         .from(review)
-                                        .where(review.guest.id.eq(guestId))
+                                        .where(review.member.id.eq(memberId))
         );
     }
 }

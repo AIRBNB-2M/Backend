@@ -8,7 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import project.airbnb.clone.WithMockGuest;
+import project.airbnb.clone.WithMockMember;
 import project.airbnb.clone.controller.RestDocsTestSupport;
 import project.airbnb.clone.dto.PageResponseDto;
 import project.airbnb.clone.dto.review.MyReviewResDto;
@@ -50,7 +50,7 @@ class ReviewControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("등록한 후기 목록 조회")
-    @WithMockGuest
+    @WithMockMember
     void getMyReviews() throws Exception {
         //given
         LocalDate now = LocalDate.now();
@@ -149,7 +149,7 @@ class ReviewControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("등록한 후기 수정")
-    @WithMockGuest
+    @WithMockMember
     void updateReview() throws Exception {
         //given
         UpdateReviewReqDto requestDto = new UpdateReviewReqDto(BigDecimal.valueOf(4.5), "만족스러운 여행이었어요!");
@@ -189,7 +189,7 @@ class ReviewControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("등록한 후기 삭제")
-    @WithMockGuest
+    @WithMockMember
     void deleteReview() throws Exception {
         //given
 

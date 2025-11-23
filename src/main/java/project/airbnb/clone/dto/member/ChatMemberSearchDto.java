@@ -1,8 +1,8 @@
-package project.airbnb.clone.dto.guest;
+package project.airbnb.clone.dto.member;
 
 import java.time.LocalDateTime;
 
-public record ChatGuestSearchDto(
+public record ChatMemberSearchDto(
         Long id,
         String name,
         LocalDateTime createdDateTime,

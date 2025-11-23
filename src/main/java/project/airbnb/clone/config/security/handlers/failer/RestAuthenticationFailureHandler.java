@@ -1,5 +1,6 @@
 package project.airbnb.clone.config.security.handlers.failer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,7 +13,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 import project.airbnb.clone.common.advice.ErrorResponse;
-import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 
@@ -21,7 +21,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class RestAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
-    private final JsonMapper jsonMapper;
+    private final ObjectMapper objectMapper;
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
@@ -44,6 +44,6 @@ public class RestAuthenticationFailureHandler implements AuthenticationFailureHa
 
         response.setStatus(httpStatus.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        jsonMapper.writeValue(response.getWriter(), errorResponse);
+        objectMapper.writeValue(response.getWriter(), errorResponse);
     }
 }

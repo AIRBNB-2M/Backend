@@ -5,7 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import project.airbnb.clone.entity.BaseEntity;
-import project.airbnb.clone.entity.Guest;
+import project.airbnb.clone.entity.Member;
 
 import java.time.LocalDateTime;
 
@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "chat_participants",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"chat_room_id", "guest_id"})
+                @UniqueConstraint(columnNames = {"chat_room_id", "member_id"})
         })
 public class ChatParticipant extends BaseEntity {
 
@@ -28,8 +28,8 @@ public class ChatParticipant extends BaseEntity {
     private ChatRoom chatRoom;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "guest_id", nullable = false)
-    private Guest guest;
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "last_read_message")
@@ -50,17 +50,17 @@ public class ChatParticipant extends BaseEntity {
     @Column(name = "last_rejoined_at")
     private LocalDateTime lastRejoinedAt;
 
-    public static ChatParticipant creator(ChatRoom chatRoom, Guest sender, String roomName) {
+    public static ChatParticipant creator(ChatRoom chatRoom, Member sender, String roomName) {
         return new ChatParticipant(chatRoom, sender, true, roomName);
     }
 
-    public static ChatParticipant participant(ChatRoom chatRoom, Guest receiver, String roomName) {
+    public static ChatParticipant participant(ChatRoom chatRoom, Member receiver, String roomName) {
         return new ChatParticipant(chatRoom, receiver, false, roomName);
     }
 
-    private ChatParticipant(ChatRoom chatRoom, Guest guest, Boolean isCreator, String customRoomName) {
+    private ChatParticipant(ChatRoom chatRoom, Member member, Boolean isCreator, String customRoomName) {
         this.chatRoom = chatRoom;
-        this.guest = guest;
+        this.member = member;
         this.isCreator = isCreator;
         this.customRoomName = customRoomName;
     }

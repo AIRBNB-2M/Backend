@@ -8,7 +8,7 @@ import project.airbnb.clone.repository.query.support.CustomQuerydslRepositorySup
 
 import java.util.List;
 
-import static project.airbnb.clone.entity.QGuest.guest;
+import static project.airbnb.clone.entity.QMember.member;
 import static project.airbnb.clone.entity.chat.QChatMessage.chatMessage;
 import static project.airbnb.clone.entity.chat.QChatParticipant.chatParticipant;
 import static project.airbnb.clone.entity.chat.QChatRoom.chatRoom;
@@ -26,14 +26,14 @@ public class ChatMessageQueryRepository extends CustomQuerydslRepositorySupport 
                 ChatMessageResDto.class,
                 chatMessage.id,
                 chatRoom.id,
-                guest.id,
-                guest.name,
+                member.id,
+                member.name,
                 chatMessage.content,
                 chatMessage.createdAt))
                 .from(chatMessage)
                 .join(chatMessage.chatRoom, chatRoom)
-                .join(chatMessage.writer, guest)
-                .join(chatParticipant).on(chatParticipant.chatRoom.eq(chatRoom).and(chatParticipant.guest.eq(guest)))
+                .join(chatMessage.writer, member)
+                .join(chatParticipant).on(chatParticipant.chatRoom.eq(chatRoom).and(chatParticipant.member.eq(member)))
                 .where(chatRoom.id.eq(roomId),
                         lastMessageId != null ? chatMessage.id.lt(lastMessageId) : null,
                         chatParticipant.lastRejoinedAt.isNull()

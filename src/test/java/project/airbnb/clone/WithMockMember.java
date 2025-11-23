@@ -9,5 +9,5 @@ import java.lang.annotation.RetentionPolicy;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @WithSecurityContext(factory = WithTestAuthSecurityContextFactory.class)
-public @interface WithMockGuest {
+public @interface WithMockMember {
 }

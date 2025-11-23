@@ -10,23 +10,23 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import project.airbnb.clone.common.annotations.CurrentGuestId;
+import project.airbnb.clone.common.annotations.CurrentMemberId;
 import project.airbnb.clone.model.AuthProviderUser;
 import project.airbnb.clone.model.PrincipalUser;
 
-public class CurrentGuestIdArgumentResolver implements HandlerMethodArgumentResolver {
+public class CurrentMemberIdArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(CurrentGuestId.class) &&
+        return parameter.hasParameterAnnotation(CurrentMemberId.class) &&
                 Long.class.isAssignableFrom(parameter.getParameterType());
     }
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        CurrentGuestId annotation = parameter.getParameterAnnotation(CurrentGuestId.class);
-        Assert.notNull(annotation, "Cannot be empty @CurrentGuestId");
+        CurrentMemberId annotation = parameter.getParameterAnnotation(CurrentMemberId.class);
+        Assert.notNull(annotation, "Cannot be empty CurrentMemberId");
 
         Authentication authentication = SecurityContextHolder.getContextHolderStrategy()
                                                              .getContext()

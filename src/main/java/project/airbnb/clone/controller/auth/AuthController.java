@@ -9,19 +9,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import project.airbnb.clone.common.annotations.CurrentGuestId;
-import project.airbnb.clone.dto.guest.SignupRequestDto;
-import project.airbnb.clone.service.guest.EmailVerificationService;
-import project.airbnb.clone.service.guest.GuestService;
+import org.springframework.web.bind.annotation.*;
+import project.airbnb.clone.common.annotations.CurrentMemberId;
+import project.airbnb.clone.dto.member.SignupRequestDto;
 import project.airbnb.clone.service.jwt.TokenService;
+import project.airbnb.clone.service.member.EmailVerificationService;
+import project.airbnb.clone.service.member.MemberService;
 
 import java.net.URI;
 
@@ -35,7 +28,7 @@ import static project.airbnb.clone.common.jwt.JwtProperties.REFRESH_TOKEN_KEY;
 public class AuthController {
 
     private final TokenService tokenService;
-    private final GuestService guestService;
+    private final MemberService memberService;
     private final EmailVerificationService emailVerificationService;
 
     @PostMapping("/refresh")
@@ -61,13 +54,13 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@Valid @RequestBody SignupRequestDto signupRequestDto) {
-        guestService.register(signupRequestDto);
+        memberService.register(signupRequestDto);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PostMapping("/email/verify")
-    public ResponseEntity<?> sendEmail(@CurrentGuestId Long guestId) {
-        emailVerificationService.sendEmail(guestId);
+    public ResponseEntity<?> sendEmail(@CurrentMemberId Long memberId) {
+        emailVerificationService.sendEmail(memberId);
         return ResponseEntity.ok().build();
     }
 

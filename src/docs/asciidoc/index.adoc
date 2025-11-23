@@ -7,10 +7,10 @@ airbnb
 :toclevels: 2
 :sectlinks:
 
-[[Guest-API]]
-== Guest API
+[[Member-API]]
+== Member API
 
-include::guest-signup.adoc[]
+include::member-signup.adoc[]
 
 [[Token-API]]
 == Token API

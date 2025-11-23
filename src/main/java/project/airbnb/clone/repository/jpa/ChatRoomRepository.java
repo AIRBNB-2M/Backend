@@ -13,8 +13,8 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
                 SELECT cp1.chatRoom
                 FROM ChatParticipant cp1
                 JOIN ChatParticipant cp2 ON cp1.chatRoom = cp2.chatRoom
-                WHERE cp1.guest.id = :currentGuestId
-                AND cp2.guest.id = :otherGuestId
+                WHERE cp1.member.id = :currentMemberId
+                AND cp2.member.id = :otherMemberId
             """)
-    Optional<ChatRoom> findByGuestsId(@Param("currentGuestId") Long currentGuestId, @Param("otherGuestId") Long otherGuestId);
+    Optional<ChatRoom> findByMembersId(@Param("currentMemberId") Long currentMemberId, @Param("otherMemberId") Long otherMemberId);
 }

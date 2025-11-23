@@ -15,10 +15,10 @@ import project.airbnb.clone.common.events.logout.OAuthLogoutEvent;
 import project.airbnb.clone.common.jwt.JwtProperties;
 import project.airbnb.clone.common.jwt.JwtProvider;
 import project.airbnb.clone.dto.jwt.TokenResponse;
-import project.airbnb.clone.entity.Guest;
+import project.airbnb.clone.entity.Member;
 import project.airbnb.clone.repository.dto.BlacklistedToken;
 import project.airbnb.clone.repository.dto.RefreshToken;
-import project.airbnb.clone.repository.jpa.GuestRepository;
+import project.airbnb.clone.repository.jpa.MemberRepository;
 import project.airbnb.clone.repository.redis.BlacklistedTokenRepository;
 import project.airbnb.clone.repository.redis.RefreshTokenRepository;
 
@@ -36,15 +36,15 @@ public class TokenService {
 
     private final JwtProvider jwtProvider;
     private final JwtProperties jwtProperties;
-    private final GuestRepository guestRepository;
+    private final MemberRepository memberRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final RefreshTokenRepository refreshTokenRepository;
     private final BlacklistedTokenRepository blacklistedTokenRepository;
 
     public TokenResponse generateAndSendToken(String email, String principalName, HttpServletResponse response) {
-        Guest guest = guestRepository.getGuestByEmail(email);
+        Member member = memberRepository.getMemberByEmail(email);
 
-        return getTokenResponse(response, guest, principalName);
+        return getTokenResponse(response, member, principalName);
     }
 
     public void refreshAccessToken(String refreshToken, HttpServletResponse response, HttpServletRequest request) {
@@ -57,9 +57,9 @@ public class TokenService {
         refreshTokenRepository.deleteById(refreshToken);
 
         String principalName = jwtProvider.getPrincipalName(refreshToken);
-        Guest guest = guestRepository.getGuestById(id);
+        Member member = memberRepository.getMemberById(id);
 
-        getTokenResponse(response, guest, principalName);
+        getTokenResponse(response, member, principalName);
     }
 
     private void validateSavedRefreshToken(String refreshToken) {
@@ -71,16 +71,16 @@ public class TokenService {
         }
     }
 
-    private TokenResponse getTokenResponse(HttpServletResponse response, Guest guest, String principalName) {
-        String accessToken = jwtProvider.generateAccessToken(guest, principalName);
-        String refreshToken = jwtProvider.generateRefreshToken(guest, principalName);
+    private TokenResponse getTokenResponse(HttpServletResponse response, Member member, String principalName) {
+        String accessToken = jwtProvider.generateAccessToken(member, principalName);
+        String refreshToken = jwtProvider.generateRefreshToken(member, principalName);
 
         response.addHeader(AUTHORIZATION_HEADER, TOKEN_PREFIX + accessToken);
         Duration refreshDuration = Duration.ofSeconds(jwtProperties.getRefreshToken().getExpiration());
 
         refreshTokenRepository.save(RefreshToken.builder()
                                                 .token(refreshToken)
-                                                .guestId(guest.getId())
+                                                .memberId(member.getId())
                                                 .ttl(refreshDuration.getSeconds())
                                                 .build());
 
@@ -108,8 +108,8 @@ public class TokenService {
         Long id = removeRefreshToken(refreshToken);
 
         //로그아웃 이벤트 발행
-        Guest guest = guestRepository.getGuestById(id);
-        eventPublisher.publishEvent(new OAuthLogoutEvent(guest.getSocialType()));
+        Member member = memberRepository.getMemberById(id);
+        eventPublisher.publishEvent(new OAuthLogoutEvent(member.getSocialType()));
     }
 
     private void addBlackList(String accessToken) {

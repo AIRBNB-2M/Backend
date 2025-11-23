@@ -28,13 +28,13 @@ import static project.airbnb.clone.entity.QSigunguCode.sigunguCode;
 import static project.airbnb.clone.entity.QWishlist.wishlist;
 import static project.airbnb.clone.entity.QWishlistAccommodation.wishlistAccommodation;
 
-public record AccommodationQueryBuilder(JPAQueryFactory queryFactory, DayType dayType, Season season, Long guestId) {
+public record AccommodationQueryBuilder(JPAQueryFactory queryFactory, DayType dayType, Season season, Long memberId) {
 
     // =====================================================
     // 공통 메서드
     // =====================================================
-    private boolean hasGuest() {
-        return guestId != null;
+    private boolean hasMember() {
+        return memberId != null;
     }
 
     private JPAQuery<?> baseQuery() {
@@ -48,12 +48,12 @@ public record AccommodationQueryBuilder(JPAQueryFactory queryFactory, DayType da
     }
 
     private JPAQuery<?> withWishlistJoin(JPAQuery<?> query) {
-        if (guestId == null) {
+        if (!hasMember()) {
             return query;
         }
 
         return query.leftJoin(wishlistAccommodation).on(wishlistAccommodation.accommodation.eq(accommodation))
-                    .leftJoin(wishlistAccommodation.wishlist, wishlist).on(wishlist.guest.id.eq(guestId));
+                    .leftJoin(wishlistAccommodation.wishlist, wishlist).on(wishlist.member.id.eq(memberId));
     }
 
     // =====================================================
@@ -85,7 +85,7 @@ public record AccommodationQueryBuilder(JPAQueryFactory queryFactory, DayType da
      * 메인 페이지용 select
      */
     private Expression<MainAccListQueryDto> buildMainAccListProjection() {
-        if (!hasGuest()) {
+        if (!hasMember()) {
             return constructor(MainAccListQueryDto.class,
                     accommodation.id,
                     accommodation.title,
@@ -125,7 +125,7 @@ public record AccommodationQueryBuilder(JPAQueryFactory queryFactory, DayType da
                 areaCode.code
         ));
 
-        if (guestId != null) {
+        if (hasMember()) {
             fields.add(wishlist.id);
             fields.add(wishlist.name);
         }
@@ -164,7 +164,7 @@ public record AccommodationQueryBuilder(JPAQueryFactory queryFactory, DayType da
      * 검색 페이지용 Select
      */
     public Expression<FilteredAccListQueryDto> buildFilteredProjection() {
-        if (guestId == null) {
+        if (!hasMember()) {
             return constructor(FilteredAccListQueryDto.class,
                     accommodation.id,
                     accommodation.title,
@@ -196,7 +196,7 @@ public record AccommodationQueryBuilder(JPAQueryFactory queryFactory, DayType da
                 accommodationPrice.price
         ));
 
-        if (hasGuest()) {
+        if (hasMember()) {
             fields.add(wishlist.id);
             fields.add(wishlist.name);
         }
@@ -232,7 +232,7 @@ public record AccommodationQueryBuilder(JPAQueryFactory queryFactory, DayType da
                                                           .from(review)
                                                           .join(review.reservation, reservation)
                                                           .where(reservation.accommodation.id.eq(accId));
-        if (guestId == null) {
+        if (!hasMember()) {
             return constructor(DetailAccommodationQueryDto.class,
                     accommodation.id,
                     accommodation.title,

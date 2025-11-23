@@ -15,10 +15,10 @@ public interface ViewHistoryRepository extends JpaRepository<ViewHistory, Long> 
             UPDATE ViewHistory vh
             SET vh.viewedAt = :now
             WHERE vh.accommodation.id = :accommodationId
-            AND vh.guest.id = :guestId
+            AND vh.member.id = :memberId
             """
     )
     int updateViewedAt(@Param("accommodationId") Long accommodationId,
-                       @Param("guestId") Long guestId,
+                       @Param("memberId") Long memberId,
                        @Param("now") LocalDateTime now);
 }

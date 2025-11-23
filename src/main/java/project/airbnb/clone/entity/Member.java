@@ -1,13 +1,6 @@
 package project.airbnb.clone.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,12 +13,12 @@ import java.util.UUID;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "guests")
-public class Guest extends BaseEntity {
+@Table(name = "members")
+public class Member extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "guest_id", nullable = false)
+    @Column(name = "member_id", nullable = false)
     private Long id;
 
     @Column(name = "name", nullable = false)
@@ -60,24 +53,24 @@ public class Guest extends BaseEntity {
     @Column(name = "role", nullable = false)
     private Role role = Role.GUEST;
 
-    public static Guest createAdmin(String adminEmail, String password) {
-        return new Guest("ADMIN-USER", null, null, adminEmail, password, SocialType.NONE, Role.ADMIN, true);
+    public static Member createAdmin(String adminEmail, String password) {
+        return new Member("ADMIN-USER", null, null, adminEmail, password, SocialType.NONE, Role.ADMIN, true);
     }
 
-    public static Guest createForRest(String name, String email, String number, LocalDate birthDate, String password) {
-        return new Guest(name, birthDate, number, email, password, SocialType.NONE, Role.GUEST, false);
+    public static Member createForRest(String name, String email, String number, LocalDate birthDate, String password) {
+        return new Member(name, birthDate, number, email, password, SocialType.NONE, Role.GUEST, false);
     }
 
-    public static Guest createForSocial(String name, String email, String number, LocalDate birthDate, String password, SocialType socialType) {
-        return new Guest(name, birthDate, number, email, password, socialType, Role.GUEST, false);
+    public static Member createForSocial(String name, String email, String number, LocalDate birthDate, String password, SocialType socialType) {
+        return new Member(name, birthDate, number, email, password, socialType, Role.GUEST, false);
     }
 
-    public static Guest createForTest() {
-        return new Guest("test-user", null, null, "test@email.com", UUID.randomUUID().toString(), SocialType.NONE, Role.GUEST, false);
+    public static Member createForTest() {
+        return new Member("test-user", null, null, "test@email.com", UUID.randomUUID().toString(), SocialType.NONE, Role.GUEST, false);
     }
 
-    private Guest(String name, LocalDate birthDate, String number, String email, String password,
-                  SocialType socialType, Role role, boolean isEmailVerified) {
+    private Member(String name, LocalDate birthDate, String number, String email, String password,
+                   SocialType socialType, Role role, boolean isEmailVerified) {
         this.name = name;
         this.birthDate = birthDate;
         this.number = number;

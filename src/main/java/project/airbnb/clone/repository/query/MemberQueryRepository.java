@@ -4,9 +4,9 @@ import com.querydsl.core.types.Projections;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-import project.airbnb.clone.dto.guest.ChatGuestSearchDto;
-import project.airbnb.clone.dto.guest.TripHistoryResDto;
-import project.airbnb.clone.entity.Guest;
+import project.airbnb.clone.dto.member.ChatMemberSearchDto;
+import project.airbnb.clone.dto.member.TripHistoryResDto;
+import project.airbnb.clone.entity.Member;
 import project.airbnb.clone.repository.dto.DefaultProfileQueryDto;
 import project.airbnb.clone.repository.query.support.CustomQuerydslRepositorySupport;
 
@@ -16,45 +16,45 @@ import java.util.Optional;
 
 import static project.airbnb.clone.entity.QAccommodation.accommodation;
 import static project.airbnb.clone.entity.QAccommodationImage.accommodationImage;
-import static project.airbnb.clone.entity.QGuest.guest;
+import static project.airbnb.clone.entity.QMember.member;
 import static project.airbnb.clone.entity.QReservation.reservation;
 import static project.airbnb.clone.entity.QReview.review;
 
 @Repository
-public class GuestQueryRepository extends CustomQuerydslRepositorySupport {
+public class MemberQueryRepository extends CustomQuerydslRepositorySupport {
 
-    public GuestQueryRepository() {
-        super(Guest.class);
+    public MemberQueryRepository() {
+        super(Member.class);
     }
 
-    public Optional<DefaultProfileQueryDto> getDefaultProfile(Long guestId) {
+    public Optional<DefaultProfileQueryDto> getDefaultProfile(Long memberId) {
         return Optional.ofNullable(
                 select(Projections.constructor(
                         DefaultProfileQueryDto.class,
-                        guest.name,
-                        guest.profileUrl,
-                        guest.createdAt,
-                        guest.aboutMe,
-                        guest.isEmailVerified))
-                        .from(guest)
-                        .where(guest.id.eq(guestId))
+                        member.name,
+                        member.profileUrl,
+                        member.createdAt,
+                        member.aboutMe,
+                        member.isEmailVerified))
+                        .from(member)
+                        .where(member.id.eq(memberId))
                         .fetchOne()
         );
     }
 
-    public List<ChatGuestSearchDto> findGuestsByName(String name) {
+    public List<ChatMemberSearchDto> findMembersByName(String name) {
         return select(Projections.constructor(
-                ChatGuestSearchDto.class,
-                guest.id,
-                guest.name,
-                guest.createdAt,
-                guest.profileUrl))
-                .from(guest)
-                .where(guest.name.contains(name))
+                ChatMemberSearchDto.class,
+                member.id,
+                member.name,
+                member.createdAt,
+                member.profileUrl))
+                .from(member)
+                .where(member.name.contains(name))
                 .fetch();
     }
 
-    public Page<TripHistoryResDto> getTripsHistory(Long guestId, Pageable pageable) {
+    public Page<TripHistoryResDto> getTripsHistory(Long memberId, Pageable pageable) {
         return applyPagination(pageable,
                 contentQuery ->
                         contentQuery.select(Projections.constructor(
@@ -75,14 +75,14 @@ public class GuestQueryRepository extends CustomQuerydslRepositorySupport {
                                     .leftJoin(review).on(review.reservation.eq(reservation))
                                     .where(
                                             reservation.isNotNull(),
-                                            reservation.guest.id.eq(guestId),
+                                            reservation.member.id.eq(memberId),
                                             reservation.endDate.before(LocalDateTime.now()))
                                     .orderBy(reservation.id.desc())
                 ,
                 countQuery -> countQuery.select(reservation.count())
                                         .from(reservation)
                                         .where(
-                                                reservation.guest.id.eq(guestId),
+                                                reservation.member.id.eq(memberId),
                                                 reservation.endDate.before(LocalDateTime.now())
                                         )
         );

@@ -18,5 +18,5 @@ public class EmailVerification {
     @Id
     String token;
 
-    Long guestId;
+    Long memberId;
 }

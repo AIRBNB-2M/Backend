@@ -21,8 +21,8 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final ReviewQueryRepository reviewQueryRepository;
 
-    public PageResponseDto<MyReviewResDto> getMyReviews(Long guestId, Pageable pageable) {
-        Page<MyReviewResDto> result = reviewQueryRepository.getMyReviews(guestId, pageable);
+    public PageResponseDto<MyReviewResDto> getMyReviews(Long memberId, Pageable pageable) {
+        Page<MyReviewResDto> result = reviewQueryRepository.getMyReviews(memberId, pageable);
 
         return PageResponseDto.<MyReviewResDto>builder()
                               .contents(result.getContent())
@@ -33,19 +33,19 @@ public class ReviewService {
     }
 
     @Transactional
-    public void updateReview(Long reviewId, UpdateReviewReqDto reqDto, Long guestId) {
-        Review review = getReview(reviewId, guestId);
+    public void updateReview(Long reviewId, UpdateReviewReqDto reqDto, Long memberId) {
+        Review review = getReview(reviewId, memberId);
         review.update(reqDto.rating().doubleValue(), reqDto.content());
     }
 
     @Transactional
-    public void deleteReview(Long reviewId, Long guestId) {
-        Review review = getReview(reviewId, guestId);
+    public void deleteReview(Long reviewId, Long memberId) {
+        Review review = getReview(reviewId, memberId);
         reviewRepository.delete(review);
     }
 
-    private Review getReview(Long reviewId, Long guestId) {
-        return reviewRepository.findByIdAndGuestId(reviewId, guestId)
-                               .orElseThrow(() -> new EntityNotFoundException("Cannot be found Review for id: " + reviewId + " and guestId: " + guestId));
+    private Review getReview(Long reviewId, Long memberId) {
+        return reviewRepository.findByIdAndMemberId(reviewId, memberId)
+                               .orElseThrow(() -> new EntityNotFoundException("Cannot be found Review for id: " + reviewId + " and memberId: " + memberId));
     }
 }

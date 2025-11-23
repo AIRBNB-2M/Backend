@@ -8,11 +8,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import project.airbnb.clone.WithMockGuest;
+import project.airbnb.clone.WithMockMember;
 import project.airbnb.clone.controller.RestDocsTestSupport;
-import project.airbnb.clone.dto.guest.SignupRequestDto;
-import project.airbnb.clone.service.guest.EmailVerificationService;
-import project.airbnb.clone.service.guest.GuestService;
+import project.airbnb.clone.dto.member.SignupRequestDto;
+import project.airbnb.clone.service.member.EmailVerificationService;
+import project.airbnb.clone.service.member.MemberService;
 
 import java.time.LocalDate;
 
@@ -37,7 +37,7 @@ class AuthControllerTest extends RestDocsTestSupport {
 
     public static final String AUTH_API_TAG = "Auth API";
 
-    @MockitoBean GuestService guestService;
+    @MockitoBean MemberService memberService;
     @MockitoBean EmailVerificationService emailVerificationService;
 
     @Test
@@ -157,7 +157,7 @@ class AuthControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("이메일 인증 요청")
-    @WithMockGuest
+    @WithMockMember
     void sendEmail() throws Exception {
         //given
 

@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import project.airbnb.clone.TestContainerSupport;
 import project.airbnb.clone.entity.Accommodation;
 import project.airbnb.clone.entity.AreaCode;
-import project.airbnb.clone.entity.Guest;
+import project.airbnb.clone.entity.Member;
 import project.airbnb.clone.entity.SigunguCode;
 import project.airbnb.clone.entity.ViewHistory;
 
@@ -23,14 +23,13 @@ class ViewHistoryServiceTest extends TestContainerSupport {
     @Autowired ViewHistoryService viewHistoryService;
     @Autowired EntityManager em;
 
-    Guest guest;
+    Member member;
     Accommodation accommodation;
 
     @BeforeEach
     void setUp() {
-        // Guest 생성
-        guest = Guest.createForTest();
-        em.persist(guest);
+        member = Member.createForTest();
+        em.persist(member);
 
         // 지역 코드 생성
         AreaCode areaCode = AreaCode.create("11", "서울");
@@ -53,19 +52,19 @@ class ViewHistoryServiceTest extends TestContainerSupport {
         void saveRecentView_create_new() {
             // given
             Long accommodationId = accommodation.getId();
-            Long guestId = guest.getId();
+            Long memberId = member.getId();
 
             // when
-            viewHistoryService.saveRecentView(accommodationId, guestId);
+            viewHistoryService.saveRecentView(accommodationId, memberId);
             em.flush();
             em.clear();
 
             // then
-            ViewHistory result = findViewHistory(accommodationId, guestId);
+            ViewHistory result = findViewHistory(accommodationId, memberId);
 
             assertThat(result).isNotNull();
             assertThat(result.getAccommodation().getId()).isEqualTo(accommodationId);
-            assertThat(result.getGuest().getId()).isEqualTo(guestId);
+            assertThat(result.getMember().getId()).isEqualTo(memberId);
             assertThat(result.getViewedAt()).isNotNull();
             assertThat(result.getViewedAt()).isBeforeOrEqualTo(LocalDateTime.now());
         }
@@ -75,10 +74,10 @@ class ViewHistoryServiceTest extends TestContainerSupport {
         void saveRecentView_update_existing() {
             // given
             Long accommodationId = accommodation.getId();
-            Long guestId = guest.getId();
+            Long memberId = member.getId();
 
             LocalDateTime firstViewTime = LocalDateTime.now().minusHours(2);
-            ViewHistory existingHistory = ViewHistory.create(guest, accommodation, firstViewTime);
+            ViewHistory existingHistory = ViewHistory.create(member, accommodation, firstViewTime);
             em.persist(existingHistory);
             Long existingId = existingHistory.getId();
 
@@ -86,12 +85,12 @@ class ViewHistoryServiceTest extends TestContainerSupport {
             em.clear();
 
             // when
-            viewHistoryService.saveRecentView(accommodationId, guestId);
+            viewHistoryService.saveRecentView(accommodationId, memberId);
             em.flush();
             em.clear();
 
             // then
-            ViewHistory result = findViewHistory(accommodationId, guestId);
+            ViewHistory result = findViewHistory(accommodationId, memberId);
 
             assertThat(result).isNotNull();
             assertThat(result.getId()).isEqualTo(existingId); // 같은 엔티티
@@ -99,7 +98,7 @@ class ViewHistoryServiceTest extends TestContainerSupport {
             assertThat(result.getViewedAt()).isBeforeOrEqualTo(LocalDateTime.now());
 
             // 새로운 레코드가 생성되지 않았는지 확인
-            long count = countViewHistories(accommodationId, guestId);
+            long count = countViewHistories(accommodationId, memberId);
             assertThat(count).isEqualTo(1);
         }
 
@@ -108,40 +107,40 @@ class ViewHistoryServiceTest extends TestContainerSupport {
         void saveRecentView_multiple_times() {
             // given
             Long accommodationId = accommodation.getId();
-            Long guestId = guest.getId();
+            Long memberId = member.getId();
 
             // when - 3번 조회
-            viewHistoryService.saveRecentView(accommodationId, guestId);
-            viewHistoryService.saveRecentView(accommodationId, guestId);
-            viewHistoryService.saveRecentView(accommodationId, guestId);
+            viewHistoryService.saveRecentView(accommodationId, memberId);
+            viewHistoryService.saveRecentView(accommodationId, memberId);
+            viewHistoryService.saveRecentView(accommodationId, memberId);
 
             em.flush();
             em.clear();
 
             // then
-            long count = countViewHistories(accommodationId, guestId);
+            long count = countViewHistories(accommodationId, memberId);
 
             assertThat(count).isEqualTo(1);
         }
     }
 
-    private ViewHistory findViewHistory(Long accommodationId, Long guestId) {
+    private ViewHistory findViewHistory(Long accommodationId, Long memberId) {
         List<ViewHistory> results = em.createQuery("SELECT vh FROM ViewHistory vh " +
                                                       "WHERE vh.accommodation.id = :accommodationId " +
-                                                      "AND vh.guest.id = :guestId", ViewHistory.class)
+                                                      "AND vh.member.id = :memberId", ViewHistory.class)
                                       .setParameter("accommodationId", accommodationId)
-                                      .setParameter("guestId", guestId)
+                                      .setParameter("memberId", memberId)
                                       .getResultList();
 
         return results.isEmpty() ? null : results.get(0);
     }
 
-    private long countViewHistories(Long accommodationId, Long guestId) {
+    private long countViewHistories(Long accommodationId, Long memberId) {
         return em.createQuery("SELECT COUNT(vh) FROM ViewHistory vh " +
                                  "WHERE vh.accommodation.id = :accommodationId " +
-                                 "AND vh.guest.id = :guestId", Long.class)
+                                 "AND vh.member.id = :memberId", Long.class)
                  .setParameter("accommodationId", accommodationId)
-                 .setParameter("guestId", guestId)
+                 .setParameter("memberId", memberId)
                  .getSingleResult();
     }
 }

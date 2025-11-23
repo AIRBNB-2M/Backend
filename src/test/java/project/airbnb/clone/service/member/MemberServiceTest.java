@@ -1,4 +1,4 @@
-package project.airbnb.clone.service.guest;
+package project.airbnb.clone.service.member;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -10,11 +10,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import project.airbnb.clone.TestContainerSupport;
 import project.airbnb.clone.common.exceptions.EmailAlreadyExistsException;
 import project.airbnb.clone.consts.SocialType;
-import project.airbnb.clone.dto.guest.DefaultProfileResDto;
-import project.airbnb.clone.dto.guest.SignupRequestDto;
-import project.airbnb.clone.entity.Guest;
+import project.airbnb.clone.dto.member.DefaultProfileResDto;
+import project.airbnb.clone.dto.member.SignupRequestDto;
+import project.airbnb.clone.entity.Member;
 import project.airbnb.clone.model.ProviderUser;
-import project.airbnb.clone.repository.jpa.GuestRepository;
+import project.airbnb.clone.repository.jpa.MemberRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,15 +22,17 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class GuestServiceTest extends TestContainerSupport {
+class MemberServiceTest extends TestContainerSupport {
 
-    @Autowired GuestService guestService;
-    @Autowired GuestRepository guestRepository;
+    @Autowired
+    MemberService memberService;
+    @Autowired
+    MemberRepository memberRepository;
     @Autowired PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
-        guestRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
     }
 
     @Test
@@ -40,16 +42,16 @@ class GuestServiceTest extends TestContainerSupport {
         ProviderUser providerUser = createProviderUser("google");
 
         //when
-        guestService.register(providerUser);
+        memberService.register(providerUser);
 
         //then
-        assertThat(guestRepository.existsByEmailAndSocialType(providerUser.getEmail(), SocialType.from(providerUser.getProvider()))).isTrue();
+        assertThat(memberRepository.existsByEmailAndSocialType(providerUser.getEmail(), SocialType.from(providerUser.getProvider()))).isTrue();
 
-        Guest guest = guestRepository.getGuestByEmail(providerUser.getEmail());
+        Member member = memberRepository.getMemberByEmail(providerUser.getEmail());
 
-        assertThat(guest).isNotNull();
-        assertThat(guest.getPassword()).isNotEqualTo(providerUser.getPassword());
-        assertThat(passwordEncoder.matches(providerUser.getPassword(), guest.getPassword())).isTrue();
+        assertThat(member).isNotNull();
+        assertThat(member.getPassword()).isNotEqualTo(providerUser.getPassword());
+        assertThat(passwordEncoder.matches(providerUser.getPassword(), member.getPassword())).isTrue();
     }
 
     @Test
@@ -57,14 +59,14 @@ class GuestServiceTest extends TestContainerSupport {
     void oauthRegister_duplicate() {
         //given
         ProviderUser providerUser = createProviderUser("google");
-        guestService.register(providerUser);
+        memberService.register(providerUser);
 
-        long first = guestRepository.count();
+        long first = memberRepository.count();
 
         //when
-        guestService.register(providerUser);
+        memberService.register(providerUser);
 
-        long second = guestRepository.count();
+        long second = memberRepository.count();
 
         //then
         assertThat(first).isEqualTo(second);
@@ -75,13 +77,13 @@ class GuestServiceTest extends TestContainerSupport {
     void oauthRegister_throws() {
         //given
         ProviderUser googleUser = createProviderUser("google");
-        guestService.register(googleUser);
+        memberService.register(googleUser);
 
         ProviderUser kakaoUser = createProviderUser("kakao");
 
         //when
         //then
-        assertThatThrownBy(() -> guestService.register(kakaoUser))
+        assertThatThrownBy(() -> memberService.register(kakaoUser))
                 .isInstanceOf(EmailAlreadyExistsException.class)
                 .hasMessageContaining("Email already exists : ");
     }
@@ -93,14 +95,14 @@ class GuestServiceTest extends TestContainerSupport {
         SignupRequestDto requestDto = createRequestDto();
 
         //when
-        guestService.register(requestDto);
+        memberService.register(requestDto);
 
         //then
-        Guest guest = guestRepository.getGuestByEmail(requestDto.email());
+        Member member = memberRepository.getMemberByEmail(requestDto.email());
 
-        assertThat(guest).isNotNull();
-        assertThat(guest.getPassword()).isNotEqualTo(requestDto.password());
-        assertThat(passwordEncoder.matches(requestDto.password(), guest.getPassword())).isTrue();
+        assertThat(member).isNotNull();
+        assertThat(member.getPassword()).isNotEqualTo(requestDto.password());
+        assertThat(passwordEncoder.matches(requestDto.password(), member.getPassword())).isTrue();
     }
 
     @Test
@@ -108,11 +110,11 @@ class GuestServiceTest extends TestContainerSupport {
     void restRegister_throws() {
         //given
         SignupRequestDto requestDto = createRequestDto();
-        guestService.register(requestDto);
+        memberService.register(requestDto);
 
         //when
         //then
-        assertThatThrownBy(() -> guestService.register(requestDto))
+        assertThatThrownBy(() -> memberService.register(requestDto))
                 .isInstanceOf(EmailAlreadyExistsException.class)
                 .hasMessageContaining("Email already exists : ");
     }
@@ -121,20 +123,20 @@ class GuestServiceTest extends TestContainerSupport {
     @DisplayName("사용자 기본 정보 조회")
     void getDefaultProfile() {
         //given
-        Guest guest = saveAndGetGuest();
+        Member member = saveAndGetMember();
 
         //when
-        DefaultProfileResDto result = guestService.getDefaultProfile(guest.getId());
+        DefaultProfileResDto result = memberService.getDefaultProfile(member.getId());
 
         //then
-        assertThat(result.name()).isEqualTo(guest.getName());
-        assertThat(result.profileImageUrl()).isEqualTo(guest.getProfileUrl());
-        assertThat(result.createdDate()).isEqualTo(guest.getCreatedAt().toLocalDate());
-        assertThat(result.aboutMe()).isEqualTo(guest.getAboutMe());
+        assertThat(result.name()).isEqualTo(member.getName());
+        assertThat(result.profileImageUrl()).isEqualTo(member.getProfileUrl());
+        assertThat(result.createdDate()).isEqualTo(member.getCreatedAt().toLocalDate());
+        assertThat(result.aboutMe()).isEqualTo(member.getAboutMe());
     }
 
-    private Guest saveAndGetGuest() {
-        return guestRepository.save(Guest.createForTest());
+    private Member saveAndGetMember() {
+        return memberRepository.save(Member.createForTest());
     }
 
     private SignupRequestDto createRequestDto() {

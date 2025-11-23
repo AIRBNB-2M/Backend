@@ -1,5 +1,6 @@
 package project.airbnb.clone.config.security.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -13,7 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import project.airbnb.clone.common.advice.ErrorResponse;
-import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 
@@ -22,7 +22,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtExceptionFilter extends OncePerRequestFilter {
 
-    private final JsonMapper jsonMapper;
+    private final ObjectMapper objectMapper;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -48,7 +48,7 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
                                                                .build();
             response.setStatus(httpStatus.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            jsonMapper.writeValue(response.getWriter(), errorResponse);
+            objectMapper.writeValue(response.getWriter(), errorResponse);
         }
     }
 }

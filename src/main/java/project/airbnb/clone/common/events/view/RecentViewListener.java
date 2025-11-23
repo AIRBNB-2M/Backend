@@ -17,6 +17,6 @@ public class RecentViewListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleRecentViewEvent(ViewHistoryEvent event) {
-        viewHistoryService.saveRecentView(event.accommodationId(), event.guestId());
+        viewHistoryService.saveRecentView(event.accommodationId(), event.memberId());
     }
 }

@@ -19,7 +19,7 @@ public class RefreshToken {
     @Id
     String token;
 
-    Long guestId;
+    Long memberId;
 
     @TimeToLive
     Long ttl;

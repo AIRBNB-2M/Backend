@@ -2,7 +2,7 @@ package project.airbnb.clone.common.converters.impls;
 
 import project.airbnb.clone.common.converters.ProviderUserConverter;
 import project.airbnb.clone.common.converters.ProviderUserRequest;
-import project.airbnb.clone.entity.Guest;
+import project.airbnb.clone.entity.Member;
 import project.airbnb.clone.model.ProviderUser;
 import project.airbnb.clone.model.RestUser;
 
@@ -11,16 +11,16 @@ public class RestProviderUserConverter implements ProviderUserConverter<Provider
     @Override
     public ProviderUser converter(ProviderUserRequest providerUserRequest) {
 
-        Guest guest = providerUserRequest.guest();
+        Member member = providerUserRequest.member();
 
-        if (guest == null) {
+        if (member == null) {
             return null;
         }
 
         return RestUser.builder()
-                       .username(guest.getEmail())
-                       .email(guest.getEmail())
-                       .password(guest.getPassword())
+                       .username(member.getEmail())
+                       .email(member.getEmail())
+                       .password(member.getPassword())
                        .provider("none")
                        .build();
     }

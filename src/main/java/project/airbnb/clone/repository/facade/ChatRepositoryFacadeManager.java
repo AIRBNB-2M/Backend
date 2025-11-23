@@ -27,8 +27,8 @@ public class ChatRepositoryFacadeManager {
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatMessageQueryRepository chatMessageQueryRepository;
 
-    public Optional<ChatRoom> findChatRoomByGuestsId(Long currentGuestId, Long otherGuestId) {
-        return chatRoomRepository.findByGuestsId(currentGuestId, otherGuestId);
+    public Optional<ChatRoom> findChatRoomByMembersId(Long currentMemberId, Long otherMemberId) {
+        return chatRoomRepository.findByMembersId(currentMemberId, otherMemberId);
     }
 
     public ChatRoom getChatRoomByRoomId(Long roomId) {
@@ -62,12 +62,12 @@ public class ChatRepositoryFacadeManager {
                              .ifPresent(chatParticipant::updateLastReadMessage);
     }
 
-    public List<ChatRoomResDto> findChatRoomsByGuestId(Long guestId) {
-        return chatRoomQueryRepository.findChatRooms(guestId);
+    public List<ChatRoomResDto> findChatRoomsByMemberId(Long memberId) {
+        return chatRoomQueryRepository.findChatRooms(memberId);
     }
 
-    public Optional<ChatParticipant> findByChatRoomIdAndGuestId(Long roomId, Long guestId) {
-        return chatParticipantRepository.findByChatRoomIdAndGuestId(roomId, guestId);
+    public Optional<ChatParticipant> findByChatRoomIdAndMemberId(Long roomId, Long memberId) {
+        return chatParticipantRepository.findByChatRoomIdAndMemberId(roomId, memberId);
     }
 
     public ChatRoom saveChatRoom(ChatRoom chatRoom) {
@@ -78,8 +78,8 @@ public class ChatRepositoryFacadeManager {
         chatParticipantRepository.saveAll(participants);
     }
 
-    public ChatRoomResDto getChatRoomInfo(Long currentGuestId, Long otherGuestId, ChatRoom chatRoom) {
-        return chatRoomQueryRepository.findChatRoomInfo(currentGuestId, otherGuestId, chatRoom)
-                                      .orElseThrow(() -> new EntityNotFoundException("Chatroom with guests id " + currentGuestId + " and " + otherGuestId + " cannot be found"));
+    public ChatRoomResDto getChatRoomInfo(Long currentMemberId, Long otherMemberId, ChatRoom chatRoom) {
+        return chatRoomQueryRepository.findChatRoomInfo(currentMemberId, otherMemberId, chatRoom)
+                                      .orElseThrow(() -> new EntityNotFoundException("Chatroom with members id " + currentMemberId + " and " + otherMemberId + " cannot be found"));
     }
 }

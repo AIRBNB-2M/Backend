@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import project.airbnb.clone.WithMockGuest;
+import project.airbnb.clone.WithMockMember;
 import project.airbnb.clone.controller.RestDocsTestSupport;
 import project.airbnb.clone.dto.reservation.PostReviewReqDto;
 import project.airbnb.clone.service.reservation.ReservationService;
@@ -36,7 +36,7 @@ class ReservationControllerTest extends RestDocsTestSupport {
 
     @Test
     @DisplayName("예약 리뷰 등록")
-    @WithMockGuest
+    @WithMockMember
     void postReview() throws Exception {
         //given
         PostReviewReqDto requestDto = new PostReviewReqDto(BigDecimal.valueOf(4.5), "만족스러운 여행이었어요!");

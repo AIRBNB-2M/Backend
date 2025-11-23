@@ -1,4 +1,4 @@
-package project.airbnb.clone.dto.guest;
+package project.airbnb.clone.dto.member;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

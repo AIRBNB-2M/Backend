@@ -252,7 +252,7 @@ tasks.register('copyOasToSwagger', Copy) {
         // 3. 병합: paths
         swaggerMap.paths = swaggerMap.paths ?: [:]
         swaggerMap.paths.putAll(authSpec.paths)
-        swaggerMap.paths["/api/guests/me"].put.requestBody = editProfileRequestBody
+        swaggerMap.paths["/api/members/me"].put.requestBody = editProfileRequestBody
 
         // 4. 병합: components.securitySchemes
         swaggerMap.components = swaggerMap.components ?: [:]

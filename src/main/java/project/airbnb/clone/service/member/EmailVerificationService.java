@@ -1,4 +1,4 @@
-package project.airbnb.clone.service.guest;
+package project.airbnb.clone.service.member;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -17,9 +17,9 @@ import org.springframework.retry.support.RetrySynchronizationManager;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import project.airbnb.clone.entity.Guest;
+import project.airbnb.clone.entity.Member;
 import project.airbnb.clone.repository.dto.EmailVerification;
-import project.airbnb.clone.repository.jpa.GuestRepository;
+import project.airbnb.clone.repository.jpa.MemberRepository;
 import project.airbnb.clone.repository.redis.EmailVerificationRepository;
 
 import java.util.UUID;
@@ -37,21 +37,21 @@ public class EmailVerificationService {
     private String baseUrl;
 
     private final JavaMailSender javaMailSender;
-    private final GuestRepository guestRepository;
+    private final MemberRepository memberRepository;
     private final EmailVerificationRepository emailVerificationRepository;
 
     @Async
     @Retryable(retryFor = MailSendException.class, backoff = @Backoff(delay = 1000))
-    public void sendEmail(Long guestId) {
-        Guest guest = guestRepository.findById(guestId)
-                                     .orElseThrow(() -> new EntityNotFoundException("Guest with id " + guestId + "cannot be found"));
+    public void sendEmail(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                                        .orElseThrow(() -> new EntityNotFoundException("Guest with id " + memberId + "cannot be found"));
 
         String token = UUID.randomUUID().toString();
 
         String link = baseUrl + "/api/auth/email/verify?token=" + token;
         String subject = "[Airbnb-2M] 이메일 인증을 완료해주세요.";
         String html = generateHtml(link);
-        String email = guest.getEmail();
+        String email = member.getEmail();
 
         try {
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
@@ -65,7 +65,7 @@ public class EmailVerificationService {
             log.debug("이메일 인증 링크 전송: {}, 시도 횟수 {}", email, retryCount);
 
             javaMailSender.send(mimeMessage);
-            emailVerificationRepository.save(new EmailVerification(token, guestId));
+            emailVerificationRepository.save(new EmailVerification(token, memberId));
 
             log.debug("이메일 인증 링크 전송 성공: {}", email);
 
@@ -90,10 +90,10 @@ public class EmailVerificationService {
             return redirectUrl + "failed";
         }
 
-        Long guestId = verification.getGuestId();
-        Guest guest = guestRepository.findById(guestId)
-                                     .orElseThrow(() -> new EntityNotFoundException("Guest with id " + guestId + "cannot be found"));
-        guest.verifyEmail();
+        Long memberId = verification.getMemberId();
+        Member member = memberRepository.findById(memberId)
+                                        .orElseThrow(() -> new EntityNotFoundException("Guest with id " + memberId + "cannot be found"));
+        member.verifyEmail();
         emailVerificationRepository.delete(verification);
 
         return redirectUrl + "success";
