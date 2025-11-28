@@ -2,8 +2,6 @@ package project.airbnb.clone.service.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +10,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 import project.airbnb.clone.common.events.logout.OAuthLogoutEvent;
+import project.airbnb.clone.common.exceptions.BusinessException;
+import project.airbnb.clone.common.exceptions.ErrorCode;
+import project.airbnb.clone.common.exceptions.factory.MemberExceptions;
 import project.airbnb.clone.common.jwt.JwtProperties;
 import project.airbnb.clone.common.jwt.JwtProvider;
 import project.airbnb.clone.dto.jwt.TokenResponse;
@@ -42,22 +43,23 @@ public class TokenService {
     private final BlacklistedTokenRepository blacklistedTokenRepository;
 
     public TokenResponse generateAndSendToken(String email, String principalName, HttpServletResponse response) {
-        Member member = memberRepository.getMemberByEmail(email);
+        Member member = memberRepository.findByEmail(email)
+                                        .orElseThrow(() -> MemberExceptions.notFoundByEmail(email));
 
         return getTokenResponse(response, member, principalName);
     }
 
-    public void refreshAccessToken(String refreshToken, HttpServletResponse response, HttpServletRequest request) {
+    public void refreshAccessToken(String refreshToken, HttpServletResponse response) {
         jwtProvider.validateToken(refreshToken);
 
         Long id = jwtProvider.getId(refreshToken);
-        request.setAttribute("key", String.valueOf(id)); //예외 발생 시 Advice에서 처리할 수 있도록 저장
 
         validateSavedRefreshToken(refreshToken);
         refreshTokenRepository.deleteById(refreshToken);
 
         String principalName = jwtProvider.getPrincipalName(refreshToken);
-        Member member = memberRepository.getMemberById(id);
+        Member member = memberRepository.findById(id)
+                                        .orElseThrow(() -> MemberExceptions.notFoundById(id));
 
         getTokenResponse(response, member, principalName);
     }
@@ -67,7 +69,7 @@ public class TokenService {
                                                 .map(savedRefreshToken -> savedRefreshToken.getToken().equals(refreshToken))
                                                 .orElse(false);
         if (!isValid) {
-            throw new JwtException("Refresh Token is invalid: " + refreshToken);
+            throw new BusinessException(ErrorCode.INVALID_TOKEN);
         }
     }
 
@@ -108,7 +110,8 @@ public class TokenService {
         Long id = removeRefreshToken(refreshToken);
 
         //로그아웃 이벤트 발행
-        Member member = memberRepository.getMemberById(id);
+        Member member = memberRepository.findById(id)
+                                        .orElseThrow(() -> MemberExceptions.notFoundById(id));
         eventPublisher.publishEvent(new OAuthLogoutEvent(member.getSocialType()));
     }
 
@@ -124,7 +127,7 @@ public class TokenService {
 
             if (remain > 0) {
                 blacklistedTokenRepository.save(new BlacklistedToken(accessToken, remain));
-                log.debug("Access Token added to blacklist: {}", accessToken);
+                log.debug("블랙리스트에 액세스토큰 저장 : {}", accessToken);
             }
         } catch (ExpiredJwtException ignored) {
         }
@@ -133,7 +136,7 @@ public class TokenService {
     private Long removeRefreshToken(String refreshToken) {
         Long id = jwtProvider.getId(refreshToken);
         refreshTokenRepository.deleteById(refreshToken);
-        log.debug("Refresh Token removed from Redis: {}", refreshToken);
+        log.debug("레디스에서 리프레시 토큰 제거 : {}", refreshToken);
 
         return id;
     }

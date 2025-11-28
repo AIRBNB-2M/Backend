@@ -12,12 +12,12 @@ import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import project.airbnb.clone.common.exceptions.EmailAlreadyExistsException;
+import project.airbnb.clone.common.exceptions.BusinessException;
 import project.airbnb.clone.dto.jwt.TokenResponse;
 import project.airbnb.clone.model.PrincipalUser;
 import project.airbnb.clone.model.ProviderUser;
-import project.airbnb.clone.service.member.MemberService;
 import project.airbnb.clone.service.jwt.TokenService;
+import project.airbnb.clone.service.member.MemberService;
 
 import java.io.IOException;
 
@@ -46,7 +46,7 @@ public class OAuthAuthenticationSuccessHandler extends SimpleUrlAuthenticationSu
 
             redirectStrategy.sendRedirect(request, response, frondEndUrl + "/auth/callback?token=" + tokenResponse.accessToken());
 
-        } catch (EmailAlreadyExistsException ex) {
+        } catch (BusinessException ex) {
             OAuth2Error oAuth2Error = new OAuth2Error(ex.getMessage(), "Email Already Exists", null);
             throw new OAuth2AuthenticationException(oAuth2Error, ex);
         }

@@ -1,9 +1,11 @@
 package project.airbnb.clone.service.accommodation;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import project.airbnb.clone.common.exceptions.factory.AccommodationExceptions;
+import project.airbnb.clone.common.exceptions.factory.MemberExceptions;
+import project.airbnb.clone.common.exceptions.factory.WishlistExceptions;
 import project.airbnb.clone.dto.wishlist.*;
 import project.airbnb.clone.entity.Accommodation;
 import project.airbnb.clone.entity.Member;
@@ -37,7 +39,9 @@ public class WishlistService {
 
     @Transactional
     public WishlistCreateResDto createWishlist(WishlistCreateReqDto reqDto, Long memberId) {
-        Member member = memberRepository.getMemberById(memberId);
+        Member member = memberRepository.findById(memberId)
+                                        .orElseThrow(() -> MemberExceptions.notFoundById(memberId));
+
         Wishlist savedWishlist = wishlistRepository.save(Wishlist.create(member, reqDto.wishlistName()));
         return new WishlistCreateResDto(savedWishlist.getId(), savedWishlist.getName());
     }
@@ -78,7 +82,7 @@ public class WishlistService {
     @Transactional
     public void updateMemo(Long wishlistId, Long accommodationId, Long memberId, MemoUpdateReqDto reqDto) {
         WishlistAccommodation wishlistAccommodation = wishlistAccommodationRepository.findByAllIds(wishlistId, accommodationId, memberId)
-                                                                                     .orElseThrow(() -> new EntityNotFoundException("Cannot be found wishlistAccommodation for wishlistId: " + wishlistId + ", accommodationId: " + accommodationId + ", memberId: " + memberId));
+                                                                                     .orElseThrow(() -> WishlistExceptions.notFoundWishlistAccommodation(wishlistId, accommodationId, memberId));
         wishlistAccommodation.updateMemo(reqDto.memo());
     }
 
@@ -106,11 +110,11 @@ public class WishlistService {
 
     private Wishlist getWishlistByIdAndMemberId(Long wishlistId, Long memberId) {
         return wishlistRepository.findByIdAndMemberId(wishlistId, memberId).orElseThrow(
-                () -> new EntityNotFoundException("Cannot be found wishlist for wishlistId: " + wishlistId + ", memberId: " + memberId));
+                () -> WishlistExceptions.notFoundByIdAndMemberId(wishlistId, memberId));
     }
 
     private Accommodation getAccommodationById(Long accommodationId) {
         return accommodationRepository.findById(accommodationId).orElseThrow(
-                () -> new EntityNotFoundException("Cannot found accommodation for : " + accommodationId));
+                () -> AccommodationExceptions.notFoundById(accommodationId));
     }
 }

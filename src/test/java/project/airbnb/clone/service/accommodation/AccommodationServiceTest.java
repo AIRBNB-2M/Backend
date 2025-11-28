@@ -1,7 +1,6 @@
 package project.airbnb.clone.service.accommodation;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,6 +14,7 @@ import org.springframework.test.context.event.RecordApplicationEvents;
 import org.springframework.transaction.annotation.Transactional;
 import project.airbnb.clone.TestContainerSupport;
 import project.airbnb.clone.common.events.view.ViewHistoryEvent;
+import project.airbnb.clone.common.exceptions.BusinessException;
 import project.airbnb.clone.consts.DayType;
 import project.airbnb.clone.consts.Season;
 import project.airbnb.clone.dto.PageResponseDto;
@@ -289,8 +289,8 @@ class AccommodationServiceTest extends TestContainerSupport {
 
             // when & then
             assertThatThrownBy(() -> accommodationService.getDetailAccommodation(nonExistentId, member.getId()))
-                    .isInstanceOf(EntityNotFoundException.class)
-                    .hasMessageContaining("Accommodation with id " + nonExistentId);
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining("id=999 숙소 조회 실패");
         }
     }
 

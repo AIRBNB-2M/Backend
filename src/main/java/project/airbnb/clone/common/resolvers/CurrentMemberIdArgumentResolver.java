@@ -1,8 +1,6 @@
 package project.airbnb.clone.common.resolvers;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.Assert;
@@ -11,6 +9,8 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import project.airbnb.clone.common.annotations.CurrentMemberId;
+import project.airbnb.clone.common.exceptions.AuthException;
+import project.airbnb.clone.common.exceptions.ErrorCode;
 import project.airbnb.clone.model.AuthProviderUser;
 import project.airbnb.clone.model.PrincipalUser;
 
@@ -35,7 +35,7 @@ public class CurrentMemberIdArgumentResolver implements HandlerMethodArgumentRes
 
         if (authentication == null) {
             if (required) {
-                throw new AuthenticationCredentialsNotFoundException("Authentication is required but not found");
+                throw new AuthException(ErrorCode.UNAUTHORIZED);
             }
             return null;
         }
@@ -47,7 +47,7 @@ public class CurrentMemberIdArgumentResolver implements HandlerMethodArgumentRes
         }
 
         if (required) {
-            throw new AccessDeniedException("Principal type is invalid");
+            throw new AuthException(ErrorCode.ACCESS_DENIED);
         }
 
         return null;

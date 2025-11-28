@@ -1,7 +1,6 @@
 package project.airbnb.clone.common.jwt;
 
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.Keys;
@@ -16,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
+import project.airbnb.clone.common.exceptions.JwtProcessingException;
 import project.airbnb.clone.common.jwt.JwtProperties.TokenProperties;
 import project.airbnb.clone.config.security.jwt.JwtAuthenticationToken;
 import project.airbnb.clone.consts.Role;
@@ -26,6 +26,7 @@ import project.airbnb.clone.repository.jpa.MemberRepository;
 
 import javax.crypto.SecretKey;
 import java.util.Base64;
+import java.util.Optional;
 
 import static io.jsonwebtoken.io.Decoders.BASE64;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -110,9 +111,9 @@ class JwtProviderUnitTest {
             //when
             //then
             assertThatThrownBy(() -> jwtProvider.validateToken(expiredToken))
-                    .isInstanceOf(JwtException.class)
+                    .isInstanceOf(JwtProcessingException.class)
                     .hasCauseInstanceOf(ExpiredJwtException.class)
-                    .hasMessage("Token is invalid");
+                    .hasMessage("토큰이 만료되었습니다");
         }
 
         @Test
@@ -124,9 +125,9 @@ class JwtProviderUnitTest {
             //when
             //then
             assertThatThrownBy(() -> jwtProvider.validateToken(invalidToken))
-                    .isInstanceOf(JwtException.class)
+                    .isInstanceOf(JwtProcessingException.class)
                     .hasCauseInstanceOf(MalformedJwtException.class)
-                    .hasMessage("Token is invalid");
+                    .hasMessage("토큰 형식이 올바르지 않습니다");
         }
 
         @Test
@@ -146,9 +147,9 @@ class JwtProviderUnitTest {
 
             //then
             assertThatThrownBy(() -> jwtProvider.validateToken(invalidToken))
-                    .isInstanceOf(JwtException.class)
+                    .isInstanceOf(JwtProcessingException.class)
                     .hasCauseInstanceOf(SignatureException.class)
-                    .hasMessage("Token is invalid");
+                    .hasMessage("유효하지 않은 토큰입니다");
         }
 
         @Test
@@ -160,9 +161,9 @@ class JwtProviderUnitTest {
             //when
             //then
             assertThatThrownBy(() -> jwtProvider.validateToken(invalidToken))
-                    .isInstanceOf(JwtException.class)
+                    .isInstanceOf(JwtProcessingException.class)
                     .hasCauseInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("Token is invalid");
+                    .hasMessage("유효하지 않은 토큰입니다");
         }
     }
 
@@ -198,7 +199,7 @@ class JwtProviderUnitTest {
             Member member = mock(Member.class);
             given(member.getId()).willReturn(1L);
             given(member.getRole()).willReturn(Role.GUEST);
-            given(memberRepository.getMemberById(1L)).willReturn(member);
+            given(memberRepository.findById(1L)).willReturn(Optional.of(member));
 
             String token = jwtProvider.generateAccessToken(member, "principal");
 
@@ -219,16 +220,14 @@ class JwtProviderUnitTest {
             //given
             Member member = mock(Member.class);
             given(member.getId()).willReturn(1L);
-            given(memberRepository.getMemberById(1L)).willThrow(EntityNotFoundException.class);
+            given(memberRepository.findById(1L)).willThrow(EntityNotFoundException.class);
 
             String token = jwtProvider.generateAccessToken(member, "principal");
 
             //when
             //then
             assertThatThrownBy(() -> jwtProvider.getAuthentication(token))
-                    .isInstanceOf(JwtException.class)
-                    .hasCauseInstanceOf(EntityNotFoundException.class)
-                    .hasMessageContaining("Cannot found guest for token subject: ");
+                    .isInstanceOf(EntityNotFoundException.class);
         }
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import project.airbnb.clone.TestContainerSupport;
-import project.airbnb.clone.common.exceptions.EmailAlreadyExistsException;
+import project.airbnb.clone.common.exceptions.BusinessException;
 import project.airbnb.clone.consts.SocialType;
 import project.airbnb.clone.dto.member.DefaultProfileResDto;
 import project.airbnb.clone.dto.member.SignupRequestDto;
@@ -47,7 +47,7 @@ class MemberServiceTest extends TestContainerSupport {
         //then
         assertThat(memberRepository.existsByEmailAndSocialType(providerUser.getEmail(), SocialType.from(providerUser.getProvider()))).isTrue();
 
-        Member member = memberRepository.getMemberByEmail(providerUser.getEmail());
+        Member member = memberRepository.findByEmail(providerUser.getEmail()).orElse(null);
 
         assertThat(member).isNotNull();
         assertThat(member.getPassword()).isNotEqualTo(providerUser.getPassword());
@@ -84,8 +84,8 @@ class MemberServiceTest extends TestContainerSupport {
         //when
         //then
         assertThatThrownBy(() -> memberService.register(kakaoUser))
-                .isInstanceOf(EmailAlreadyExistsException.class)
-                .hasMessageContaining("Email already exists : ");
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("이미 존재하는 이메일입니다");
     }
 
     @Test
@@ -98,7 +98,7 @@ class MemberServiceTest extends TestContainerSupport {
         memberService.register(requestDto);
 
         //then
-        Member member = memberRepository.getMemberByEmail(requestDto.email());
+        Member member = memberRepository.findByEmail(requestDto.email()).orElse(null);
 
         assertThat(member).isNotNull();
         assertThat(member.getPassword()).isNotEqualTo(requestDto.password());
@@ -115,8 +115,8 @@ class MemberServiceTest extends TestContainerSupport {
         //when
         //then
         assertThatThrownBy(() -> memberService.register(requestDto))
-                .isInstanceOf(EmailAlreadyExistsException.class)
-                .hasMessageContaining("Email already exists : ");
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("이미 존재하는 이메일입니다");
     }
 
     @Test

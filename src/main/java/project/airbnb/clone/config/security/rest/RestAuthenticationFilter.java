@@ -5,10 +5,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import project.airbnb.clone.common.exceptions.CustomAuthenticationException;
+import project.airbnb.clone.common.exceptions.ErrorCode;
 import project.airbnb.clone.dto.member.LoginRequestDto;
 
 import java.io.IOException;
@@ -31,7 +32,7 @@ public class RestAuthenticationFilter extends AbstractAuthenticationProcessingFi
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
 
         if (!HttpMethod.POST.name().equals(request.getMethod())) {
-            throw new IllegalArgumentException("Authentication method is not supported");
+            throw new CustomAuthenticationException(ErrorCode.INVALID_INPUT);
         }
 
         LoginRequestDto loginRequest = objectMapper.readValue(request.getReader(), LoginRequestDto.class);
@@ -40,11 +41,10 @@ public class RestAuthenticationFilter extends AbstractAuthenticationProcessingFi
         String password = loginRequest.password();
 
         if (!EMAIL_PATTERN.matcher(email).matches() || !PASSWORD_PATTERN.matcher(password).matches()) {
-            throw new BadCredentialsException("Email or Password is not provided");
+            throw new CustomAuthenticationException(ErrorCode.INVALID_CREDENTIALS);
         }
 
-        RestAuthenticationToken authenticationToken =
-                RestAuthenticationToken.unauthenticated(email, password);
+        RestAuthenticationToken authenticationToken = RestAuthenticationToken.unauthenticated(email, password);
 
         return getAuthenticationManager().authenticate(authenticationToken);
     }

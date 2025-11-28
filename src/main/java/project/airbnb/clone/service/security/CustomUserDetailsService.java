@@ -22,7 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Member member = memberRepository.findByEmail(username)
-                                        .orElseThrow(() -> new UsernameNotFoundException("Cannot find guest for: " + username));
+                                        .orElseThrow(() -> new UsernameNotFoundException("email=" + username + " 사용자 조회 실패"));
 
         ProviderUserRequest providerUserRequest = new ProviderUserRequest(member);
         ProviderUser providerUser = providerUserConverter.converter(providerUserRequest);

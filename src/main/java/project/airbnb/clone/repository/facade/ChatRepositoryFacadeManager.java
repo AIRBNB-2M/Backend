@@ -1,8 +1,8 @@
 package project.airbnb.clone.repository.facade;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import project.airbnb.clone.common.exceptions.factory.ChatExceptions;
 import project.airbnb.clone.dto.chat.ChatMessageResDto;
 import project.airbnb.clone.dto.chat.ChatRoomResDto;
 import project.airbnb.clone.entity.chat.ChatMessage;
@@ -33,7 +33,7 @@ public class ChatRepositoryFacadeManager {
 
     public ChatRoom getChatRoomByRoomId(Long roomId) {
         return chatRoomRepository.findById(roomId)
-                                 .orElseThrow(() -> new EntityNotFoundException("Chatroom with id " + roomId + "cannot be found"));
+                                 .orElseThrow(() -> ChatExceptions.notFoundChatRoom(roomId));
     }
 
     public List<ChatParticipant> findParticipantsByChatRoom(ChatRoom chatRoom) {
@@ -50,7 +50,7 @@ public class ChatRepositoryFacadeManager {
 
     public ChatMessage getChatMessageById(Long id) {
         return chatMessageRepository.findById(id)
-                                    .orElseThrow(() -> new EntityNotFoundException("ChatMessage with id: " + id + "cannot be found"));
+                                    .orElseThrow(() -> ChatExceptions.notFoundChatMessage(id));
     }
 
     public int updateCustomName(String customName, ChatRoom chatRoom, Long id) {
@@ -80,6 +80,6 @@ public class ChatRepositoryFacadeManager {
 
     public ChatRoomResDto getChatRoomInfo(Long currentMemberId, Long otherMemberId, ChatRoom chatRoom) {
         return chatRoomQueryRepository.findChatRoomInfo(currentMemberId, otherMemberId, chatRoom)
-                                      .orElseThrow(() -> new EntityNotFoundException("Chatroom with members id " + currentMemberId + " and " + otherMemberId + " cannot be found"));
+                                      .orElseThrow(() -> ChatExceptions.notFoundChatRoom(currentMemberId, otherMemberId));
     }
 }

@@ -1,6 +1,5 @@
 package project.airbnb.clone.service.accommodation;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -8,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.airbnb.clone.common.events.view.ViewHistoryEvent;
+import project.airbnb.clone.common.exceptions.factory.AccommodationExceptions;
 import project.airbnb.clone.consts.DayType;
 import project.airbnb.clone.consts.Season;
 import project.airbnb.clone.dto.PageResponseDto;
@@ -88,7 +88,7 @@ public class AccommodationService {
         DayType dayType = dateManager.getDayType(now);
 
         DetailAccommodationQueryDto detailAccQueryDto = accommodationQueryRepository.findAccommodation(accId, memberId, season, dayType)
-                                                                                    .orElseThrow(() -> new EntityNotFoundException("Accommodation with id " + accId + "cannot be found"));
+                                                                                    .orElseThrow(() -> AccommodationExceptions.notFoundById(accId));
         List<ImageDataQueryDto> images = accommodationQueryRepository.findImages(accId);
         List<String> amenities = accommodationQueryRepository.findAmenities(accId);
         List<DetailReviewDto> reviews = accommodationQueryRepository.findReviews(accId);

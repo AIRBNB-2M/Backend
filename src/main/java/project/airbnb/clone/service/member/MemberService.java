@@ -1,6 +1,5 @@
 package project.airbnb.clone.service.member;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -9,9 +8,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import project.airbnb.clone.common.events.member.MemberProfileImageChangedEvent;
 import project.airbnb.clone.common.events.member.MemberImageUploadEvent;
-import project.airbnb.clone.common.exceptions.EmailAlreadyExistsException;
+import project.airbnb.clone.common.events.member.MemberProfileImageChangedEvent;
+import project.airbnb.clone.common.exceptions.BusinessException;
+import project.airbnb.clone.common.exceptions.ErrorCode;
+import project.airbnb.clone.common.exceptions.factory.MemberExceptions;
 import project.airbnb.clone.consts.SocialType;
 import project.airbnb.clone.dto.PageResponseDto;
 import project.airbnb.clone.dto.member.*;
@@ -73,7 +74,7 @@ public class MemberService {
     @Transactional
     public EditProfileResDto editMyProfile(Long memberId, MultipartFile imageFile, EditProfileReqDto profileReqDto) {
         Member member = memberRepository.findById(memberId)
-                                        .orElseThrow(() -> new EntityNotFoundException("Guest with id " + memberId + "cannot be found"));
+                                        .orElseThrow(() -> MemberExceptions.notFoundById(memberId));
 
         if (profileReqDto.isProfileImageChanged()) {
             eventPublisher.publishEvent(new MemberProfileImageChangedEvent(memberId, member.getProfileUrl(), imageFile));
@@ -85,7 +86,7 @@ public class MemberService {
 
     public DefaultProfileResDto getDefaultProfile(Long memberId) {
         DefaultProfileQueryDto profileQueryDto = memberQueryRepository.getDefaultProfile(memberId)
-                                                                      .orElseThrow(() -> new EntityNotFoundException("Guest with id " + memberId + "cannot be found"));
+                                                                      .orElseThrow(() -> MemberExceptions.notFoundById(memberId));
         return DefaultProfileResDto.from(profileQueryDto);
     }
 
@@ -107,7 +108,7 @@ public class MemberService {
 
     private void validateExistsEmail(String email) {
         if (memberRepository.existsByEmail(email)) {
-            throw new EmailAlreadyExistsException("Email already exists : " + email);
+            throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
     }
 

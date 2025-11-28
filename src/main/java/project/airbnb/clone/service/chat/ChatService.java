@@ -1,19 +1,15 @@
 package project.airbnb.clone.service.chat;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.airbnb.clone.common.events.chat.ChatLeaveEvent;
 import project.airbnb.clone.common.events.chat.ChatRequestAcceptedEvent;
 import project.airbnb.clone.common.events.chat.ChatRequestCreatedEvent;
 import project.airbnb.clone.common.events.chat.ChatRequestRejectedEvent;
-import project.airbnb.clone.common.exceptions.chat.AlreadyActiveChatException;
-import project.airbnb.clone.common.exceptions.chat.AlreadyRequestException;
-import project.airbnb.clone.common.exceptions.chat.ParticipantLeftException;
-import project.airbnb.clone.common.exceptions.chat.SameParticipantException;
+import project.airbnb.clone.common.exceptions.factory.ChatExceptions;
+import project.airbnb.clone.common.exceptions.factory.MemberExceptions;
 import project.airbnb.clone.dto.chat.*;
 import project.airbnb.clone.entity.Member;
 import project.airbnb.clone.entity.chat.ChatMessage;
@@ -45,20 +41,20 @@ public class ChatService {
 
         for (ChatParticipant participant : participants) {
             if (participant.hasLeft()) {
-                throw new ParticipantLeftException("Cannot send message: one of the participants has left the chat, left memberId: " + participant.getMember().getId());
+                throw ChatExceptions.participantLeft(chatRoom.getId(), participant.getMember().getId());
             }
         }
 
         Long senderId = chatMessageDto.senderId();
         String content = chatMessageDto.content();
 
-        Member writer = geteMemberyId(senderId);
+        Member writer = getMemberById(senderId);
         ChatMessage message = chatRepositoryFacade.saveChatMessage(ChatMessage.create(chatRoom, writer, content));
 
         ChatParticipant chatParticipant = participants.stream()
                                                       .filter(participant -> participant.getMember().getId().equals(writer.getId()))
                                                       .findFirst()
-                                                      .orElseThrow(() -> new EntityNotFoundException("Writer " + writer.getId() + " not found in participants"));
+                                                      .orElseThrow(() -> ChatExceptions.notFoundChatParticipant(chatRoom.getId(), writer.getId()));
         chatParticipant.updateLastReadMessage(message);
 
         return ChatMessageResDto.builder()
@@ -93,15 +89,15 @@ public class ChatService {
     }
 
     @Transactional
-    public ChatRoomResDto updateChatRoomName(String customName, Long othermemberId, Long myId, Long roomId) {
+    public ChatRoomResDto updateChatRoomName(String customName, Long otherMemberId, Long myId, Long roomId) {
         ChatRoom chatRoom = chatRepositoryFacade.getChatRoomByRoomId(roomId);
 
         int updated = chatRepositoryFacade.updateCustomName(customName, chatRoom, myId);
         if (updated == 0) {
-            throw new EntityNotFoundException("ChatParticipant with roomId: " + roomId + " and memberId: " + myId + "cannot be found");
+            throw ChatExceptions.notFoundChatParticipant(roomId, myId);
         }
 
-        return chatRepositoryFacade.getChatRoomInfo(othermemberId, myId, chatRoom);
+        return chatRepositoryFacade.getChatRoomInfo(myId, otherMemberId, chatRoom);
     }
 
     @Transactional
@@ -116,9 +112,11 @@ public class ChatService {
     @Transactional
     public ChatRoomResDto acceptRequestChat(String requestId, Long receiverId) {
         ChatRequest chatRequest = chatRequestRepository.findById(requestId)
-                                                       .orElseThrow(() -> new EntityNotFoundException("요청이 존재하지 않거나 만료되었습니다. => " + requestId));
+                                                       .orElseThrow(() -> ChatExceptions.notFoundChatRequest(requestId));
 
-        if (!chatRequest.getReceiverId().equals(receiverId)) throw new AccessDeniedException("본인에게 온 요청만 수락할 수 있습니다.");
+        if (!chatRequest.getReceiverId().equals(receiverId)) {
+            throw ChatExceptions.notOwnerOfChatRequest(requestId, receiverId);
+        }
 
         chatRequestRepository.delete(chatRequest);
 
@@ -139,9 +137,11 @@ public class ChatService {
 
     public void rejectRequestChat(String requestId, Long rejecterId) {
         ChatRequest chatRequest = chatRequestRepository.findById(requestId)
-                                                       .orElseThrow(() -> new EntityNotFoundException("요청이 존재하지 않거나 만료되었습니다. => " + requestId));
+                                                       .orElseThrow(() -> ChatExceptions.notFoundChatRequest(requestId));
 
-        if (!chatRequest.getReceiverId().equals(rejecterId)) throw new AccessDeniedException("본인에게 온 요청만 거절할 수 있습니다.");
+        if (!chatRequest.getReceiverId().equals(rejecterId)) {
+            throw ChatExceptions.notOwnerOfChatRequest(requestId, rejecterId);
+        }
 
         chatRequestRepository.delete(chatRequest);
         eventPublisher.publishEvent(new ChatRequestRejectedEvent(requestId, chatRequest.getSenderId()));
@@ -150,24 +150,22 @@ public class ChatService {
     public RequestChatResDto requestChat(Long receiverId, Long senderId) {
         String requestKey = "chat:chatRequest:" + senderId + ":" + receiverId;
 
-        if (receiverId.equals(senderId)) throw new SameParticipantException("자기 자신과는 채팅할 수 없습니다.");
-        if (chatRequestRepository.existsById(requestKey)) throw new AlreadyRequestException("이미 요청된 채팅입니다.");
+        if (receiverId.equals(senderId)) throw ChatExceptions.sameParticipant(receiverId);
+        if (chatRequestRepository.existsById(requestKey)) throw ChatExceptions.alreadyRequest(requestKey);
 
         chatRepositoryFacade.findChatRoomByMembersId(receiverId, senderId)
                             .map(chatRoom -> getChatParticipant(chatRoom.getId(), senderId))
                             .ifPresent(participant -> {
                                 if (participant.isActiveParticipant()) {
-                                    throw new AlreadyActiveChatException("이미 참가 중인 채팅방이 존재합니다.");
+                                    throw ChatExceptions.alreadyActiveChat();
                                 }
                             });
 
         LocalDateTime now = LocalDateTime.now();
         Duration requestTTL = Duration.ofDays(1);
 
-        Member sender = memberRepository.findById(senderId)
-                                        .orElseThrow(() -> new EntityNotFoundException("요청자 정보(id: %d)를 찾을 수 없습니다.".formatted(senderId)));
-        Member receiver = memberRepository.findById(receiverId)
-                                          .orElseThrow(() -> new EntityNotFoundException("수신자 정보(id: %d)를 찾을 수 없습니다.".formatted(receiverId)));
+        Member sender = memberRepository.findById(senderId).orElseThrow(() -> MemberExceptions.notFoundById(senderId));
+        Member receiver = memberRepository.findById(receiverId).orElseThrow(() -> MemberExceptions.notFoundById(receiverId));
 
         ChatRequest chatRequest = ChatRequest.builder()
                                              .requestId(requestKey)
@@ -218,8 +216,8 @@ public class ChatService {
     }
 
     private ChatRoom createNewChatRoom(Long receiverId, Long senderId) {
-        Member receiver = geteMemberyId(receiverId);
-        Member sender = geteMemberyId(senderId);
+        Member receiver = getMemberById(receiverId);
+        Member sender = getMemberById(senderId);
 
         ChatRoom chatRoom = chatRepositoryFacade.saveChatRoom(new ChatRoom());
 
@@ -239,13 +237,13 @@ public class ChatService {
         }
     }
 
-    private Member geteMemberyId(Long memberId) {
+    private Member getMemberById(Long memberId) {
         return memberRepository.findById(memberId)
-                               .orElseThrow(() -> new EntityNotFoundException("Guest with id " + memberId + "cannot be found"));
+                               .orElseThrow(() -> MemberExceptions.notFoundById(memberId));
     }
 
     private ChatParticipant getChatParticipant(Long roomId, Long memberId) {
         return chatRepositoryFacade.findByChatRoomIdAndMemberId(roomId, memberId)
-                                   .orElseThrow(() -> new EntityNotFoundException("ChatParticipant with roomId: " + roomId + " and memberId: " + memberId + "cannot be found"));
+                                   .orElseThrow(() -> ChatExceptions.notFoundChatParticipant(roomId, memberId));
     }
 }

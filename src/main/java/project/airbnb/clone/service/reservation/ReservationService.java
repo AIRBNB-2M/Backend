@@ -1,9 +1,10 @@
 package project.airbnb.clone.service.reservation;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import project.airbnb.clone.common.exceptions.factory.MemberExceptions;
+import project.airbnb.clone.common.exceptions.factory.ReservationExceptions;
 import project.airbnb.clone.dto.reservation.PostReviewReqDto;
 import project.airbnb.clone.entity.Member;
 import project.airbnb.clone.entity.Reservation;
@@ -24,9 +25,9 @@ public class ReservationService {
     @Transactional
     public void postReview(Long reservationId, PostReviewReqDto reqDto, Long memberId) {
         Reservation reservation = reservationRepository.findById(reservationId)
-                                                       .orElseThrow(() -> new EntityNotFoundException("Cannot be found Reservation for id: " + reservationId));
+                                                       .orElseThrow(() -> ReservationExceptions.notFoundById(reservationId));
         Member member = memberRepository.findById(memberId)
-                                        .orElseThrow(() -> new EntityNotFoundException("Cannot be found Guest for id: " + memberId));
+                                        .orElseThrow(() -> MemberExceptions.notFoundById(memberId));
 
         reviewRepository.save(Review.create(reqDto.rating().doubleValue(), reqDto.content(), reservation, member));
     }

@@ -2,7 +2,6 @@ package project.airbnb.clone.service.member;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +16,7 @@ import org.springframework.retry.support.RetrySynchronizationManager;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import project.airbnb.clone.common.exceptions.factory.MemberExceptions;
 import project.airbnb.clone.entity.Member;
 import project.airbnb.clone.repository.dto.EmailVerification;
 import project.airbnb.clone.repository.jpa.MemberRepository;
@@ -44,7 +44,7 @@ public class EmailVerificationService {
     @Retryable(retryFor = MailSendException.class, backoff = @Backoff(delay = 1000))
     public void sendEmail(Long memberId) {
         Member member = memberRepository.findById(memberId)
-                                        .orElseThrow(() -> new EntityNotFoundException("Guest with id " + memberId + "cannot be found"));
+                                        .orElseThrow(() -> MemberExceptions.notFoundById(memberId));
 
         String token = UUID.randomUUID().toString();
 
@@ -92,7 +92,7 @@ public class EmailVerificationService {
 
         Long memberId = verification.getMemberId();
         Member member = memberRepository.findById(memberId)
-                                        .orElseThrow(() -> new EntityNotFoundException("Guest with id " + memberId + "cannot be found"));
+                                        .orElseThrow(() -> MemberExceptions.notFoundById(memberId));
         member.verifyEmail();
         emailVerificationRepository.delete(verification);
 

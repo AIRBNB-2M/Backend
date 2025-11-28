@@ -15,10 +15,12 @@ public class TestContainerSupport extends IntegrationTestSupport {
     static MySQLContainer<?> MYSQL_CONTAINER = new MySQLContainer<>("mysql:8.0.35")
             .withDatabaseName("testdb")
             .withUsername("test")
-            .withPassword("test");
+            .withPassword("test")
+            .withReuse(true);
 
     static GenericContainer<?> REDIS_CONTAINER = new GenericContainer<>(DockerImageName.parse("redis:7.2.4"))
-            .withExposedPorts(6379);
+            .withExposedPorts(6379)
+            .withReuse(true);
 
     static {
         MYSQL_CONTAINER.start();

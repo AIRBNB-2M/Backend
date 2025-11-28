@@ -1,6 +1,5 @@
 package project.airbnb.clone.service.member;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -8,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import project.airbnb.clone.common.exceptions.ImageUploadException;
+import project.airbnb.clone.common.exceptions.factory.MemberExceptions;
 import project.airbnb.clone.entity.Member;
 import project.airbnb.clone.repository.jpa.MemberRepository;
 import project.airbnb.clone.service.s3.S3Uploader;
@@ -38,7 +38,7 @@ public class MemberProfileImageUploadService {
 
     private void uploadProfileImage(Long memberId, FileUploadFunction uploadFunction) {
         Member member = memberRepository.findById(memberId)
-                                        .orElseThrow(() -> new EntityNotFoundException("Guest with id " + memberId + "cannot be found"));
+                                        .orElseThrow(() -> MemberExceptions.notFoundById(memberId));
         String key = String.format("members/%s", UUID.randomUUID());
 
         try {

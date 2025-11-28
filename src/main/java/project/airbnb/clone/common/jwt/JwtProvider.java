@@ -1,12 +1,11 @@
 package project.airbnb.clone.common.jwt;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+import project.airbnb.clone.common.exceptions.ErrorCode;
+import project.airbnb.clone.common.exceptions.JwtProcessingException;
 import project.airbnb.clone.config.security.jwt.JwtAuthenticationToken;
 import project.airbnb.clone.entity.Member;
 import project.airbnb.clone.model.AuthProviderUser;
@@ -45,21 +44,25 @@ public class JwtProvider {
         Long id = getId(token);
         String principalName = getPrincipalName(token);
 
-        try {
-            Member member = memberRepository.getMemberById(id);
+        Member member = memberRepository.findById(id)
+                                        .orElseThrow(() -> new JwtProcessingException(ErrorCode.MEMBER_NOT_FOUND));
+        PrincipalUser principal = new PrincipalUser(new AuthProviderUser(member, principalName));
 
-            PrincipalUser principal = new PrincipalUser(new AuthProviderUser(member, principalName));
-            return JwtAuthenticationToken.authenticated(principal, token, principal.getAuthorities());
-        } catch (EntityNotFoundException e) {
-            throw new JwtException("Cannot found guest for token subject: " + id, e);
-        }
+        return JwtAuthenticationToken.authenticated(principal, token, principal.getAuthorities());
     }
 
     public void validateToken(String token) {
         try {
             parseClaims(token);
-        } catch (JwtException | IllegalArgumentException e) {
-            throw new JwtException("Token is invalid", e);
+        }
+        catch (ExpiredJwtException e) {
+            throw new JwtProcessingException(ErrorCode.TOKEN_EXPIRED, e);
+        }
+        catch (MalformedJwtException e) {
+            throw new JwtProcessingException(ErrorCode.MALFORMED_TOKEN, e);
+        }
+        catch (IllegalArgumentException | JwtException e) {
+            throw new JwtProcessingException(ErrorCode.INVALID_TOKEN, e);
         }
     }
 

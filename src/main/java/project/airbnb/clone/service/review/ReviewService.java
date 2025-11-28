@@ -1,11 +1,11 @@
 package project.airbnb.clone.service.review;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import project.airbnb.clone.common.exceptions.factory.ReviewExceptions;
 import project.airbnb.clone.dto.PageResponseDto;
 import project.airbnb.clone.dto.review.MyReviewResDto;
 import project.airbnb.clone.dto.review.UpdateReviewReqDto;
@@ -46,6 +46,6 @@ public class ReviewService {
 
     private Review getReview(Long reviewId, Long memberId) {
         return reviewRepository.findByIdAndMemberId(reviewId, memberId)
-                               .orElseThrow(() -> new EntityNotFoundException("Cannot be found Review for id: " + reviewId + " and memberId: " + memberId));
+                               .orElseThrow(() -> ReviewExceptions.notFoundReview(reviewId, memberId));
     }
 }

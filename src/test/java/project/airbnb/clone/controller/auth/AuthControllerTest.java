@@ -50,7 +50,7 @@ class AuthControllerTest extends RestDocsTestSupport {
             response.addHeader(AUTHORIZATION, "Bearer {dummy-access-token}");
             response.addHeader(SET_COOKIE, "RefreshToken={dummy-refresh-token}; Path=/; HttpOnly");
             return null;
-        }).when(tokenService).refreshAccessToken(any(), any(), any());
+        }).when(tokenService).refreshAccessToken(any(), any());
 
         //when
         //then

@@ -1,15 +1,10 @@
 package project.airbnb.clone.service.jwt;
 
-import io.jsonwebtoken.JwtException;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import project.airbnb.clone.TestContainerSupport;
+import project.airbnb.clone.common.exceptions.BusinessException;
 import project.airbnb.clone.common.jwt.JwtProvider;
 import project.airbnb.clone.dto.jwt.TokenResponse;
 import project.airbnb.clone.entity.Member;
@@ -100,17 +95,12 @@ class TokenServiceTest extends TestContainerSupport {
                                                     .build());
 
             MockHttpServletResponse response = new MockHttpServletResponse();
-            MockHttpServletRequest request = new MockHttpServletRequest();
 
             //when
-            tokenService.refreshAccessToken(oldRefreshToken, response, request);
+            tokenService.refreshAccessToken(oldRefreshToken, response);
 
             //then
-            //1. 예외 상황에 대비해 request에 key가 저장되어야 한다.
-            String key = String.valueOf(member.getId());
-            assertThat(request.getAttribute("key")).isEqualTo(key);
-
-            //2. 정상적으로 액세스 토큰과 리프레시 토큰이 전달된다.
+            //정상적으로 액세스 토큰과 리프레시 토큰이 전달된다.
             String authHeader = response.getHeader("Authorization");
             assertThat(authHeader).isNotBlank().startsWith("Bearer ");
 
@@ -121,13 +111,13 @@ class TokenServiceTest extends TestContainerSupport {
                     .contains("HttpOnly")
                     .contains("Path=/");
 
-            //3. 새로운 리프레시 토큰이 Redis에 저장되었는지 확인
+            //새로운 리프레시 토큰이 Redis에 저장되었는지 확인
             String newRefreshToken = extractRefreshTokenFromCookie(setCookie);
             RefreshToken newToken = refreshTokenRepository.findById(newRefreshToken).orElse(null);
             assertThat(newToken).isNotNull();
             assertThat(newToken.getMemberId()).isEqualTo(member.getId());
 
-            //4. 기존 리프레시 토큰이 Redis에서 삭제되었는지 확인
+            //기존 리프레시 토큰이 Redis에서 삭제되었는지 확인
             assertThat(refreshTokenRepository.existsById(oldRefreshToken)).isFalse();
         }
 
@@ -143,12 +133,11 @@ class TokenServiceTest extends TestContainerSupport {
                                                     .build());
 
             MockHttpServletResponse response = new MockHttpServletResponse();
-            MockHttpServletRequest request = new MockHttpServletRequest();
 
             //when
-            assertThatThrownBy(() -> tokenService.refreshAccessToken(token, response, request))
-                    .isInstanceOf(JwtException.class)
-                    .hasMessageContaining("Refresh Token is invalid: ");
+            assertThatThrownBy(() -> tokenService.refreshAccessToken(token, response))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining("유효하지 않은 토큰입니다");
         }
 
         /**

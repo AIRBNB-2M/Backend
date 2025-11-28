@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import project.airbnb.clone.common.exceptions.ErrorCode;
+import project.airbnb.clone.common.exceptions.JwtProcessingException;
 import project.airbnb.clone.common.jwt.JwtProvider;
 import project.airbnb.clone.service.jwt.TokenService;
 
@@ -37,12 +39,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String accessToken = resolveToken(request);
 
-        if (accessToken != null && !tokenService.containsBlackList(accessToken)) {
-            jwtProvider.validateToken(accessToken);
+        if (accessToken != null) {
+            if (tokenService.containsBlackList(accessToken)) {
+                throw new JwtProcessingException(ErrorCode.BLACKLISTED_TOKEN);
+            }
 
-            SecurityContextHolder.getContextHolderStrategy().getContext().setAuthentication(
-                    jwtProvider.getAuthentication(accessToken)
-            );
+            jwtProvider.validateToken(accessToken);
+            SecurityContextHolder.getContext().setAuthentication(jwtProvider.getAuthentication(accessToken));
         }
 
         filterChain.doFilter(request, response);

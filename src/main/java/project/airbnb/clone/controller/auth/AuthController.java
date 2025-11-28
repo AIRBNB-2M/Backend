@@ -1,6 +1,5 @@
 package project.airbnb.clone.controller.auth;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,9 +32,8 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public void refreshAccessToken(@CookieValue(REFRESH_TOKEN_KEY) String refreshToken,
-                                   HttpServletResponse response, HttpServletRequest request) {
-        log.debug("RefreshTokenController.refreshAccessToken");
-        tokenService.refreshAccessToken(refreshToken, response, request);
+                                   HttpServletResponse response) {
+        tokenService.refreshAccessToken(refreshToken, response);
     }
 
     @PostMapping("/logout")
