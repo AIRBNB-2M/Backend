@@ -15,7 +15,7 @@ import project.airbnb.clone.entity.Member;
 import project.airbnb.clone.entity.chat.ChatMessage;
 import project.airbnb.clone.entity.chat.ChatParticipant;
 import project.airbnb.clone.entity.chat.ChatRoom;
-import project.airbnb.clone.repository.dto.ChatRequest;
+import project.airbnb.clone.repository.dto.redis.ChatRequest;
 import project.airbnb.clone.repository.facade.ChatRepositoryFacadeManager;
 import project.airbnb.clone.repository.jpa.MemberRepository;
 import project.airbnb.clone.repository.redis.ChatRequestRepository;

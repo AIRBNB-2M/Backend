@@ -1,10 +1,8 @@
-package project.airbnb.clone.repository.dto;
+package project.airbnb.clone.repository.dto.redis;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
@@ -13,12 +11,11 @@ import org.springframework.data.redis.core.TimeToLive;
 @Builder
 @AllArgsConstructor
 @RedisHash(value = "jwt:blacklist")
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class BlacklistedToken {
 
     @Id
-    String token;
+    private String token;
 
     @TimeToLive
-    Long ttl;
+    private Long ttl;
 }

@@ -1,11 +1,9 @@
-package project.airbnb.clone.repository.dto;
+package project.airbnb.clone.repository.dto.redis;
 
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
@@ -17,23 +15,22 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @RedisHash(value = "chatRequest", timeToLive = 86400)
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChatRequest {
     @Id
-    String requestId;
+    private String requestId;
 
     @Indexed
-    Long senderId;
-    String senderName;
-    String senderProfileImage;
+    private Long senderId;
+    private String senderName;
+    private String senderProfileImage;
 
     @Indexed
-    Long receiverId;
-    String receiverName;
-    String receiverProfileImage;
+    private Long receiverId;
+    private String receiverName;
+    private String receiverProfileImage;
 
-    LocalDateTime createdAt;
-    LocalDateTime expiresAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime expiresAt;
 
     public RequestChatResDto toResDto() {
         return RequestChatResDto.builder()

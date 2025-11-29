@@ -1,10 +1,8 @@
-package project.airbnb.clone.repository.dto;
+package project.airbnb.clone.repository.dto.redis;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
@@ -13,14 +11,13 @@ import org.springframework.data.redis.core.TimeToLive;
 @Builder
 @AllArgsConstructor
 @RedisHash(value = "jwt:refreshToken")
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class RefreshToken {
 
     @Id
-    String token;
+    private String token;
 
-    Long memberId;
+    private Long memberId;
 
     @TimeToLive
-    Long ttl;
+    private Long ttl;
 }

@@ -8,7 +8,7 @@ import project.airbnb.clone.dto.chat.ChatMessageResDto;
 import project.airbnb.clone.dto.chat.ChatRoomResDto;
 import project.airbnb.clone.dto.chat.StompChatRequestNotification;
 import project.airbnb.clone.dto.chat.StompChatRequestResponseNotification;
-import project.airbnb.clone.repository.dto.ChatRequest;
+import project.airbnb.clone.repository.dto.redis.ChatRequest;
 
 import java.time.LocalDateTime;
 

@@ -1,10 +1,8 @@
-package project.airbnb.clone.repository.dto;
+package project.airbnb.clone.repository.dto.redis;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
@@ -12,11 +10,10 @@ import org.springframework.data.redis.core.RedisHash;
 @Builder
 @AllArgsConstructor
 @RedisHash(value = "email:verify", timeToLive = 3600)
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class EmailVerification {
 
     @Id
-    String token;
+    private String token;
 
-    Long memberId;
+    private Long memberId;
 }

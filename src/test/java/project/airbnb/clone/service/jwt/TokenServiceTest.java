@@ -8,7 +8,7 @@ import project.airbnb.clone.common.exceptions.BusinessException;
 import project.airbnb.clone.common.jwt.JwtProvider;
 import project.airbnb.clone.dto.jwt.TokenResponse;
 import project.airbnb.clone.entity.Member;
-import project.airbnb.clone.repository.dto.RefreshToken;
+import project.airbnb.clone.repository.dto.redis.RefreshToken;
 import project.airbnb.clone.repository.jpa.MemberRepository;
 import project.airbnb.clone.repository.redis.BlacklistedTokenRepository;
 import project.airbnb.clone.repository.redis.RefreshTokenRepository;
