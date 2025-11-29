@@ -56,6 +56,7 @@ public class PaymentService {
 
         paymentRepository.save(Payment.of(response, reservation));
         tempPaymentRepository.deleteById(orderId);
+        reservation.confirm();
 
         String receiptUrl = response.get("receipt").get("url").asText(null);
         return new PaymentResDto(receiptUrl);
