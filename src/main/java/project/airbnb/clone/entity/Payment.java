@@ -1,61 +1,70 @@
 package project.airbnb.clone.entity;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import lombok.*;
-import project.airbnb.clone.consts.PayMethod;
-import project.airbnb.clone.consts.PayStatus;
+import org.springframework.util.StringUtils;
+import project.airbnb.clone.consts.payment.PaymentMethod;
+import project.airbnb.clone.consts.payment.PaymentStatus;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
-@Table(
-    name = "payments",
-    indexes = {
-        @Index(name = "idx_pay_imp_uid", columnList = "imp_uid"),
-        @Index(name = "idx_pay_reservation_id", columnList = "reservation_id")
-    },
-    uniqueConstraints = {
-        @UniqueConstraint(name = "uk_pay_merchant_uid", columnNames = "merchant_uid")
-    }
-)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Table(name = "payments")
 public class Payment extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "payment_id", nullable = false)
-    private Long id;
-    
-    @Column(name = "merchant_uid", nullable = false, length = 60)
-    private String merchantUid; // 주문번호
-    
-    @Column(name = "imp_uid", length = 60)
-    private String impUid; // 포트원 결제 고유ID
+    private String paymentKey;
+
+    @Column(nullable = false)
+    private String orderId;
+
+    @Column(nullable = false)
+    private int totalAmount;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "method", nullable = true, length = 20)
-    private PayMethod method;
+    @Column(nullable = false)
+    private PaymentStatus paymentStatus;
+
+    @Column(nullable = false)
+    private LocalDateTime requestedAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 20)
-    private PayStatus status;
-    
-    @Column(name = "amount", nullable = false)
-    private Integer amount; // 결제 금액
-    
-    @Column(name = "paid_at")
-    private LocalDateTime paidAt; // 결제 완료 시각
+    private PaymentMethod paymentMethod;
+
+    private LocalDateTime approvedAt;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reservation_id", nullable = false, unique = true)
+    @JoinColumn(name = "reservation_id", nullable = false)
     private Reservation reservation;
-    
-    public void setImpUid(String impUid) { this.impUid = impUid; }
-    public void setMethod(PayMethod method) { this.method = method; }
-    public void setStatus(PayStatus status) { this.status = status; }
-    public void setPaidAt(LocalDateTime paidAt) { this.paidAt = paidAt; }
-    public void setAmount(Integer amount) { this.amount = amount; }
+
+    private static final ZoneId ZONE_ASIA_SEOUL = ZoneId.of("Asia/Seoul");
+
+    public static Payment of(JsonNode response, Reservation reservation) {
+        String orderId = response.get("orderId").asText();
+        String paymentKey = response.get("paymentKey").asText();
+
+        PaymentStatus paymentStatus = PaymentStatus.of(response.get("status").asText());
+        PaymentMethod paymentMethod = PaymentMethod.of(response.get("method").asText());
+
+        LocalDateTime requestedAt = parseToLocalDateTime(response.get("requestedAt").asText());
+        LocalDateTime approvedAt = parseToLocalDateTime(response.get("approvedAt").asText(null));
+
+        int totalAmount = response.get("totalAmount").asInt();
+
+        return new Payment(paymentKey, orderId, totalAmount, paymentStatus, requestedAt, paymentMethod, approvedAt, reservation);
+    }
+
+    private static LocalDateTime parseToLocalDateTime(String timestamp) {
+        if (!StringUtils.hasText(timestamp)) {
+            return null;
+        }
+
+        return OffsetDateTime.parse(timestamp).atZoneSameInstant(ZONE_ASIA_SEOUL).toLocalDateTime();
+    }
 }

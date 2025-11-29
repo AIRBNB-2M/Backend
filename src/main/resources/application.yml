@@ -137,6 +137,9 @@ cloudflare:
 rest-day:
   api-key: ${REST_DAY_API_KEY}
 
+payment:
+  secret-key: ${PAYMENT_SECRET_KEY}
+
 app:
   admin:
     email: ${ADMIN_EMAIL}

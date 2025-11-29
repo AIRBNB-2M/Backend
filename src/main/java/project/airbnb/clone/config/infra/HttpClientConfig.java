@@ -12,13 +12,17 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 import project.airbnb.clone.common.clients.*;
 
 import java.net.http.HttpClient;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
 import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Configuration
 public class HttpClientConfig {
@@ -98,6 +102,19 @@ public class HttpClientConfig {
         return HttpServiceProxyFactory.builderFor(RestClientAdapter.create(restClient))
                                       .build()
                                       .createClient(HolidayApiClient.class);
+    }
+    @Bean
+    public PaymentClient paymentClient(RestClient.Builder builder,
+                                       @Value("${payment.secret-key}") String secretKey) {
+        String authHeaderValue = "Basic " + Base64.getEncoder().encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
+        RestClient restClient = builder.baseUrl("https://api.tosspayments.com/v1/payments")
+                                       .defaultHeader(AUTHORIZATION, authHeaderValue)
+                                       .defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                                       .build();
+
+        return HttpServiceProxyFactory.builderFor(RestClientAdapter.create(restClient))
+                                      .build()
+                                      .createClient(PaymentClient.class);
     }
 
     @Bean

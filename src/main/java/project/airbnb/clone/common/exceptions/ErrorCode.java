@@ -35,7 +35,11 @@ public enum ErrorCode {
     ALREADY_ACTIVE_CHAT(HttpStatus.BAD_REQUEST, "CHT-002", "이미 활성화된 채팅방이 있습니다"),
     ALREADY_REQUEST_SENT(HttpStatus.BAD_REQUEST, "CHT-003", "이미 채팅 요청을 보냈습니다"),
     SAME_PARTICIPANT(HttpStatus.BAD_REQUEST, "CHT-004", "자기 자신에게 채팅을 요청할 수 없습니다"),
-    PARTICIPANT_LEFT(HttpStatus.BAD_REQUEST, "CHT-005", "상대방이 채팅방을 나갔습니다");
+    PARTICIPANT_LEFT(HttpStatus.BAD_REQUEST, "CHT-005", "상대방이 채팅방을 나갔습니다"),
+
+    // ========== 숙소 ==========
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "PAYMENT-001", "임시 저장된 결제 정보를 찾을 수 없습니다"),
+    NOT_EQUALS_AMOUNT(HttpStatus.BAD_REQUEST, "PAYMENT-001", "임시 저장된 결제 정보와 일치하지 않습니다");
 
     private final HttpStatus httpStatus;
     private final String code;
