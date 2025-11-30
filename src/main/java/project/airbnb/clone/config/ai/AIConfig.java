@@ -9,8 +9,6 @@ import org.springframework.ai.chat.memory.repository.jdbc.JdbcChatMemoryReposito
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class AIConfig {
@@ -18,19 +16,6 @@ public class AIConfig {
     @Bean
     public ChatClient openAiChatClient(ChatModel openAiChatModel) {
         return ChatClient.create(openAiChatModel);
-    }
-
-    @Bean
-    public JdbcChatMemoryRepository jdbcChatMemoryRepository(JdbcTemplate jdbcTemplate, PlatformTransactionManager transactionManager) {
-        return JdbcChatMemoryRepository.builder()
-                                       .jdbcTemplate(jdbcTemplate)
-                                       .transactionManager(transactionManager)
-                                       .build();
-    }
-
-    @Bean
-    public InMemoryChatMemoryRepository inMemoryChatMemoryRepository() {
-        return new InMemoryChatMemoryRepository();
     }
 
     @Bean
@@ -42,10 +27,10 @@ public class AIConfig {
     }
 
     @Bean
-    public ChatMemory anonymousChatMemory(InMemoryChatMemoryRepository inMemoryChatMemoryRepository) {
+    public ChatMemory anonymousChatMemory() {
         return MessageWindowChatMemory.builder()
                                       .maxMessages(10)
-                                      .chatMemoryRepository(inMemoryChatMemoryRepository)
+                                      .chatMemoryRepository(new InMemoryChatMemoryRepository())
                                       .build();
     }
 
