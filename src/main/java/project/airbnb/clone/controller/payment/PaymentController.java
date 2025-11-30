@@ -15,7 +15,7 @@ import project.airbnb.clone.service.payment.PaymentService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/payments")
+@RequestMapping("/api/payments")
 public class PaymentController {
 
     private final PaymentService paymentService;
