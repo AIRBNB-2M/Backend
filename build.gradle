@@ -8,6 +8,9 @@ plugins {
     id 'com.epages.restdocs-api-spec' version '0.18.4'
     id 'org.hidetake.swagger.generator' version '2.19.2'
 }
+ext {
+    springAiVersion = "1.1.0"
+}
 
 group = 'project.airbnb'
 version = '0.0.1-SNAPSHOT'
@@ -51,6 +54,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'org.springframework.ai:spring-ai-starter-model-chat-memory-repository-jdbc:1.1.0'
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai:1.1.0'
 
     // Database & Querydsl
     runtimeOnly 'com.h2database:h2'
@@ -73,8 +78,6 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-//    implementation "tools.jackson.core:jackson-databind"
-//    implementation 'tools.jackson.dataformat:jackson-dataformat-xml'
     implementation 'org.yaml:snakeyaml:2.0'
     implementation 'org.springframework.retry:spring-retry:2.0.12'
 
@@ -122,6 +125,12 @@ openapi3 {
     description = "RestDocsWithSwagger Docs"
     version = "0.0.1"
     format = "yaml"
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.ai:spring-ai-bom:$springAiVersion"
+    }
 }
 
 gradle.taskGraph.whenReady { taskGraph ->

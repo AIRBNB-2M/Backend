@@ -13,6 +13,19 @@ management:
           enabled: true                 # /actuator/health/{liveness,readiness} 활성화
         show-details: never             # 프로브 용도면 never 권장(민감정보 차단)
 spring:
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4.1-mini
+          temperature: 0.0
+          max-tokens: 1024
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: never
   data:
     redis:
       repositories:
@@ -114,10 +127,6 @@ logging:
 
 tourapi:
   key: ${TOUR_API_KEY}
-
-portone:
-  api-key: ${PORTONE_API_ID}
-  api-secret: ${PORTONE_API_SECRET}
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}

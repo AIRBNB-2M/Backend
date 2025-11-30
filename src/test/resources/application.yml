@@ -1,7 +1,12 @@
 tourapi:
   key: hello
+payment:
+  secret-key: payment-test
 
 spring:
+  ai:
+    openai:
+      api-key: test
   mail:
     host: test
     port: 587
