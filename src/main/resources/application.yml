@@ -44,10 +44,10 @@ spring:
             enable: false
             required: false
   datasource:
-    url: jdbc:mysql://localhost:3307/airbnb?zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true
+    url: jdbc:mariadb://localhost:3306/airbnb?zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true
     username: root
-    password: 1234
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    password: rmsdud135790
+    driver-class-name: org.mariadb.jdbc.Driver
     hikari:
       auto-commit: false
   jpa:

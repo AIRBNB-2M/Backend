@@ -4,7 +4,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
@@ -12,7 +12,7 @@ import org.testcontainers.utility.DockerImageName;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class TestContainerSupport extends IntegrationTestSupport {
 
-    static MySQLContainer<?> MYSQL_CONTAINER = new MySQLContainer<>("mysql:8.0.35")
+    static MariaDBContainer<?> MARIADB_CONTAINER = new MariaDBContainer<>("mariadb")
             .withDatabaseName("testdb")
             .withUsername("test")
             .withPassword("test")
@@ -23,16 +23,16 @@ public class TestContainerSupport extends IntegrationTestSupport {
             .withReuse(true);
 
     static {
-        MYSQL_CONTAINER.start();
+        MARIADB_CONTAINER.start();
         REDIS_CONTAINER.start();
     }
 
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {
-        // MySQL
-        registry.add("spring.datasource.url", MYSQL_CONTAINER::getJdbcUrl);
-        registry.add("spring.datasource.username", MYSQL_CONTAINER::getUsername);
-        registry.add("spring.datasource.password", MYSQL_CONTAINER::getPassword);
+        // Mariadb
+        registry.add("spring.datasource.url", MARIADB_CONTAINER::getJdbcUrl);
+        registry.add("spring.datasource.username", MARIADB_CONTAINER::getUsername);
+        registry.add("spring.datasource.password", MARIADB_CONTAINER::getPassword);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
 
         // Redis
