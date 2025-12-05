@@ -60,6 +60,9 @@ public class Accommodation extends BaseEntity {
     @Column(name = "refund_regulation", columnDefinition = "TEXT")
     private String refundRegulation;
 
+    @Column(name = "is_embedded")
+    private Boolean isEmbedded;
+
     public static Accommodation createEmpty() {
         return new Accommodation();
     }
