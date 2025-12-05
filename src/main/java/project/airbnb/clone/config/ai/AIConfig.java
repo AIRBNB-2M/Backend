@@ -1,9 +1,7 @@
 package project.airbnb.clone.config.ai;
 
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.memory.repository.jdbc.JdbcChatMemoryRepository;
 import org.springframework.ai.chat.model.ChatModel;
@@ -21,26 +19,24 @@ public class AIConfig {
     @Bean
     public ChatMemory loginChatMemory(JdbcChatMemoryRepository jdbcChatMemoryRepository) {
         return MessageWindowChatMemory.builder()
-                                      .maxMessages(10)
                                       .chatMemoryRepository(jdbcChatMemoryRepository)
                                       .build();
     }
 
     @Bean
     public ChatMemory anonymousChatMemory() {
-        return MessageWindowChatMemory.builder()
-                                      .maxMessages(10)
-                                      .chatMemoryRepository(new InMemoryChatMemoryRepository())
-                                      .build();
+        return MessageWindowChatMemory.builder().build();
     }
 
     @Bean
-    public MessageChatMemoryAdvisor loginMemoryAdvisor(ChatMemory loginChatMemory) {
-        return MessageChatMemoryAdvisor.builder(loginChatMemory).build();
+    public CustomMessageChatMemoryAdvisor loginMemoryAdvisor(ChatMemory loginChatMemory, ChatbotHistoryMemory chatbotHistoryMemory) {
+        return CustomMessageChatMemoryAdvisor.builder(loginChatMemory)
+                                             .chatbotHistoryMemory(chatbotHistoryMemory)
+                                             .build();
     }
 
     @Bean
-    public MessageChatMemoryAdvisor anonymousMemoryAdvisor(ChatMemory anonymousChatMemory) {
-        return MessageChatMemoryAdvisor.builder(anonymousChatMemory).build();
+    public CustomMessageChatMemoryAdvisor anonymousMemoryAdvisor(ChatMemory anonymousChatMemory) {
+        return CustomMessageChatMemoryAdvisor.builder(anonymousChatMemory).build();
     }
 }

@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import project.airbnb.clone.common.annotations.CurrentMemberId;
-import project.airbnb.clone.dto.chatbot.ChatbotHistoryResDto;
+import project.airbnb.clone.config.ai.ChatbotHistoryDto;
 import project.airbnb.clone.dto.chatbot.ChatbotReqDto;
 import project.airbnb.clone.service.chatbot.ChatbotService;
 import reactor.core.publisher.Flux;
@@ -27,9 +27,9 @@ public class ChatbotController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ChatbotHistoryResDto>> getMessages(@CurrentMemberId(required = false) Long memberId,
-                                                                  HttpSession session) {
-        List<ChatbotHistoryResDto> response = chatbotService.getMessages(memberId, session);
+    public ResponseEntity<List<ChatbotHistoryDto>> getMessages(@CurrentMemberId(required = false) Long memberId,
+                                                               HttpSession session) {
+        List<ChatbotHistoryDto> response = chatbotService.getMessages(memberId, session);
         return ResponseEntity.ok(response);
     }
 }
