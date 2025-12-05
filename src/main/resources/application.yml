@@ -14,6 +14,13 @@ management:
         show-details: never             # 프로브 용도면 never 권장(민감정보 차단)
 spring:
   ai:
+    vectorstore:
+      mariadb:
+        initialize-schema: true
+        distance-type: cosine
+        dimensions: 1536
+        schema-name: airbnb
+        table-name: vectors
     openai:
       api-key: ${OPENAI_API_KEY}
       chat:
@@ -122,7 +129,7 @@ server:
 logging:
   level:
     project.airbnb.clone: debug
-    org.hibernate.orm.jdbc.bind: trace
+#    org.hibernate.orm.jdbc.bind: trace
     org.springframework.web.filter.CommonsRequestLoggingFilter: debug
 
 tourapi:

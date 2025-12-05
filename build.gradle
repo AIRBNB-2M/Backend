@@ -56,7 +56,8 @@ dependencies {
     implementation 'io.micrometer:micrometer-registry-prometheus'
     implementation 'org.springframework.ai:spring-ai-starter-model-chat-memory-repository-jdbc:1.1.0'
     implementation 'org.springframework.ai:spring-ai-starter-model-openai:1.1.0'
-    implementation 'org.springframework.ai:spring-ai-starter-vector-store-mariadb'
+    implementation 'org.springframework.ai:spring-ai-starter-vector-store-mariadb:1.1.0'
+    implementation 'org.springframework.ai:spring-ai-advisors-vector-store:1.1.0'
 
     // Database & Querydsl
     runtimeOnly 'com.h2database:h2'
