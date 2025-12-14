@@ -43,7 +43,7 @@ public class ChatbotService {
                                                    .query(message)
                                                    .topK(10)
                                                    .filterExpression(expression)
-                                                   .similarityThreshold(0.3)
+                                                   .similarityThreshold(0.1)
                                                    .build();
 
         List<Document> documents = vectorStore.similaritySearch(searchRequest)
@@ -92,8 +92,8 @@ public class ChatbotService {
         if (filterInfo.maxPrice() != null) {
             expressions.add(builder.lte("maxPrice", filterInfo.maxPrice()).build());
         }
-        if (filterInfo.amenities() != null && !filterInfo.amenities().isEmpty()) {
-            expressions.add(builder.in("amenities", filterInfo.amenities().toArray()).build());
+        if (filterInfo.peopleCount() != null) {
+            expressions.add(builder.lte("maxPeople", filterInfo.peopleCount()).build());
         }
 
         Filter.Expression expression = null;
@@ -122,7 +122,6 @@ public class ChatbotService {
                - minPrice: "최소 X원", "X원 이상" 등 최소 가격이 명시된 경우만
                - maxPrice: "최대 X원", "X원 이하" 등 최대 가격이 명시된 경우만
                - peopleCount: "N명", "N인" 등 인원이 명시된 경우만
-               - amenities: "wifi", "주차", "수영장" 등이 명시된 경우만
                
                **지역 추출 규칙:**
                - 도시명만 추출하세요 (예: "강원도 강릉" → "강릉", "서울특별시" → "서울")

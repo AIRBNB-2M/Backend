@@ -35,7 +35,6 @@ public class EmbeddingService {
         List<AccommodationEmbeddingDto> embeddingDtos = getEmbeddingDtos(ids);
         Map<Long, AccommodationEmbeddingDto> baseInfoMapping = collectBaseInfo(embeddingDtos);
 
-        Map<Long, String> pricesMapping = collectEmbedPrices(embeddingDtos);
         Map<Long, Map<Season, Map<DayType, Integer>>> priceInfo = collectMetadataPrices(embeddingDtos);
 
         List<AmenitiesDto> amenitiesDtos = getAmenitiesDtos(ids);
@@ -51,19 +50,25 @@ public class EmbeddingService {
                 AccommodationEmbeddingDto dto = baseInfoMapping.get(id);
                 if (dto == null) continue;
 
-                String prices = pricesMapping.getOrDefault(id, "");
                 List<String> amenities = amenitiesMapping.getOrDefault(id, List.of());
 
+                Map<String, Object> metadata = getMetadata(id, priceInfo, dto);
+                String priceRange = summarizePriceRange(metadata);
+
                 String content = String.format("""
-                        [제목] : %s
-                        [설명] : %s
-                        [주소] : %s
-                        [최대인원] : %d
-                        [시기별 가격] :
-                        %s
-                        [편의시설] : %s
-                        """, dto.title(), dto.description(), dto.address(), dto.maxPeople(), prices, String.join(", ", amenities));
-                Map<String, Object> metadata = getMetadata(id, priceInfo, dto, amenities);
+                                %s은(는) %s에 위치한 숙소입니다.
+                                %s
+                                최대 %d명까지 숙박 가능하며,
+                                가격대는 %s 수준입니다.
+                                주요 편의시설로는 %s 등이 있습니다.
+                                """,
+                        dto.title(),
+                        dto.address(),
+                        dto.description(),
+                        dto.maxPeople(),
+                        priceRange,
+                        amenities.isEmpty() ? "별도 정보 없음" : String.join(", ", amenities)
+                );
 
                 documents.add(Document.builder().text(content).metadata(metadata).build());
                 successIds.add(id);
@@ -82,6 +87,21 @@ public class EmbeddingService {
 
         afterProcess(successIds, "숙소 정보 임베딩 성공", true);
         afterProcess(failedIds, "숙소 정보 임베딩 실패", false);
+    }
+
+    private String summarizePriceRange(Map<String, Object> metadata) {
+        int min = Integer.parseInt(metadata.get("minPrice").toString());
+        int max = Integer.parseInt(metadata.get("maxPrice").toString());
+
+        if (min == 0 || max == 0) {
+            return "가격 정보 없음";
+        }
+
+        if (min == max) {
+            return String.format("%,d원", min);
+        }
+
+        return String.format("%,d원 ~ %,d원", min, max);
     }
 
     private List<Long> getEmbeddingTargetIds(Pageable pageable) {
@@ -127,17 +147,6 @@ public class EmbeddingService {
                             ));
     }
 
-    private Map<Long, String> collectEmbedPrices(List<AccommodationEmbeddingDto> embeddingDtos) {
-        return embeddingDtos.stream()
-                            .collect(Collectors.groupingBy(
-                                    AccommodationEmbeddingDto::accommodationId,
-                                    Collectors.mapping(
-                                            dto -> String.format("\t[%s / %s] : %,d원", dto.season(), dto.dayType(), dto.price()),
-                                            Collectors.joining("\n")
-                                    )
-                            ));
-    }
-
     private Map<Long, Map<Season, Map<DayType, Integer>>> collectMetadataPrices(List<AccommodationEmbeddingDto> embeddingDtos) {
         return embeddingDtos.stream()
                             .collect(Collectors.groupingBy(
@@ -179,8 +188,7 @@ public class EmbeddingService {
 
     private Map<String, Object> getMetadata(Long id,
                                             Map<Long, Map<Season, Map<DayType, Integer>>> priceInfo,
-                                            AccommodationEmbeddingDto dto,
-                                            List<String> amenities) {
+                                            AccommodationEmbeddingDto dto) {
 
         Map<Season, Map<DayType, Integer>> pricesMap = priceInfo.get(id);
 
@@ -189,15 +197,14 @@ public class EmbeddingService {
                                            .flatMap(dayMap -> dayMap.values().stream())
                                            .toList();
 
-        Integer minPrice = allPrices.stream().min(Integer::compareTo).orElse(null);
-        Integer maxPrice = allPrices.stream().max(Integer::compareTo).orElse(null);
+        Integer minPrice = allPrices.stream().min(Integer::compareTo).orElse(0);
+        Integer maxPrice = allPrices.stream().max(Integer::compareTo).orElse(0);
 
         Map<String, Object> metadata = new HashMap<>();
         metadata.put("accId", id);
         metadata.put("title", dto.title());
         metadata.put("maxPeople", dto.maxPeople());
         metadata.put("address", dto.address());
-        metadata.put("amenities", amenities);
         metadata.put("minPrice", minPrice);
         metadata.put("maxPrice", maxPrice);
 
