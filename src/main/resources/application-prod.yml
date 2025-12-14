@@ -1,5 +1,12 @@
 spring:
   data:
+    mongodb:
+      host: ${MONGODB_HOST}
+      port: ${MONGODB_PORT}
+      database: chatbot
+      username: ${MONGODB_USERNAME}
+      password: ${MONGODB_PASSWORD}
+      authentication-database: admin
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}

@@ -13,8 +13,8 @@ public record ChatbotHistoryDto(
         Map<String, Object> metadata,
         LocalDateTime createdAt) {
 
-    public static ChatbotHistoryDto of(Message message) {
-        return new ChatbotHistoryDto(message.getMessageType(), message.getText(), message.getMetadata(), LocalDateTime.now());
+    public static ChatbotHistoryDto of(Message message, Map<String, Object> metadata) {
+        return new ChatbotHistoryDto(message.getMessageType(), message.getText(), metadata, LocalDateTime.now());
     }
 
     public static ChatbotHistoryDto of(ChatbotHistory chatbotHistory) {

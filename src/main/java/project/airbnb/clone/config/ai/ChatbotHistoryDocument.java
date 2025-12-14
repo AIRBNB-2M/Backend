@@ -39,8 +39,8 @@ public class ChatbotHistoryDocument {
     @CreatedDate
     private LocalDateTime createdAt;
 
-    public static ChatbotHistoryDocument of(String conversationId, Message message) {
-        return new ChatbotHistoryDocument(conversationId, message.getText(), message.getMetadata(), message.getMessageType());
+    public static ChatbotHistoryDocument of(String conversationId, Message message, Map<String, Object> metadata) {
+        return new ChatbotHistoryDocument(conversationId, message.getText(), metadata, message.getMessageType());
     }
 
     private ChatbotHistoryDocument(String conversationId, String content, Map<String, Object> metadata, MessageType messageType) {

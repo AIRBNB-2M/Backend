@@ -14,6 +14,7 @@ import reactor.core.scheduler.Scheduler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class CustomMessageChatMemoryAdvisor implements BaseChatMemoryAdvisor {
 
@@ -74,7 +75,7 @@ public class CustomMessageChatMemoryAdvisor implements BaseChatMemoryAdvisor {
         this.chatMemory.add(conversationId, userMessage);
 
         // 추가
-        chatbotHistoryMemory.save(conversationId, userMessage);
+        chatbotHistoryMemory.save(conversationId, userMessage, null);
 
         return processedChatClientRequest;
     }
@@ -93,7 +94,9 @@ public class CustomMessageChatMemoryAdvisor implements BaseChatMemoryAdvisor {
         this.chatMemory.add(conversationId, assistantMessages);
 
         // 추가
-        assistantMessages.forEach(assistantMessage -> chatbotHistoryMemory.save(conversationId, assistantMessage));
+        Map<String, Object> context = chatClientResponse.context();
+        Map<String, Object> metadata = (Map<String, Object>) context.get("metadata");
+        assistantMessages.forEach(assistantMessage -> chatbotHistoryMemory.save(conversationId, assistantMessage, metadata));
 
         return chatClientResponse;
     }

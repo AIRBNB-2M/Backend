@@ -43,7 +43,7 @@ public class ChatbotService {
                                                    .query(message)
                                                    .topK(10)
                                                    .filterExpression(expression)
-                                                   .similarityThreshold(0.1)
+                                                   .similarityThreshold(0.3)
                                                    .build();
 
         List<Document> documents = vectorStore.similaritySearch(searchRequest)
@@ -64,20 +64,21 @@ public class ChatbotService {
                          ))
                          .toList();
 
-        String textResponse = chatClient.prompt()
-                                        .user(buildPrompt(message, recommendedAccommodations))
-                                        .system(systemPrompt)
-                                        .advisors(adv -> adv
-                                                .advisors(advisor)
-                                                .param(ChatMemory.CONVERSATION_ID, conversationId)
-                                        )
-                                        .call()
-                                        .content();
-
         Map<String, Object> metadata = new HashMap<>();
         if (!recommendedAccommodations.isEmpty()) {
             metadata.put("recommendedAccommodations", recommendedAccommodations);
         }
+
+        String textResponse = chatClient.prompt()
+                                        .user(message)
+                                        .system(systemPrompt + "\n\n" + buildSearchContext(recommendedAccommodations))
+                                        .advisors(adv -> adv
+                                                .advisors(advisor)
+                                                .param(ChatMemory.CONVERSATION_ID, conversationId)
+                                                .param("metadata", metadata)
+                                        )
+                                        .call()
+                                        .content();
 
         return new ChatbotResponseDto(textResponse, metadata);
     }
@@ -113,27 +114,27 @@ public class ChatbotService {
 
     private AccommodationFilterInfo getFilterInfoByToolCalling(String message) {
         String filterExtractionPrompt = """
-                사용자 메시지에서 숙소 검색 필터 정보를 추출하세요.
+                 사용자 메시지에서 숙소 검색 필터 정보를 추출하세요.
+                
+                ⚠️ 규칙: 사용자가 명시하지 않은 값은 추측/가정하지 말고 반드시 null을 사용하세요.
+                
+                추출 항목:
+                - region: 지역명이 명시된 경우만 (예: "서울", "부산")
+                - minPrice: "최소 X원", "X원 이상" 등 최소 가격이 명시된 경우만
+                - maxPrice: "최대 X원", "X원 이하" 등 최대 가격이 명시된 경우만
+                - peopleCount: "N명", "N인" 등 인원이 명시된 경우만
+                
+                **지역 추출 규칙:**
+                - 도시명만 추출하세요 (예: "강원도 강릉" → "강릉", "서울특별시" → "서울")
+                - "~도", "~시", "특별시", "광역시" 등의 행정구역 접미사는 제거
+                
+                예시:
+                - "인천에 숙소 추천해줘" → region="인천", 나머지 모두 null
+                - "서울에 5만원 이하 2인 숙소" → region="서울", maxPrice=50000, peopleCount=2
+                
+                사용자 메시지: %s
+                """.formatted(message);
 
-               ⚠️ 규칙: 사용자가 명시하지 않은 값은 추측/가정하지 말고 반드시 null을 사용하세요.
-
-               추출 항목:
-               - region: 지역명이 명시된 경우만 (예: "서울", "부산")
-               - minPrice: "최소 X원", "X원 이상" 등 최소 가격이 명시된 경우만
-               - maxPrice: "최대 X원", "X원 이하" 등 최대 가격이 명시된 경우만
-               - peopleCount: "N명", "N인" 등 인원이 명시된 경우만
-               
-               **지역 추출 규칙:**
-               - 도시명만 추출하세요 (예: "강원도 강릉" → "강릉", "서울특별시" → "서울")
-               - "~도", "~시", "특별시", "광역시" 등의 행정구역 접미사는 제거
-
-               예시:
-               - "인천에 숙소 추천해줘" → region="인천", 나머지 모두 null
-               - "서울에 5만원 이하 2인 숙소" → region="서울", maxPrice=50000, peopleCount=2
-
-               사용자 메시지: %s
-               """.formatted(message);
-        
         return chatClient.prompt()
                          .user(filterExtractionPrompt)
                          .tools(new AccommodationSearchTool())
@@ -170,6 +171,37 @@ public class ChatbotService {
 
         prompt.append("\n위 숙소들을 참고하여 사용자에게 친절하게 추천해주세요.");
         return prompt.toString();
+    }
+
+    private String buildSearchContext(List<RecommendedAccommodation> accommodations) {
+        if (accommodations.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("""
+                [검색된 숙소 정보]
+                아래 정보는 추천을 위한 참고 자료이며,
+                사용자가 직접 말한 내용이 아닙니다.
+                """);
+
+        for (int i = 0; i < accommodations.size(); i++) {
+            RecommendedAccommodation acc = accommodations.get(i);
+            sb.append(String.format(
+                    "%d. %s (최대 %d명, 가격 %s)\n",
+                    i + 1,
+                    acc.title(),
+                    acc.maxPeople(),
+                    acc.price()
+            ));
+        }
+
+        sb.append("""
+                위 숙소 정보만을 활용하여
+                사용자에게 자연스럽게 추천하세요.
+                """);
+
+        return sb.toString();
     }
 
     public List<ChatbotHistoryDto> getMessages(Long memberId, HttpSession session) {

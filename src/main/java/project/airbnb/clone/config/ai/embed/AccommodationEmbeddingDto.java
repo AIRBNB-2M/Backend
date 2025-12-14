@@ -9,8 +9,13 @@ public record AccommodationEmbeddingDto(
         String description,
         int maxPeople,
         String address,
+        String areaName,
+        String sigunguName,
         Season season,
         DayType dayType,
         int price
 ) {
+    public String getRegion() {
+        return areaName + " " + sigunguName;
+    }
 }

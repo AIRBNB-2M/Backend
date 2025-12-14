@@ -56,14 +56,15 @@ public class EmbeddingService {
                 String priceRange = summarizePriceRange(metadata);
 
                 String content = String.format("""
-                                %s은(는) %s에 위치한 숙소입니다.
+                                %s은(는) %s에 위치한 숙소로, %s에서 숙소를 찾는 사용자에게 추천할 수 있는 숙소입니다.
                                 %s
                                 최대 %d명까지 숙박 가능하며,
                                 가격대는 %s 수준입니다.
                                 주요 편의시설로는 %s 등이 있습니다.
                                 """,
                         dto.title(),
-                        dto.address(),
+                        dto.getRegion(),
+                        dto.sigunguName(),
                         dto.description(),
                         dto.maxPeople(),
                         priceRange,
@@ -124,12 +125,16 @@ public class EmbeddingService {
                              acc.description,
                              acc.maxPeople,
                              acc.address,
+                             ac.codeName,
+                             sc.codeName,
                              p.season,
                              p.dayType,
                              p.price
                          )
                          FROM Accommodation AS acc
                          JOIN AccommodationPrice AS p ON p.accommodation = acc
+                         JOIN SigunguCode AS sc ON sc = acc.sigunguCode
+                         JOIN AreaCode AS ac ON ac = sc.areaCode
                          WHERE acc.id IN :ids
                          """, AccommodationEmbeddingDto.class)
                  .setParameter("ids", ids)
