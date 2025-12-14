@@ -5,17 +5,23 @@ import org.springframework.ai.chat.messages.MessageType;
 import project.airbnb.clone.entity.chat.ChatbotHistory;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 public record ChatbotHistoryDto(
         MessageType type,
-        String text,
+        String content,
+        Map<String, Object> metadata,
         LocalDateTime createdAt) {
 
     public static ChatbotHistoryDto of(Message message) {
-        return new ChatbotHistoryDto(message.getMessageType(), message.getText(), LocalDateTime.now());
+        return new ChatbotHistoryDto(message.getMessageType(), message.getText(), message.getMetadata(), LocalDateTime.now());
     }
 
     public static ChatbotHistoryDto of(ChatbotHistory chatbotHistory) {
-        return new ChatbotHistoryDto(chatbotHistory.getType(), chatbotHistory.getText(), chatbotHistory.getCreatedAt());
+        return new ChatbotHistoryDto(chatbotHistory.getType(), chatbotHistory.getText(), null, chatbotHistory.getCreatedAt());
+    }
+
+    public static ChatbotHistoryDto of(ChatbotHistoryDocument document) {
+        return new ChatbotHistoryDto(document.getMessageType(), document.getContent(), document.getMetadata(), document.getCreatedAt());
     }
 }

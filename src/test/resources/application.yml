@@ -92,3 +92,7 @@ app:
   admin:
     email: test
     password: test
+
+chatbot:
+  system-prompt:
+    recommend-accommodations: test

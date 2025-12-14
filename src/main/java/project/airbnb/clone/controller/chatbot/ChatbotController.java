@@ -6,9 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import project.airbnb.clone.common.annotations.CurrentMemberId;
 import project.airbnb.clone.config.ai.ChatbotHistoryDto;
+import project.airbnb.clone.config.ai.ChatbotResponseDto;
 import project.airbnb.clone.dto.chatbot.ChatbotReqDto;
 import project.airbnb.clone.service.chatbot.ChatbotService;
-import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -20,10 +20,11 @@ public class ChatbotController {
     private final ChatbotService chatbotService;
 
     @PostMapping
-    public Flux<String> postMessage(@CurrentMemberId(required = false) Long memberId,
-                                    @RequestBody ChatbotReqDto reqDto,
-                                    HttpSession session) {
-        return chatbotService.postMessage(memberId, reqDto.message(), session);
+    public ResponseEntity<ChatbotResponseDto> postMessage(@CurrentMemberId(required = false) Long memberId,
+                                                          @RequestBody ChatbotReqDto reqDto,
+                                                          HttpSession session) {
+        ChatbotResponseDto response = chatbotService.postMessage(memberId, reqDto.message(), session);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping

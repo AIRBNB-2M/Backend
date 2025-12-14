@@ -58,6 +58,7 @@ dependencies {
     implementation 'org.springframework.ai:spring-ai-starter-model-openai:1.1.0'
     implementation 'org.springframework.ai:spring-ai-starter-vector-store-mariadb:1.1.0'
     implementation 'org.springframework.ai:spring-ai-advisors-vector-store:1.1.0'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 
     // Database & Querydsl
     runtimeOnly 'com.h2database:h2'
@@ -97,6 +98,7 @@ dependencies {
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:mariadb'
+    testImplementation 'org.testcontainers:mongodb'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'com.github.codemonstur:embedded-redis:1.4.3'
 }

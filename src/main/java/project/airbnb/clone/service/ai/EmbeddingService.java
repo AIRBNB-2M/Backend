@@ -28,10 +28,8 @@ public class EmbeddingService {
     private final EntityManager em;
     private final VectorStore vectorStore;
 
+    //TODO : 사진 텍스트 설명 추출
     public void embedAccommodations(Pageable pageable) {
-        //숙소 - 제목, 설명, 최대인원, 주소, 편의시설, 가격
-        //도전과제 - 사진 텍스트 설명 추출
-
         List<Long> ids = getEmbeddingTargetIds(pageable);
 
         List<AccommodationEmbeddingDto> embeddingDtos = getEmbeddingDtos(ids);
@@ -179,20 +177,30 @@ public class EmbeddingService {
                             ));
     }
 
-    private Map<String, Object> getMetadata(Long id, Map<Long, Map<Season, Map<DayType, Integer>>> priceInfo, AccommodationEmbeddingDto dto, List<String> amenities) {
+    private Map<String, Object> getMetadata(Long id,
+                                            Map<Long, Map<Season, Map<DayType, Integer>>> priceInfo,
+                                            AccommodationEmbeddingDto dto,
+                                            List<String> amenities) {
+
         Map<Season, Map<DayType, Integer>> pricesMap = priceInfo.get(id);
 
-        Map<String, Object> priceMetadata = new HashMap<>();
-        pricesMap.forEach((season, dayMap) -> dayMap.forEach((dayType, price) -> priceMetadata.put(
-                "price_" + season.name().toLowerCase() + "_" + dayType.name().toLowerCase(),
-                price
-        )));
+        List<Integer> allPrices = pricesMap.values()
+                                           .stream()
+                                           .flatMap(dayMap -> dayMap.values().stream())
+                                           .toList();
 
+        Integer minPrice = allPrices.stream().min(Integer::compareTo).orElse(null);
+        Integer maxPrice = allPrices.stream().max(Integer::compareTo).orElse(null);
 
-        Map<String, Object> metadata = new HashMap<>(priceMetadata);
+        Map<String, Object> metadata = new HashMap<>();
         metadata.put("accId", id);
+        metadata.put("title", dto.title());
         metadata.put("maxPeople", dto.maxPeople());
+        metadata.put("address", dto.address());
         metadata.put("amenities", amenities);
+        metadata.put("minPrice", minPrice);
+        metadata.put("maxPrice", maxPrice);
+
         return metadata;
     }
 

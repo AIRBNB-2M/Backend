@@ -13,6 +13,8 @@ management:
           enabled: true                 # /actuator/health/{liveness,readiness} 활성화
         show-details: never             # 프로브 용도면 never 권장(민감정보 차단)
 spring:
+  config:
+    import: optional:file:.env[.properties], classpath:chatbot-prompt.yml
   ai:
     vectorstore:
       mariadb:
@@ -28,12 +30,22 @@ spring:
           model: gpt-4.1-mini
           temperature: 0.0
           max-tokens: 1024
+      embedding:
+        options:
+          model: text-embedding-3-small
     chat:
       memory:
         repository:
           jdbc:
             initialize-schema: never
   data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: chatbot
+      username: admin
+      password: rmsdud135790
+      authentication-database: admin
     redis:
       repositories:
         enabled: true
