@@ -42,9 +42,7 @@ spring:
 logging:
   level:
     project.airbnb.clone: info
-    org.hibernate.orm.jdbc.bind: info
-    org.hibernate.orm.jdbc.extract: info
-    org.springframework.transaction.interceptor: info
+    org.springframework.web.filter.CommonsRequestLoggingFilter: debug
 
 app:
   frontend-url: https://www.jgy914.shop
