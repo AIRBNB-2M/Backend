@@ -8,8 +8,8 @@
 <div>
 </div>
 
-<img src="https://img.shields.io/badge/프로젝트 기간-2025.07~2025.11-green?style=flat&logo=&logoColor=white" />
-<img src="https://img.shields.io/badge/마지막 리드미 수정-2025.11.11-gold?style=flat&logo=&logoColor=white" />
+<img src="https://img.shields.io/badge/프로젝트 기간-2025.07~2025.12-green?style=flat&logo=&logoColor=white" />
+<img src="https://img.shields.io/badge/마지막 리드미 수정-2025.12.18-gold?style=flat&logo=&logoColor=white" />
 
 <div>
 </div>
@@ -23,69 +23,76 @@
 - **AirL&J**은 Airbnb 서비스를 모티브로 한 숙소 예약 플랫폼 클론 코딩 프로젝트입니다.
 - OpenAPI 연동으로 다양한 **실제 숙소 데이터를 확보**하였으며, **지역별·편의시설·가격별 조건으로 숙소를 검색**할 수 있습니다.
 - 마음에 드는 숙소를 **위시리스트에 저장**할 수 있고, **실시간 1:1 채팅 기능**으로 사용자 간의 소통을 지원합니다.
-
-## 👥 팀원 소개
-
-|                                                               **장근영**                                                               |                                                                 **이동진**                                                                 |
-|:-----------------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------:|
-| [<img src="https://avatars.githubusercontent.com/u/138780449?v=4" height=150 width=150> <br/> @geun-00](https://github.com/geun-00) | [<img src="https://avatars.githubusercontent.com/u/175531369?v=4" height=150 width=150> <br/> @ilPadrin0](https://github.com/ilPadrin0) |
+- **챗봇**을 통해 원하는 숙소를 빠르고 편리하게 추천받을 수 있습니다.
 
 ## ⚙ 기술 스택
 
 ### 🧱 Core
 
 <div>
-<img src="https://img.shields.io/badge/Java-007396?style=flat&logo=openjdk&logoColor=white" />
-<img src="https://img.shields.io/badge/Spring_Boot-6DB33F?style=flat&logo=Spring-Boot&logoColor=white" />
-<img src="https://img.shields.io/badge/Spring_Security-6DB33F?style=flat&logo=springsecurity&logoColor=white" />
-<img src="https://img.shields.io/badge/Spring_Data_Jpa-6DB33F?style=flat&logo=%20Data%20JPA&logoColor=white">
-<img src="https://img.shields.io/badge/JWT-black?style=flat&logo=JSON-Web-Tokens&logoColor=white">
-<img src="https://img.shields.io/badge/Querydsl-blue?style=flat&logoColor=white">
-<img src="https://img.shields.io/badge/WebSocket-orange?style=flat&logoColor=white">
+  <img src="https://img.shields.io/badge/Java-007396?style=flat&logo=openjdk&logoColor=white" />
+  <img src="https://img.shields.io/badge/Spring_Boot-6DB33F?style=flat&logo=Spring-Boot&logoColor=white" />
+  <img src="https://img.shields.io/badge/Spring_Security-6DB33F?style=flat&logo=springsecurity&logoColor=white" />
+  <img src="https://img.shields.io/badge/Spring_Data_Jpa-6DB33F?style=flat&logo=%20Data%20JPA&logoColor=white">
+  <img src="https://img.shields.io/badge/JWT-black?style=flat&logo=JSON-Web-Tokens&logoColor=white">
+  <img src="https://img.shields.io/badge/Querydsl-blue?style=flat&logoColor=white">
+  <img src="https://img.shields.io/badge/WebSocket-orange?style=flat&logoColor=white">
 </div>
-
 
 ### 🛢️ Database
 
 <div>
-<img src="https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=MySQL&logoColor=white" />
-<img src="https://img.shields.io/badge/Redis-FF4438?style=flat&logo=redis&logoColor=white" />
-<img src="https://img.shields.io/badge/Mariadb-003545?style=flat&logo=mariadb&logoColor=white" />
+  <img src="https://img.shields.io/badge/Redis-FF4438?style=flat&logo=redis&logoColor=white" />
+  <img src="https://img.shields.io/badge/Mariadb-003545?style=flat&logo=mariadb&logoColor=white" />
+  <img src="https://img.shields.io/badge/MongoDB-47A248?style=flat&logo=mongodb&logoColor=white" />
 </div>
 
 ### 📚 Test & Docs
 
 <div> 
-<img src="https://img.shields.io/badge/Junit5-25A162?style=flat&logo=junit5&logoColor=white" />
-<img src="https://img.shields.io/badge/RestDocs-8CA1AF?style=flat&logo=readthedocs&logoColor=white" />
-<img src="https://img.shields.io/badge/Swagger-85EA2D?style=flat&logo=swagger&logoColor=white" />
+  <img src="https://img.shields.io/badge/Junit5-25A162?style=flat&logo=junit5&logoColor=white" />
+  <img src="https://img.shields.io/badge/RestDocs-8CA1AF?style=flat&logo=readthedocs&logoColor=white" />
+  <img src="https://img.shields.io/badge/Swagger-85EA2D?style=flat&logo=swagger&logoColor=white" />
 </div>
 
 ### 🖥️ Infra
 
 <div>
-<img src="https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white" />
-<img src="https://img.shields.io/badge/Cloudflare-F38020?style=flat&logo=cloudflare&logoColor=white" />
-<img src="https://img.shields.io/badge/Cloudtype-black?style=flat&logoColor=white">
-<img src="https://img.shields.io/badge/Terraform-844FBA?style=flat&logo=terraform&logoColor=white">
-<img src="https://img.shields.io/badge/Nginx Proxy Manager-F15833?style=flat&logo=nginxproxymanager&logoColor=white">
-<img src="https://img.shields.io/badge/AWS EC2-F38020?style=flat&logoColor=white" />
-<img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=flat&logo=githubactions&logoColor=white">
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white" />
+  <img src="https://img.shields.io/badge/Cloudflare-F38020?style=flat&logo=cloudflare&logoColor=white" />
+  <img src="https://img.shields.io/badge/Cloudtype-black?style=flat&logoColor=white">
+  <img src="https://img.shields.io/badge/Terraform-844FBA?style=flat&logo=terraform&logoColor=white">
+  <img src="https://img.shields.io/badge/Nginx Proxy Manager-F15833?style=flat&logo=nginxproxymanager&logoColor=white">
+  <img src="https://img.shields.io/badge/AWS EC2-F38020?style=flat&logoColor=white" />
+  <img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=flat&logo=githubactions&logoColor=white">
 
-<br>
-
-<img src="https://img.shields.io/badge/Grafana-F46800?style=flat&logo=grafana&logoColor=white">
-<img src="https://img.shields.io/badge/Prometheus-E6522C?style=flat&logo=prometheus&logoColor=white">
+  <br>
+  
+  <img src="https://img.shields.io/badge/Grafana-F46800?style=flat&logo=grafana&logoColor=white">
+  <img src="https://img.shields.io/badge/Prometheus-E6522C?style=flat&logo=prometheus&logoColor=white">
 </div>
 
-### 💬 Communication
+## 🚀 기능 소개
 
-<div>
-<img src="https://img.shields.io/badge/Notion-000000?style=flat&logo=Notion&logoColor=white" />
-<img src="https://img.shields.io/badge/Discord-5865F2?style=flat&logo=discord&logoColor=white" />
-<img src="https://img.shields.io/badge/Git-F05032?style=flat&logo=Git&logoColor=white" />
-<img src="https://img.shields.io/badge/GitHub-181717?style=flat&logo=GitHub&logoColor=white" />
-</div>
+<details>
+  <summary>회원</summary>
+  
+  ### 회원가입
+
+  <img width="419" height="1126" alt="image" src="https://github.com/user-attachments/assets/bb6d6769-8e2a-4d29-ad8b-64105ff6c3c8" />
+
+  ### 로그인
+
+  <img width="441" height="758" alt="image" src="https://github.com/user-attachments/assets/40a51f76-7e31-4189-9792-3b0828e88740" />
+  
+</details>
+
+<details>
+  <summary>숙소 조회</summary>
+
+  ### 메인 페이지
+  
+</details>
 
 ## 📝 API 설계
 
