@@ -55,7 +55,7 @@
   <img src="https://img.shields.io/badge/Swagger-85EA2D?style=flat&logo=swagger&logoColor=white" />
 </div>
 
-### 🖥️ Infra
+### 🌐 Infra
 
 <div>
   <img src="https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white" />
@@ -65,23 +65,36 @@
   <img src="https://img.shields.io/badge/Nginx Proxy Manager-F15833?style=flat&logo=nginxproxymanager&logoColor=white">
   <img src="https://img.shields.io/badge/AWS EC2-F38020?style=flat&logoColor=white" />
   <img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=flat&logo=githubactions&logoColor=white">
-
-  <br>
-  
   <img src="https://img.shields.io/badge/Grafana-F46800?style=flat&logo=grafana&logoColor=white">
   <img src="https://img.shields.io/badge/Prometheus-E6522C?style=flat&logo=prometheus&logoColor=white">
+</div>
+
+### 🧩 ETC
+
+<div>
+  <img src="https://img.shields.io/badge/Toss Payments-0854C1?style=flat&logoColor=white" />
+  <img src="https://img.shields.io/badge/OpenAI-6BA539?style=flat&logoColor=white" />
+  <img src="https://img.shields.io/badge/Google-4285F4?style=flat&logo=google&logoColor=white" />
+  <img src="https://img.shields.io/badge/Kakao-FFCD00?style=flat&logo=kakao&logoColor=white" />
+  <img src="https://img.shields.io/badge/Naver-03C75A?style=flat&logo=naver&logoColor=white" />
+  <img src="https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white" />
+  <img src="https://img.shields.io/badge/Google Maps-4285F4?style=flat&logo=googlemaps&logoColor=white" />
 </div>
 
 ## 📝 API 설계
 
 👉🏻 [API 문서 보러가기](https://airbackend.jgy914.shop/api-docs)
 
-## 🛠️ 프로젝트 아키텍쳐
+## 🛠️ 프로젝트 아키텍처
 
 ### 🗺️ ERD 설계
 
 ![img_2.png](readme-images/img_2.png)
 
+### 🌐 인프라 아키텍처
+
+<img width="3952" height="2441" alt="Web App Reference Architecture (17)" src="https://github.com/user-attachments/assets/28505540-caec-4f71-9611-878e7f8b7003" />
+
 ### 🔄 CI/CD 아키텍처
 
-![img.png](readme-images/img_1.png)
+
