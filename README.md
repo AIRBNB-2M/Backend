@@ -72,28 +72,6 @@
   <img src="https://img.shields.io/badge/Prometheus-E6522C?style=flat&logo=prometheus&logoColor=white">
 </div>
 
-## 🚀 기능 소개
-
-<details>
-  <summary>회원</summary>
-  
-  ### 회원가입
-
-  <img width="419" height="1126" alt="image" src="https://github.com/user-attachments/assets/bb6d6769-8e2a-4d29-ad8b-64105ff6c3c8" />
-
-  ### 로그인
-
-  <img width="441" height="758" alt="image" src="https://github.com/user-attachments/assets/40a51f76-7e31-4189-9792-3b0828e88740" />
-  
-</details>
-
-<details>
-  <summary>숙소 조회</summary>
-
-  ### 메인 페이지
-  
-</details>
-
 ## 📝 API 설계
 
 👉🏻 [API 문서 보러가기](https://airbackend.jgy914.shop/api-docs)
