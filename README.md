@@ -9,12 +9,13 @@
 </div>
 
 <img src="https://img.shields.io/badge/프로젝트 기간-2025.07~2025.12-green?style=flat&logo=&logoColor=white" />
-<img src="https://img.shields.io/badge/마지막 리드미 수정-2025.12.18-gold?style=flat&logo=&logoColor=white" />
+<img src="https://img.shields.io/badge/마지막 리드미 수정-2025.12.20-gold?style=flat&logo=&logoColor=white" />
 
 <div>
 </div>
 
 [![배포 주소](https://img.shields.io/badge/서비스_보러_가기-yellow?style=flat&logo=vercel&logoColor=white)](https://www.jgy914.shop)
+[![배포 주소](https://img.shields.io/badge/API_문서_보러_가기-6DB33F?style=flat&logo=swagger&logoColor=white)](https://airbackend.jgy914.shop/api-docs)
 
 </div>
 
@@ -81,15 +82,11 @@
   <img src="https://img.shields.io/badge/Google Maps-4285F4?style=flat&logo=googlemaps&logoColor=white" />
 </div>
 
-## 📝 API 설계
-
-👉🏻 [API 문서 보러가기](https://airbackend.jgy914.shop/api-docs)
-
 ## 🛠️ 프로젝트 아키텍처
 
 ### 🗺️ ERD 설계
 
-![img_2.png](readme-images/img_2.png)
+<img width="2620" height="1382" alt="AirL J (1)" src="https://github.com/user-attachments/assets/b79868ae-5e25-4bc2-a450-1440e9f8c8f9" />
 
 ### 🌐 인프라 아키텍처
 
