@@ -18,15 +18,15 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.querydsl.core.types.Projections.constructor;
-import static project.airbnb.clone.entity.QAccommodation.accommodation;
-import static project.airbnb.clone.entity.QAccommodationImage.accommodationImage;
-import static project.airbnb.clone.entity.QAccommodationPrice.accommodationPrice;
-import static project.airbnb.clone.entity.QAreaCode.areaCode;
-import static project.airbnb.clone.entity.QReservation.reservation;
-import static project.airbnb.clone.entity.QReview.review;
-import static project.airbnb.clone.entity.QSigunguCode.sigunguCode;
-import static project.airbnb.clone.entity.QWishlist.wishlist;
-import static project.airbnb.clone.entity.QWishlistAccommodation.wishlistAccommodation;
+import static project.airbnb.clone.entity.accommodation.QAccommodation.accommodation;
+import static project.airbnb.clone.entity.accommodation.QAccommodationImage.accommodationImage;
+import static project.airbnb.clone.entity.accommodation.QAccommodationPrice.accommodationPrice;
+import static project.airbnb.clone.entity.area.QAreaCode.areaCode;
+import static project.airbnb.clone.entity.area.QSigunguCode.sigunguCode;
+import static project.airbnb.clone.entity.reservation.QReservation.reservation;
+import static project.airbnb.clone.entity.reservation.QReview.review;
+import static project.airbnb.clone.entity.wishlist.QWishlist.wishlist;
+import static project.airbnb.clone.entity.wishlist.QWishlistAccommodation.wishlistAccommodation;
 
 public record AccommodationQueryBuilder(JPAQueryFactory queryFactory, DayType dayType, Season season, Long memberId) {
 

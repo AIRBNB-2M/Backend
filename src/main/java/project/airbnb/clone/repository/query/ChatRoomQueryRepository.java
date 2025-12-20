@@ -6,7 +6,7 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import org.springframework.stereotype.Repository;
 import project.airbnb.clone.dto.chat.ChatRoomResDto;
-import project.airbnb.clone.entity.QMember;
+import project.airbnb.clone.entity.member.QMember;
 import project.airbnb.clone.entity.chat.ChatRoom;
 import project.airbnb.clone.entity.chat.QChatMessage;
 import project.airbnb.clone.entity.chat.QChatParticipant;

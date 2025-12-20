@@ -8,8 +8,8 @@ import project.airbnb.clone.repository.query.support.CustomQuerydslRepositorySup
 import java.time.LocalDateTime;
 
 import static project.airbnb.clone.consts.ReservationStatus.CONFIRMED;
-import static project.airbnb.clone.entity.QAccommodation.accommodation;
-import static project.airbnb.clone.entity.QReservation.reservation;
+import static project.airbnb.clone.entity.accommodation.QAccommodation.accommodation;
+import static project.airbnb.clone.entity.reservation.QReservation.reservation;
 
 @Repository
 public class ReservationQueryRepository extends CustomQuerydslRepositorySupport {

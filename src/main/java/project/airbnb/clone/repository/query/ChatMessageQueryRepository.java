@@ -8,10 +8,10 @@ import project.airbnb.clone.repository.query.support.CustomQuerydslRepositorySup
 
 import java.util.List;
 
-import static project.airbnb.clone.entity.QMember.member;
 import static project.airbnb.clone.entity.chat.QChatMessage.chatMessage;
 import static project.airbnb.clone.entity.chat.QChatParticipant.chatParticipant;
 import static project.airbnb.clone.entity.chat.QChatRoom.chatRoom;
+import static project.airbnb.clone.entity.member.QMember.member;
 
 @Repository
 public class ChatMessageQueryRepository extends CustomQuerydslRepositorySupport {

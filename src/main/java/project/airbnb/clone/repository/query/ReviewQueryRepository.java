@@ -8,10 +8,10 @@ import project.airbnb.clone.dto.review.MyReviewResDto;
 import project.airbnb.clone.entity.reservation.Review;
 import project.airbnb.clone.repository.query.support.CustomQuerydslRepositorySupport;
 
-import static project.airbnb.clone.entity.QAccommodation.accommodation;
-import static project.airbnb.clone.entity.QAccommodationImage.accommodationImage;
-import static project.airbnb.clone.entity.QReservation.reservation;
-import static project.airbnb.clone.entity.QReview.review;
+import static project.airbnb.clone.entity.accommodation.QAccommodation.accommodation;
+import static project.airbnb.clone.entity.accommodation.QAccommodationImage.accommodationImage;
+import static project.airbnb.clone.entity.reservation.QReservation.reservation;
+import static project.airbnb.clone.entity.reservation.QReview.review;
 
 @Repository
 public class ReviewQueryRepository extends CustomQuerydslRepositorySupport {

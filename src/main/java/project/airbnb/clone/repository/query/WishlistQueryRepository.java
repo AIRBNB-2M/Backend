@@ -4,7 +4,7 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import org.springframework.stereotype.Repository;
 import project.airbnb.clone.dto.wishlist.WishlistsResDto;
-import project.airbnb.clone.entity.QWishlistAccommodation;
+import project.airbnb.clone.entity.wishlist.QWishlistAccommodation;
 import project.airbnb.clone.entity.wishlist.Wishlist;
 import project.airbnb.clone.repository.dto.AccAllImagesQueryDto;
 import project.airbnb.clone.repository.dto.WishlistDetailQueryDto;
@@ -13,13 +13,13 @@ import project.airbnb.clone.repository.query.support.CustomQuerydslRepositorySup
 import java.util.List;
 
 import static com.querydsl.core.types.Projections.constructor;
-import static project.airbnb.clone.entity.QAccommodation.accommodation;
-import static project.airbnb.clone.entity.QAccommodationImage.accommodationImage;
-import static project.airbnb.clone.entity.QMember.member;
-import static project.airbnb.clone.entity.QReservation.reservation;
-import static project.airbnb.clone.entity.QReview.review;
-import static project.airbnb.clone.entity.QWishlist.wishlist;
-import static project.airbnb.clone.entity.QWishlistAccommodation.wishlistAccommodation;
+import static project.airbnb.clone.entity.accommodation.QAccommodation.accommodation;
+import static project.airbnb.clone.entity.accommodation.QAccommodationImage.accommodationImage;
+import static project.airbnb.clone.entity.member.QMember.member;
+import static project.airbnb.clone.entity.reservation.QReservation.reservation;
+import static project.airbnb.clone.entity.reservation.QReview.review;
+import static project.airbnb.clone.entity.wishlist.QWishlist.wishlist;
+import static project.airbnb.clone.entity.wishlist.QWishlistAccommodation.wishlistAccommodation;
 
 @Repository
 public class WishlistQueryRepository extends CustomQuerydslRepositorySupport {
