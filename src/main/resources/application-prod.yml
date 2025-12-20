@@ -1,4 +1,8 @@
 spring:
+  ai:
+    vectorstore:
+      mariadb:
+        schema-name: airbnb_2m
   data:
     mongodb:
       host: ${MONGODB_HOST}
