@@ -1,4 +1,4 @@
-package project.airbnb.clone.entity;
+package project.airbnb.clone.entity.reservation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
@@ -6,6 +6,7 @@ import lombok.*;
 import org.springframework.util.StringUtils;
 import project.airbnb.clone.consts.payment.PaymentMethod;
 import project.airbnb.clone.consts.payment.PaymentStatus;
+import project.airbnb.clone.entity.BaseEntity;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;

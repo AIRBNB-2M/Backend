@@ -1,4 +1,4 @@
-package project.airbnb.clone.entity;
+package project.airbnb.clone.entity.member;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import project.airbnb.clone.consts.Role;
 import project.airbnb.clone.consts.SocialType;
+import project.airbnb.clone.entity.BaseEntity;
 
 import java.time.LocalDate;
 import java.util.UUID;

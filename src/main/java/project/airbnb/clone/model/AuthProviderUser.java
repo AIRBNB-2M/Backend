@@ -2,7 +2,7 @@ package project.airbnb.clone.model;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import project.airbnb.clone.entity.Member;
+import project.airbnb.clone.entity.member.Member;
 
 import java.util.List;
 

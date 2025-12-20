@@ -1,7 +1,7 @@
 package project.airbnb.clone.repository.jpa;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import project.airbnb.clone.entity.Accommodation;
+import project.airbnb.clone.entity.accommodation.Accommodation;
 
 import java.util.List;
 import java.util.Optional;

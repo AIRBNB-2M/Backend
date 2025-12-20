@@ -1,10 +1,11 @@
-package project.airbnb.clone.entity;
+package project.airbnb.clone.entity.member;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import project.airbnb.clone.consts.Reason;
+import project.airbnb.clone.entity.BaseEntity;
 
 @Getter
 @Entity

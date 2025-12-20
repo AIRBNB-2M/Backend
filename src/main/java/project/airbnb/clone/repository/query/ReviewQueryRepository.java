@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import project.airbnb.clone.dto.review.MyReviewResDto;
-import project.airbnb.clone.entity.Review;
+import project.airbnb.clone.entity.reservation.Review;
 import project.airbnb.clone.repository.query.support.CustomQuerydslRepositorySupport;
 
 import static project.airbnb.clone.entity.QAccommodation.accommodation;

@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import project.airbnb.clone.dto.member.ChatMemberSearchDto;
 import project.airbnb.clone.dto.member.TripHistoryResDto;
-import project.airbnb.clone.entity.Member;
+import project.airbnb.clone.entity.member.Member;
 import project.airbnb.clone.repository.dto.DefaultProfileQueryDto;
 import project.airbnb.clone.repository.query.support.CustomQuerydslRepositorySupport;
 

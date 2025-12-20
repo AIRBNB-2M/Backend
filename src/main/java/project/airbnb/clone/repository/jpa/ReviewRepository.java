@@ -1,7 +1,7 @@
 package project.airbnb.clone.repository.jpa;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import project.airbnb.clone.entity.Review;
+import project.airbnb.clone.entity.reservation.Review;
 
 import java.util.Optional;
 

@@ -7,7 +7,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import project.airbnb.clone.common.converters.ProviderUserConverter;
 import project.airbnb.clone.common.converters.ProviderUserRequest;
-import project.airbnb.clone.entity.Member;
+import project.airbnb.clone.entity.member.Member;
 import project.airbnb.clone.model.PrincipalUser;
 import project.airbnb.clone.model.ProviderUser;
 import project.airbnb.clone.repository.jpa.MemberRepository;

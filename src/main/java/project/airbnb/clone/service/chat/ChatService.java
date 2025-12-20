@@ -11,7 +11,7 @@ import project.airbnb.clone.common.events.chat.ChatRequestRejectedEvent;
 import project.airbnb.clone.common.exceptions.factory.ChatExceptions;
 import project.airbnb.clone.common.exceptions.factory.MemberExceptions;
 import project.airbnb.clone.dto.chat.*;
-import project.airbnb.clone.entity.Member;
+import project.airbnb.clone.entity.member.Member;
 import project.airbnb.clone.entity.chat.ChatMessage;
 import project.airbnb.clone.entity.chat.ChatParticipant;
 import project.airbnb.clone.entity.chat.ChatRoom;

@@ -2,7 +2,7 @@ package project.airbnb.clone.repository.jpa;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import project.airbnb.clone.consts.SocialType;
-import project.airbnb.clone.entity.Member;
+import project.airbnb.clone.entity.member.Member;
 
 import java.util.Optional;
 

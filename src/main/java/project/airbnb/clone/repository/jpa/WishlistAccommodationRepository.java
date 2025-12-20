@@ -4,9 +4,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import project.airbnb.clone.entity.Accommodation;
-import project.airbnb.clone.entity.Wishlist;
-import project.airbnb.clone.entity.WishlistAccommodation;
+import project.airbnb.clone.entity.accommodation.Accommodation;
+import project.airbnb.clone.entity.wishlist.Wishlist;
+import project.airbnb.clone.entity.wishlist.WishlistAccommodation;
 
 import java.util.Optional;
 

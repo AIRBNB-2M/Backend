@@ -1,4 +1,4 @@
-package project.airbnb.clone.entity;
+package project.airbnb.clone.entity.area;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import project.airbnb.clone.entity.BaseEntity;
 
 @Getter
 @Entity

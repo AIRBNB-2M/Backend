@@ -12,7 +12,7 @@ import project.airbnb.clone.common.exceptions.BusinessException;
 import project.airbnb.clone.consts.SocialType;
 import project.airbnb.clone.dto.member.DefaultProfileResDto;
 import project.airbnb.clone.dto.member.SignupRequestDto;
-import project.airbnb.clone.entity.Member;
+import project.airbnb.clone.entity.member.Member;
 import project.airbnb.clone.model.ProviderUser;
 import project.airbnb.clone.repository.jpa.MemberRepository;
 

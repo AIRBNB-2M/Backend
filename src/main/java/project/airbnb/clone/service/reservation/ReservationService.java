@@ -11,10 +11,10 @@ import project.airbnb.clone.common.exceptions.factory.ReservationExceptions;
 import project.airbnb.clone.dto.reservation.PostReservationReqDto;
 import project.airbnb.clone.dto.reservation.PostReservationResDto;
 import project.airbnb.clone.dto.reservation.PostReviewReqDto;
-import project.airbnb.clone.entity.Accommodation;
-import project.airbnb.clone.entity.Member;
-import project.airbnb.clone.entity.Reservation;
-import project.airbnb.clone.entity.Review;
+import project.airbnb.clone.entity.accommodation.Accommodation;
+import project.airbnb.clone.entity.member.Member;
+import project.airbnb.clone.entity.reservation.Reservation;
+import project.airbnb.clone.entity.reservation.Review;
 import project.airbnb.clone.repository.jpa.*;
 import project.airbnb.clone.repository.query.ReservationQueryRepository;
 

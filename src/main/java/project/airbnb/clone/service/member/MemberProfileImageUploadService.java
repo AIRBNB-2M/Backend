@@ -8,7 +8,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import project.airbnb.clone.common.exceptions.ImageUploadException;
 import project.airbnb.clone.common.exceptions.factory.MemberExceptions;
-import project.airbnb.clone.entity.Member;
+import project.airbnb.clone.entity.member.Member;
 import project.airbnb.clone.repository.jpa.MemberRepository;
 import project.airbnb.clone.service.s3.S3Uploader;
 

@@ -3,7 +3,7 @@ package project.airbnb.clone.model;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import project.airbnb.clone.consts.SocialType;
-import project.airbnb.clone.entity.Member;
+import project.airbnb.clone.entity.member.Member;
 
 import java.time.LocalDate;
 import java.util.List;

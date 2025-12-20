@@ -2,9 +2,9 @@ package project.airbnb.clone.service.accommodation;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import project.airbnb.clone.entity.Accommodation;
-import project.airbnb.clone.entity.Member;
-import project.airbnb.clone.entity.ViewHistory;
+import project.airbnb.clone.entity.accommodation.Accommodation;
+import project.airbnb.clone.entity.member.Member;
+import project.airbnb.clone.entity.history.ViewHistory;
 import project.airbnb.clone.repository.jpa.AccommodationRepository;
 import project.airbnb.clone.repository.jpa.MemberRepository;
 import project.airbnb.clone.repository.jpa.ViewHistoryRepository;

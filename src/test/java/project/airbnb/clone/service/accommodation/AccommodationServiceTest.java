@@ -19,7 +19,13 @@ import project.airbnb.clone.consts.DayType;
 import project.airbnb.clone.consts.Season;
 import project.airbnb.clone.dto.PageResponseDto;
 import project.airbnb.clone.dto.accommodation.*;
-import project.airbnb.clone.entity.*;
+import project.airbnb.clone.entity.accommodation.Accommodation;
+import project.airbnb.clone.entity.accommodation.AccommodationImage;
+import project.airbnb.clone.entity.accommodation.AccommodationPrice;
+import project.airbnb.clone.entity.area.AreaCode;
+import project.airbnb.clone.entity.area.SigunguCode;
+import project.airbnb.clone.entity.history.ViewHistory;
+import project.airbnb.clone.entity.member.Member;
 import project.airbnb.clone.service.DateManager;
 
 import java.time.LocalDate;

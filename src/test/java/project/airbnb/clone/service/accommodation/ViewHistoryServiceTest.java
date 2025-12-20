@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import project.airbnb.clone.TestContainerSupport;
-import project.airbnb.clone.entity.Accommodation;
-import project.airbnb.clone.entity.AreaCode;
-import project.airbnb.clone.entity.Member;
-import project.airbnb.clone.entity.SigunguCode;
-import project.airbnb.clone.entity.ViewHistory;
+import project.airbnb.clone.entity.accommodation.Accommodation;
+import project.airbnb.clone.entity.area.AreaCode;
+import project.airbnb.clone.entity.member.Member;
+import project.airbnb.clone.entity.area.SigunguCode;
+import project.airbnb.clone.entity.history.ViewHistory;
 
 import java.time.LocalDateTime;
 import java.util.List;

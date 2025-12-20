@@ -4,8 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import project.airbnb.clone.entity.Accommodation;
-import project.airbnb.clone.entity.AccommodationImage;
+import project.airbnb.clone.entity.accommodation.Accommodation;
+import project.airbnb.clone.entity.accommodation.AccommodationImage;
 
 import java.util.List;
 

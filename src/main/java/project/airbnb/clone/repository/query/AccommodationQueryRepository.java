@@ -13,7 +13,7 @@ import project.airbnb.clone.dto.accommodation.AccSearchCondDto;
 import project.airbnb.clone.dto.accommodation.DetailAccommodationResDto.DetailReviewDto;
 import project.airbnb.clone.dto.accommodation.FilteredAccListResDto;
 import project.airbnb.clone.dto.accommodation.ViewHistoryDto;
-import project.airbnb.clone.entity.Accommodation;
+import project.airbnb.clone.entity.accommodation.Accommodation;
 import project.airbnb.clone.repository.dto.*;
 import project.airbnb.clone.repository.query.support.CustomQuerydslRepositorySupport;
 

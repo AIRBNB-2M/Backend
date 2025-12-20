@@ -1,8 +1,8 @@
 package project.airbnb.clone.repository.query;
 
 import org.springframework.stereotype.Repository;
-import project.airbnb.clone.entity.Accommodation;
-import project.airbnb.clone.entity.Reservation;
+import project.airbnb.clone.entity.accommodation.Accommodation;
+import project.airbnb.clone.entity.reservation.Reservation;
 import project.airbnb.clone.repository.query.support.CustomQuerydslRepositorySupport;
 
 import java.time.LocalDateTime;

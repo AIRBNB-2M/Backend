@@ -5,7 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import project.airbnb.clone.entity.BaseEntity;
-import project.airbnb.clone.entity.Member;
+import project.airbnb.clone.entity.member.Member;
 
 import java.time.LocalDateTime;
 

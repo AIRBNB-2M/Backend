@@ -1,9 +1,12 @@
-package project.airbnb.clone.entity;
+package project.airbnb.clone.entity.history;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import project.airbnb.clone.entity.BaseEntity;
+import project.airbnb.clone.entity.accommodation.Accommodation;
+import project.airbnb.clone.entity.member.Member;
 
 import java.time.LocalDateTime;
 

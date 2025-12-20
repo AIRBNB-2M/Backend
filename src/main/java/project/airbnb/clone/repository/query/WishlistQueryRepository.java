@@ -5,7 +5,7 @@ import com.querydsl.jpa.JPQLQuery;
 import org.springframework.stereotype.Repository;
 import project.airbnb.clone.dto.wishlist.WishlistsResDto;
 import project.airbnb.clone.entity.QWishlistAccommodation;
-import project.airbnb.clone.entity.Wishlist;
+import project.airbnb.clone.entity.wishlist.Wishlist;
 import project.airbnb.clone.repository.dto.AccAllImagesQueryDto;
 import project.airbnb.clone.repository.dto.WishlistDetailQueryDto;
 import project.airbnb.clone.repository.query.support.CustomQuerydslRepositorySupport;

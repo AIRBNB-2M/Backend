@@ -6,7 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import project.airbnb.clone.entity.*;
+import project.airbnb.clone.entity.accommodation.*;
+import project.airbnb.clone.entity.area.SigunguCode;
 import project.airbnb.clone.repository.jpa.*;
 
 import java.sql.Timestamp;

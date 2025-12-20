@@ -2,7 +2,7 @@ package project.airbnb.clone.common.converters;
 
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import project.airbnb.clone.entity.Member;
+import project.airbnb.clone.entity.member.Member;
 
 public record ProviderUserRequest(
         ClientRegistration clientRegistration,

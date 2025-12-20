@@ -9,7 +9,7 @@ import project.airbnb.clone.common.exceptions.factory.ReviewExceptions;
 import project.airbnb.clone.dto.PageResponseDto;
 import project.airbnb.clone.dto.review.MyReviewResDto;
 import project.airbnb.clone.dto.review.UpdateReviewReqDto;
-import project.airbnb.clone.entity.Review;
+import project.airbnb.clone.entity.reservation.Review;
 import project.airbnb.clone.repository.jpa.ReviewRepository;
 import project.airbnb.clone.repository.query.ReviewQueryRepository;
 

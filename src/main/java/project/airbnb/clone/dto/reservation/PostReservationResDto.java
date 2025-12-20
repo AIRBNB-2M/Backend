@@ -1,7 +1,7 @@
 package project.airbnb.clone.dto.reservation;
 
-import project.airbnb.clone.entity.Accommodation;
-import project.airbnb.clone.entity.Reservation;
+import project.airbnb.clone.entity.accommodation.Accommodation;
+import project.airbnb.clone.entity.reservation.Reservation;
 
 import java.time.LocalDateTime;
 

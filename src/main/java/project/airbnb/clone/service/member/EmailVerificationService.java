@@ -17,7 +17,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.airbnb.clone.common.exceptions.factory.MemberExceptions;
-import project.airbnb.clone.entity.Member;
+import project.airbnb.clone.entity.member.Member;
 import project.airbnb.clone.repository.dto.redis.EmailVerification;
 import project.airbnb.clone.repository.jpa.MemberRepository;
 import project.airbnb.clone.repository.redis.EmailVerificationRepository;

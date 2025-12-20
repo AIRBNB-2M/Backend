@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import project.airbnb.clone.common.exceptions.ErrorCode;
 import project.airbnb.clone.common.exceptions.JwtProcessingException;
 import project.airbnb.clone.config.security.jwt.JwtAuthenticationToken;
-import project.airbnb.clone.entity.Member;
+import project.airbnb.clone.entity.member.Member;
 import project.airbnb.clone.model.AuthProviderUser;
 import project.airbnb.clone.model.PrincipalUser;
 import project.airbnb.clone.repository.jpa.MemberRepository;

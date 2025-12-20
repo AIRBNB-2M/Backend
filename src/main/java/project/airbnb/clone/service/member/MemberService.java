@@ -16,7 +16,7 @@ import project.airbnb.clone.common.exceptions.factory.MemberExceptions;
 import project.airbnb.clone.consts.SocialType;
 import project.airbnb.clone.dto.PageResponseDto;
 import project.airbnb.clone.dto.member.*;
-import project.airbnb.clone.entity.Member;
+import project.airbnb.clone.entity.member.Member;
 import project.airbnb.clone.model.ProviderUser;
 import project.airbnb.clone.repository.dto.DefaultProfileQueryDto;
 import project.airbnb.clone.repository.jpa.MemberRepository;
