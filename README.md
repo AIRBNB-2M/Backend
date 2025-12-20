@@ -84,14 +84,14 @@
 
 ## 🛠️ 프로젝트 아키텍처
 
-### 🗺️ ERD 설계
+### 🗺️ ERD
 
 <img width="2620" height="1382" alt="AirL J (1)" src="https://github.com/user-attachments/assets/b79868ae-5e25-4bc2-a450-1440e9f8c8f9" />
 
-### 🌐 인프라 아키텍처
+### 🌐 인프라
 
 <img width="3952" height="2441" alt="Web App Reference Architecture (17)" src="https://github.com/user-attachments/assets/28505540-caec-4f71-9611-878e7f8b7003" />
 
-### 🔄 CI/CD 아키텍처
+### 🔄 CI/CD
 
-
+<img width="2642" height="1694" alt="CICD Architecture (4)" src="https://github.com/user-attachments/assets/929a16da-e97b-4b06-a043-e0f65e0bde50" />
