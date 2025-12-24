@@ -21,6 +21,7 @@ import static com.querydsl.core.types.Projections.constructor;
 import static project.airbnb.clone.entity.accommodation.QAccommodation.accommodation;
 import static project.airbnb.clone.entity.accommodation.QAccommodationImage.accommodationImage;
 import static project.airbnb.clone.entity.accommodation.QAccommodationPrice.accommodationPrice;
+import static project.airbnb.clone.entity.accommodation.QAccommodationStats.accommodationStats;
 import static project.airbnb.clone.entity.area.QAreaCode.areaCode;
 import static project.airbnb.clone.entity.area.QSigunguCode.sigunguCode;
 import static project.airbnb.clone.entity.reservation.QReservation.reservation;
@@ -60,11 +61,9 @@ public record AccommodationQueryBuilder(JPAQueryFactory queryFactory, DayType da
     // 메인 페이지용 쿼리
     // =====================================================
     public List<MainAccListQueryDto> fetchMainAccList() {
-        JPAQuery<?> query = withWishlistJoin(buildAreaAccommodationsBaseQuery());
+        JPAQuery<?> query = buildAreaAccommodationsBaseQuery();
 
         return query.select(buildMainAccListProjection())
-                    .groupBy(mainGroupBy())
-                    .orderBy(reservation.count().desc())
                     .fetch();
     }
 
@@ -72,13 +71,19 @@ public record AccommodationQueryBuilder(JPAQueryFactory queryFactory, DayType da
      * 메인 페이지용 베이스쿼리
      */
     private JPAQuery<?> buildAreaAccommodationsBaseQuery() {
-        return baseQuery()
-                .join(accommodationImage).on(accommodationImage.accommodation.eq(accommodation)
-                                                                             .and(accommodationImage.thumbnail.isTrue()))
-                .join(accommodation.sigunguCode, sigunguCode)
-                .join(sigunguCode.areaCode, areaCode)
-                .leftJoin(reservation).on(reservation.accommodation.eq(accommodation))
-                .leftJoin(review).on(review.reservation.eq(reservation));
+        JPAQuery<?> query = queryFactory.from(accommodationStats)
+                                        .join(accommodationPrice).on(
+                        accommodationPrice.accommodation.id.eq(accommodationStats.accommodationId)
+                                                           .and(accommodationPrice.season.eq(season))
+                                                           .and(accommodationPrice.dayType.eq(dayType))
+                );
+
+        if (!hasMember()) {
+            return query;
+        }
+
+        return query.leftJoin(wishlistAccommodation).on(wishlistAccommodation.accommodation.id.eq(accommodationStats.accommodationId))
+                    .leftJoin(wishlistAccommodation.wishlist, wishlist).on(wishlist.member.id.eq(memberId));
     }
 
     /**
@@ -87,29 +92,29 @@ public record AccommodationQueryBuilder(JPAQueryFactory queryFactory, DayType da
     private Expression<MainAccListQueryDto> buildMainAccListProjection() {
         if (!hasMember()) {
             return constructor(MainAccListQueryDto.class,
-                    accommodation.id,
-                    accommodation.title,
-                    accommodationPrice.price.max(),
-                    review.rating.avg().coalesce(0.0),
-                    accommodationImage.imageUrl,
-                    reservation.count().coalesce(0L),
-                    areaCode.codeName,
-                    areaCode.code
+                    accommodationStats.accommodationId,
+                    accommodationStats.title,
+                    accommodationPrice.price,
+                    accommodationStats.averageRating,
+                    accommodationStats.thumbnailUrl,
+                    accommodationStats.reservationCount,
+                    accommodationStats.areaName,
+                    accommodationStats.areaCode
             );
         }
 
         return constructor(MainAccListQueryDto.class,
-                accommodation.id,
-                accommodation.title,
-                accommodationPrice.price.max(),
-                review.rating.avg().coalesce(0.0),
-                accommodationImage.imageUrl,
+                accommodationStats.accommodationId,
+                accommodationStats.title,
+                accommodationPrice.price,
+                accommodationStats.averageRating,
+                accommodationStats.thumbnailUrl,
                 wishlist.isNotNull(),
                 wishlist.id,
                 wishlist.name,
-                reservation.count().coalesce(0L),
-                areaCode.codeName,
-                areaCode.code
+                accommodationStats.reservationCount,
+                accommodationStats.areaName,
+                accommodationStats.areaCode
         );
     }
 

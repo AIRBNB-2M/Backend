@@ -47,6 +47,7 @@ class AccommodationServiceTest extends TestContainerSupport {
 
     @Autowired ApplicationEvents applicationEvents;
     @Autowired AccommodationService accommodationService;
+    @Autowired AccommodationStatisticsService statisticsService;
     @Autowired EntityManager em;
 
     @MockitoBean DateManager dateManager;
@@ -95,6 +96,8 @@ class AccommodationServiceTest extends TestContainerSupport {
             given(dateManager.getSeason(any(LocalDate.class))).willReturn(PEAK);
             given(dateManager.getDayType(any(LocalDate.class))).willReturn(WEEKEND);
 
+            statisticsService.refreshStats();
+
             // when
             List<MainAccResDto> result = accommodationService.getAccommodations(member.getId());
 
@@ -126,6 +129,8 @@ class AccommodationServiceTest extends TestContainerSupport {
 
             given(dateManager.getSeason(any(LocalDate.class))).willReturn(PEAK);
             given(dateManager.getDayType(any(LocalDate.class))).willReturn(WEEKEND);
+
+            statisticsService.refreshStats();
 
             // when
             List<MainAccResDto> result = accommodationService.getAccommodations(null);

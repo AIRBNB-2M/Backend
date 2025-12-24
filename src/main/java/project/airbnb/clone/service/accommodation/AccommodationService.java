@@ -39,7 +39,6 @@ public class AccommodationService {
     private final AccommodationQueryRepository accommodationQueryRepository;
 
     public List<MainAccResDto> getAccommodations(Long memberId) {
-        //TODO : 데이터 많아지면 네이티브 쿼리 고려
         LocalDate now = LocalDate.now();
         Season season = dateManager.getSeason(now);
         DayType dayType = dateManager.getDayType(now);
@@ -54,7 +53,7 @@ public class AccommodationService {
                                 toList(),
                                 dtos -> dtos.stream()
                                             .map(MainAccListResDto::from)
-                                            .limit(8).toList()
+                                            .toList()
                         )
                 ))
                 .entrySet()

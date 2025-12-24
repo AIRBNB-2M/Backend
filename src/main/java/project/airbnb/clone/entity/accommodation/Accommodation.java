@@ -65,6 +65,12 @@ public class Accommodation extends BaseEntity {
     @Column(name = "is_embedded")
     private Boolean isEmbedded;
 
+    @Column(name = "reservation_count")
+    private int reservationCount;
+
+    @Column(name = "average_rating")
+    private double averageRating;
+
     public static Accommodation createEmpty() {
         return new Accommodation();
     }

@@ -9,7 +9,7 @@ public record MainAccListQueryDto(
         boolean isInWishlist,
         Long wishlistId,
         String wishlistName,
-        long reservationCount,
+        int reservationCount,
         String areaName,
         String areaCode) {
 
@@ -20,7 +20,7 @@ public record MainAccListQueryDto(
     public record AreaKey(String areaName, String areaCode) {
     }
 
-    public MainAccListQueryDto(Long accommodationId, String title, int price, double avgRate, String thumbnailUrl, long reservationCount, String areaName, String areaCode) {
+    public MainAccListQueryDto(Long accommodationId, String title, int price, double avgRate, String thumbnailUrl, int reservationCount, String areaName, String areaCode) {
         this(accommodationId, title, price, avgRate, thumbnailUrl, false, null, null, reservationCount, areaName, areaCode);
     }
 }
