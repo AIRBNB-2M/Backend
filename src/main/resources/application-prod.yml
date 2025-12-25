@@ -42,10 +42,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+    show-sql: false
 
 logging:
   level:
-    project.airbnb.clone: info
+    project.airbnb.clone: debug
     org.springframework.web.filter.CommonsRequestLoggingFilter: debug
 
 app:
