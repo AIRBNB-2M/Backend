@@ -25,8 +25,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 
 @Service
@@ -49,12 +49,7 @@ public class AccommodationService {
                 .stream()
                 .collect(groupingBy(
                         MainAccListQueryDto::getAreaKey,
-                        collectingAndThen(
-                                toList(),
-                                dtos -> dtos.stream()
-                                            .map(MainAccListResDto::from)
-                                            .toList()
-                        )
+                        mapping(MainAccListResDto::from, toList())
                 ))
                 .entrySet()
                 .stream()
