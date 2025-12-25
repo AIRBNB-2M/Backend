@@ -217,9 +217,16 @@ public record AccommodationQueryBuilder(JPAQueryFactory queryFactory, DayType da
 
         return Optional.ofNullable(
                 query.select(buildDetailProjection(accId))
-                     .where(accommodation.id.eq(accId))
+                     .where(accommodation.id.eq(accId), wishlistMemberFilter())
                      .fetchOne()
         );
+    }
+
+    private BooleanExpression wishlistMemberFilter() {
+        if (!hasMember()) {
+            return null;
+        }
+        return wishlistAccommodation.isNull().or(wishlist.member.id.eq(memberId));
     }
 
     /**
